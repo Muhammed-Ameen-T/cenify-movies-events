@@ -18,7 +18,7 @@
 - **Frontend:** React.js
 - **Backend:** Node.js and Express.js
 - **Database:** MongoDB
-- **Styling:** CSS frameworks like Bootstrap or Tailwind.
+- **Styling:** Tailwind.
 - **APIs:** RESTful API design for scalability and flexibility.
 
 ---
