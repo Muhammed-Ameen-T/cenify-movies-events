@@ -21,17 +21,3 @@
 - **Styling:** Tailwind.
 - **APIs:** RESTful API design for scalability and flexibility.
 
----
-
-## Installation
-
-To get started, follow these steps:
-
-### Prerequisites:
-- Node.js
-- MongoDB
-
-### Steps:
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Muhammed-Ameen-T/cenify-movies-events.git
