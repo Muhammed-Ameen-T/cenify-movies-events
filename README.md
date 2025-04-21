@@ -17,7 +17,7 @@
 ## Tech Stack
 - **Frontend:** React.js
 - **Backend:** Node.js and Express.js
-- **Database:** MongoDB
+- **Database:** MongoDB and Redis
 - **Styling:** Tailwind.
 - **APIs:** RESTful API design for scalability and flexibility.
 
