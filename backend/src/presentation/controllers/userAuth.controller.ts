@@ -1,0 +1,216 @@
+// src/presentation/controllers/auth.controller.ts
+import 'reflect-metadata';
+import { Request, Response } from 'express';
+import { injectable, inject } from 'tsyringe';
+import { container } from 'tsyringe';
+
+import { sendResponse } from '../../utils/response/sendResponse.utils';
+import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
+import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
+import { CustomError } from '../../utils/errors/custome.error';
+
+import { VerifyOtpDTO, LoginDTO } from '../../application/dtos/auth.dto';
+
+import { IUserAuthController } from './interface/userAuth.controller.interface';
+
+import { ISendOtpUseCase } from '../../domain/interfaces/useCases/User/sentOtpUser.interface';
+import { IVerifyOtpUseCase } from '../../domain/interfaces/useCases/User/verifyOtpUser.interface';
+import { IGoogleAuthUseCase } from '../../domain/interfaces/useCases/User/googleAuthUser.interface';
+import { ILoginUserUseCase } from '../../domain/interfaces/useCases/User/loginUser.interface';
+
+import { IAuthRepository } from '../../domain/interfaces/repositories/userAuth.types';
+import { JwtService } from '../../infrastructure/services/jwt.service';
+
+@injectable()
+export class UserAuthController implements IUserAuthController {
+  constructor(
+    @inject('SendOtpUserUseCase') private sendOtpUseCase: ISendOtpUseCase,
+    @inject('VerifyOtpUserUseCase') private verifyOtpUseCase: IVerifyOtpUseCase,
+    @inject('GoogleAuthUseCase') private googleAuthUseCase: IGoogleAuthUseCase,
+    @inject('LoginUserUseCase') private loginUserUseCase: ILoginUserUseCase,
+  ) {}
+
+  async googleCallback(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await this.googleAuthUseCase.execute(req.body);
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
+        accessToken: result.accessToken,
+        user: result.user,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : ERROR_MESSAGES.AUTHENTICATION.GOOGLE_AUTH_FAILED;
+      console.error('googleCallback error:', errorMessage);
+      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  async refreshToken(req: Request, res: Response): Promise<void> {
+    try {
+      console.log('AuthController.refreshToken: Checking cookies');
+      if (!req.cookies) {
+        console.log('AuthController.refreshToken: No cookies found');
+        sendResponse(
+          res,
+          HttpResCode.BAD_REQUEST,
+          ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
+        );
+        return;
+      }
+      const refreshToken = req.cookies.refreshToken;
+      console.log(
+        'AuthController.refreshToken: Received refreshToken:',
+        refreshToken ? 'present' : 'missing',
+      );
+      if (!refreshToken) {
+        sendResponse(
+          res,
+          HttpResCode.BAD_REQUEST,
+          ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
+        );
+        return;
+      }
+      const jwtService = container.resolve<JwtService>('JwtService');
+      const decoded = jwtService.verifyRefreshToken(refreshToken);
+      const authRepository = container.resolve<IAuthRepository>('AuthRepository');
+      const user = await authRepository.findById(decoded.userId);
+      if (!user) {
+        console.log('AuthController.refreshToken: User not found for ID:', decoded.userId);
+        sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
+        return;
+      }
+      const newAccessToken = jwtService.generateAccessToken(user._id?.toString() || '', 'user');
+      console.log('AuthController.refreshToken: New access token generated');
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { accessToken: newAccessToken });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN;
+      console.error('AuthController.refreshToken error:', errorMessage);
+      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  async getCurrentUser(req: Request, res: Response): Promise<void> {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      -sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
+      return;
+    }
+    try {
+      const jwtService = container.resolve<JwtService>('JwtService');
+      const authRepository = container.resolve<IAuthRepository>('AuthRepository');
+      const decoded = jwtService.verifyAccessToken(token);
+      const user = await authRepository.findById(decoded.userId);
+      if (!user) {
+        sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
+        return;
+      }
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
+        id: user._id?.toString() || '',
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        profileImage: user.profileImage,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : ERROR_MESSAGES.AUTHENTICATION.INVALID_ACCESS_TOKEN;
+      console.error('getCurrentUser error:', errorMessage);
+      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  async sendOtp(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+      console.log('AuthController.sendOtp: Received request:', { email });
+
+      if (!email || typeof email !== 'string' || !email.trim()) {
+        console.log('AuthController.sendOtp: Missing or invalid email:', email);
+        sendResponse(res, HttpResCode.BAD_REQUEST, 'Email is required.');
+        return;
+      }
+      await this.sendOtpUseCase.execute(email.trim());
+
+      console.log('AuthController.sendOtp: OTP process completed.');
+      sendResponse(res, HttpResCode.OK, 'OTP sent successfully.');
+    } catch (error) {
+      const errorMessage = error instanceof CustomError ? error.message : 'Failed to send OTP.';
+      console.error('AuthController.sendOtp error:', { errorMessage, email: req.body.email });
+      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  async verifyOtp(req: Request, res: Response): Promise<void> {
+    try {
+      const { name, email, password, otp } = req.body;
+      console.log('AuthController.verifyOtp: Received request:', { email, otp });
+
+      const dto = new VerifyOtpDTO(name, email, otp, password);
+      const result = await this.verifyOtpUseCase.execute(dto);
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      sendResponse(res, HttpResCode.OK, 'Register successful.', {
+        accessToken: result.accessToken,
+        user: result.user,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to verify OTP.';
+      console.error('AuthController.verifyOtp error:', errorMessage);
+      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  async login(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body;
+
+      const dto = new LoginDTO(email, password);
+      const response = await this.loginUserUseCase.execute(dto);
+
+      res.cookie('refreshToken', response.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      sendResponse(res, HttpResCode.OK, 'Login successful.', {
+        accessToken: response.accessToken,
+        user: response.user,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to verify OTP.';
+      console.error('AuthController.verifyOtp error:', errorMessage);
+      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  
+  async logout(req: Request, res: Response): Promise<void> {
+    try {      
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: "strict",
+      });
+
+      sendResponse(res, HttpResCode.OK, 'Successfully logged out');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to logout.';
+      console.error("Logout failed:", error);
+      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+}

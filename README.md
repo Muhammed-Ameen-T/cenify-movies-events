@@ -1,1 +1,1 @@
-#Cenify - Movie Tickets and Theater and Events near you.
+# Cenify - Movie Tickets and Theater and Events near you.
