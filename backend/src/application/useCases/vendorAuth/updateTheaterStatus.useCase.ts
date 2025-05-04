@@ -1,5 +1,5 @@
 // src/application/use-cases/updateTheaterStatusUseCase.ts
-import { IVendorRepository } from '../../../domain/interfaces/repositories/vendor.repository';
+import { ITheaterRepository } from '../../../domain/interfaces/repositories/theater.repository';
 import { VendorResponseDTO } from '../../dtos/vendor.dto';
 import { sendResponse } from '../../../utils/response/sendResponse.utils';
 import { Response } from 'express';
@@ -9,7 +9,7 @@ import { inject, injectable } from 'tsyringe';
 
 @injectable()
 export class UpdateTheaterStatusUseCase implements IUpdateTheaterStatusUseCase{
-    constructor(@inject('VendorRepository') private vendorRepository: IVendorRepository) {}
+    constructor(@inject('TheaterRepository') private vendorRepository: ITheaterRepository) {}
 
   async execute(id: string, status: string, res: Response): Promise<void> {
     const validStatuses = ['active', 'blocked', 'verified', 'verifying', 'pending', 'request'];
@@ -39,7 +39,7 @@ export class UpdateTheaterStatusUseCase implements IUpdateTheaterStatusUseCase{
       vendor.email,
       vendor.phone,
       vendor.rating,
-      vendor.accountType,
+      vendor.description,
       vendor.createdAt,
       vendor.updatedAt,
     );

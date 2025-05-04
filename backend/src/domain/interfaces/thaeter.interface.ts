@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 
-export interface IVendor extends Document {
+export interface ITheater extends Document {
   _id: string;
   screens: string[] | null;
   name: string;
@@ -21,9 +21,8 @@ export interface IVendor extends Document {
   gallery: string[] | null;
   email: string | null;
   phone: number | null;
-  password: string | null;
+  description: string | null;
   rating: number | null;
-  accountType: 'theater' | 'event';
   createdAt: Date;
   updatedAt: Date;
 }

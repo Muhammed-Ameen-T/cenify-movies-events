@@ -9,7 +9,7 @@ import { VerifyOtpSchema, SendOtpSchema } from '../validation/userAuth.validatio
 
 const userAuthController = container.resolve<IUserAuthController>('UserAuthController');
 
-const router = Router();
+const   router = Router();
 
 router.post('/google/callback', userAuthController.googleCallback.bind(userAuthController));
 router.post('/refresh-token', userAuthController.refreshToken.bind(userAuthController));
@@ -26,5 +26,8 @@ router.post(
 );
 router.post('/login', (req, res) => userAuthController.login(req, res));
 router.post('/logout', (req,res) => userAuthController.logout(req,res));
+router.post('/fg-verify-otp', (req,res) => userAuthController.forgotPassVerifyOtp(req,res));
+router.post('/fg-send-otp', (req,res) => userAuthController.forgotPassSendOtp(req,res));
+router.post('/fg-update-pass', (req,res) => userAuthController.forgotPassUpdatePassword(req,res));
 
 export default router;

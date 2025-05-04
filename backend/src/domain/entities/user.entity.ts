@@ -17,7 +17,7 @@ export class User {
     },
     public loyalityPoints: number | null,
     public isBlocked: boolean | null,
-    public isAdmin: boolean | null,
+    public role: string,
     public createdAt: Date,
     public updatedAt: Date,
   ) {}

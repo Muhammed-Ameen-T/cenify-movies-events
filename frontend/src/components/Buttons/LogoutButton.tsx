@@ -1,6 +1,6 @@
 import { LogOut } from 'react-feather';
 import { useDispatch } from 'react-redux';
-import { clearAuth } from '../../store/slices/authSlice'; // Import Redux action
+import { clearAuth } from '../../store/slices/authSlice';
 import axios from 'axios';
 import { API_BASE_URL } from '../../constants/apiEndPoint';
 import { useNavigate } from 'react-router-dom';
@@ -13,9 +13,7 @@ const LogoutButton = () => {
 
   const handleLogout = async () => {
     try {
-      // Call backend API to remove refresh token from cookies
       await axios.post(`${API_BASE_URL}/auth/logout`);
-      // Clear localStorage data
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
 

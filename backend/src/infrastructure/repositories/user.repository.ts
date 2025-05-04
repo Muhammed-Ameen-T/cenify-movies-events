@@ -31,6 +31,12 @@ export class UserRepositoryImpl implements IUserRepository {
     const updatedUser = await UserModel.findById(user._id);
     return this.toEntity(updatedUser!);
   }
+  
+  async updatePassword(email: string, password: string): Promise<User> {
+    await UserModel.updateOne({ email }, { password });
+    const updatedUser = await UserModel.findOne({email:email});
+    return this.toEntity(updatedUser);
+  }
 
   private toEntity(doc: any): User {
     return new User(
@@ -45,7 +51,7 @@ export class UserRepositoryImpl implements IUserRepository {
       doc.moviePass,
       doc.loyalityPoints,
       doc.isBlocked,
-      doc.isAdmin,
+      doc.role,
       doc.createdAt,
       doc.updatedAt,
     );

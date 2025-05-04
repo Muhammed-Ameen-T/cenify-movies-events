@@ -7,9 +7,9 @@ import { container } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
-import { CustomError } from '../../utils/errors/custome.error';
+import { CustomError } from '../../utils/errors/custom.error';
 
-import { VerifyOtpDTO, LoginDTO } from '../../application/dtos/auth.dto';
+import { VerifyOtpDTO, LoginDTO, ForgotPassVerifyOtpDTO, ForgotPassSendOtpDTO, ForgotPassUpdateDTO } from '../../application/dtos/auth.dto';
 
 import { IUserAuthController } from './interface/userAuth.controller.interface';
 
@@ -20,6 +20,9 @@ import { ILoginUserUseCase } from '../../domain/interfaces/useCases/User/loginUs
 
 import { IAuthRepository } from '../../domain/interfaces/repositories/userAuth.types';
 import { JwtService } from '../../infrastructure/services/jwt.service';
+import { IForgotPasswordSendOtpUseCase } from '../../domain/interfaces/useCases/Admin/forgotPasswordSendOtp.interface';
+import { IForgotPasswordUpdateUseCase } from '../../domain/interfaces/useCases/Admin/forgotPasswordUpdate.interface';
+import { IForgotPasswordVerifyOtpUseCase } from '../../domain/interfaces/useCases/Admin/forgotPasswordVerifyOtp.interface';
 
 @injectable()
 export class UserAuthController implements IUserAuthController {
@@ -28,6 +31,9 @@ export class UserAuthController implements IUserAuthController {
     @inject('VerifyOtpUserUseCase') private verifyOtpUseCase: IVerifyOtpUseCase,
     @inject('GoogleAuthUseCase') private googleAuthUseCase: IGoogleAuthUseCase,
     @inject('LoginUserUseCase') private loginUserUseCase: ILoginUserUseCase,
+    @inject('ForgotPassSendOtp') private forgotPassSendOtpUseCase: IForgotPasswordSendOtpUseCase,
+    @inject('ForgotPassUpdate') private forgotPassUpdatePassUseCase: IForgotPasswordUpdateUseCase,
+    @inject('ForgotPassVerifyOtp') private forgotPassVerifyOtpUseCase: IForgotPasswordVerifyOtpUseCase,
   ) {}
 
   async googleCallback(req: Request, res: Response): Promise<void> {
@@ -211,6 +217,54 @@ export class UserAuthController implements IUserAuthController {
       const errorMessage = error instanceof Error ? error.message : 'Failed to logout.';
       console.error("Logout failed:", error);
       sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  async forgotPassSendOtp(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body as ForgotPassSendOtpDTO;
+      console.log('AuthController.requestPasswordReset: Received request:', { email });
+
+      await this.forgotPassSendOtpUseCase.execute(email.trim());
+      console.log('AuthController.requestPasswordReset: OTP process completed');
+      sendResponse(res, HttpResCode.OK, 'OTP sent successfully');
+    } catch (error) {
+      const errorMessage =
+        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.FAILED_SENDING_OTP;
+      console.error('AuthController.requestPasswordReset error:', { errorMessage, email: req.body.email });
+      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  async forgotPassVerifyOtp(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, otp } = req.body as  ForgotPassVerifyOtpDTO;
+      console.log('AuthController.verifyOtp: Received request:', { email, otp });
+
+      await this.forgotPassVerifyOtpUseCase.execute(email, otp);
+      console.log('AuthController.verifyOtp: OTP verified successfully');
+      sendResponse(res, HttpResCode.OK, 'OTP verified successfully');
+    } catch (error) {
+      const errorMessage =
+        error instanceof CustomError ? error.message : ERROR_MESSAGES.VALIDATION.INVALID_OTP;
+      console.error('AuthController.verifyOtp error:', errorMessage);
+      sendResponse(res,HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  async forgotPassUpdatePassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password } = req.body as ForgotPassUpdateDTO;
+      console.log('AuthController.updatePassword: Received request:', { email });
+
+      await this.forgotPassUpdatePassUseCase.execute(email, password);
+      console.log('AuthController.updatePassword: Password updated successfully');
+      sendResponse(res, HttpResCode.OK, 'Password updated successfully');
+    } catch (error) {
+      const errorMessage =
+        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.FAILED_TO_UPDATE_PASSWORD;
+      console.error('AuthController.updatePassword error:', errorMessage);
+      sendResponse(res,HttpResCode.BAD_REQUEST, errorMessage);
     }
   }
 }

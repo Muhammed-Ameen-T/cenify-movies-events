@@ -17,7 +17,7 @@ const userSchema: Schema<IUser> = new Schema(
     },
     loyalityPoints: { type: Number, default: 0 },
     isBlocked: { type: Boolean, default: false },
-    isAdmin: { type: Boolean, default: false },
+    role: { type: String },
   },
   { timestamps: true },
 );

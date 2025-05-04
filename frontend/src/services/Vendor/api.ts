@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Theater } from "../../types/theater";
-import {VENDOR_ENDPOINTS } from "../../constants/apiEndPoint";
-const API_BASE_URL = "http://localhost:3000/api/vendor";
+import {ADMIN_ENDPOINTS, VENDOR_ENDPOINTS } from "../../constants/apiEndPoint";
+const API_BASE_URL = "http://localhost:3000/api/";
 // import api from "../../config/axios.config";
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -13,7 +13,7 @@ const api = axios.create({
 export const registerVendor = async (data: {
   email: string;
 }): Promise<{ id: string; email: string; accountType: string }> => {
-  const response = await api.post(`/send-otp`, data);
+  const response = await api.post(`/vendor/send-otp`, data);
   return response.data;
 };
 
@@ -29,7 +29,7 @@ export const verifyVendorOtp = async (data: {
   refreshToken: string;
   user: { id: string; email: string; name: string; phone: number; profileImage: string; role: string };
 }> => {
-  const response = await api.post(`/verify-otp`, data);
+  const response = await api.post(`/vendor/verify-otp`, data);
   return response.data;
 };
 
@@ -152,5 +152,53 @@ export const updateTheaterStatus = async (id: string, status: string): Promise<v
   await axios.patch(`http://localhost:3000/api/vendor/update-theater-status/${id}`, { status });
 };
 
+export const requestPasswordReset = async ({ email }: { email: string }) => {
+  const response = await api.post('http://localhost:3000/api/auth/fg-send-otp', { email });
+  return response.data;
+};
+
+export const verifyResetOtp = async ({ email, otp }: { email: string; otp: string }) => {
+  const response = await api.post('http://localhost:3000/api/auth/fg-verify-otp', { email, otp });
+  return response.data;
+};
+
+export const updatePassword = async ({
+  email,
+  password,
+  confirmPassword,
+}: {
+  email: string;
+  password: string;
+  confirmPassword: string;
+}) => {
+  const response = await axios.post('http://localhost:3000/api/auth/fg-update-pass', {
+    email,
+    password,
+    confirmPassword,
+  });
+  return response.data;
+};
+
+
+
+export const createEvent = async (data: {
+  name: string;
+  date: string;
+  time: string;
+  theaterId: string;
+  ticketPrice: number;
+}) => {
+  // Axios POST to /api/vendor/events
+};
+
+export const createTheater = async (data: {
+  name: string;
+  location: string;
+  rows: number;
+  seatsPerRow: number;
+  seatLayout: string[][];
+}) => {
+  // Axios POST to /api/vendor/theaters
+};
 
 export default api; 

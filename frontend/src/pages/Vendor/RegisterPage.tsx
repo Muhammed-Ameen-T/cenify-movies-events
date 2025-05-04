@@ -1,10 +1,10 @@
+import { z } from "zod";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser, FaPhone } from "react-icons/fa";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ToastContainer, toast } from "react-toastify";
-import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
@@ -112,16 +112,11 @@ const VendorRegisterPage: React.FC = () => {
       resetRegisterForm();
       setRegisterFormData(null);
       setEmail("");
-      console.log(data)
-      if(data.data.user.role=='theater'){
-        const vendorId = data.data.user.id;
-        navigate(`/vendor/details?vendorId=${vendorId}`);
-      }else{
-        toast.success("Your Registration Completed, You will recieve and email once your application get approved");      
+      console.log(data)    
         setTimeout(() => {
-          navigate('/vendor/login'); 
+          navigate('/vendor/dashboard'); 
         }, 3000);  
-      }
+  
       dispatch(stopLoading());
     },
     onError: (error: any) => {

@@ -8,4 +8,7 @@ export interface IUserAuthController {
   verifyOtp(req: Request, res: Response): Promise<void>;
   login(req: Request, res: Response): Promise<void>;
   logout(req: Request, res: Response): Promise<void>;
+  forgotPassSendOtp(req: Request, res: Response): Promise<void> 
+  forgotPassVerifyOtp(req: Request, res: Response): Promise<void>
+  forgotPassUpdatePassword(req: Request, res: Response): Promise<void>
 }

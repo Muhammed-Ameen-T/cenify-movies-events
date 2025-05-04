@@ -3,7 +3,7 @@ import { IAuthRepository } from '../../domain/interfaces/repositories/userAuth.t
 import { User } from '../../domain/entities/user.entity';
 import mongoose, { Model } from 'mongoose';
 import { IUser } from '../../domain/interfaces/user.interface';
-import { CustomError } from '../../utils/errors/custome.error';
+import { CustomError } from '../../utils/errors/custom.error';
 import { HttpResCode } from '../../utils/constants/httpResponseCode.utils';
 
 export class AuthRepository implements IAuthRepository {
@@ -33,7 +33,7 @@ export class AuthRepository implements IAuthRepository {
         },
         user.loyalityPoints,
         user.isBlocked,
-        user.isAdmin,
+        user.role,
         user.createdAt,
         user.updatedAt,
       );
@@ -62,7 +62,7 @@ export class AuthRepository implements IAuthRepository {
         },
         user.loyalityPoints,
         user.isBlocked,
-        user.isAdmin,
+        user.role,
         user.createdAt,
         user.updatedAt,
       );
@@ -90,7 +90,7 @@ export class AuthRepository implements IAuthRepository {
         },
         user.loyalityPoints,
         user.isBlocked,
-        user.isAdmin,
+        user.role,
         user.createdAt,
         user.updatedAt,
       );
@@ -116,7 +116,7 @@ export class AuthRepository implements IAuthRepository {
         moviePass: user.moviePass,
         loyalityPoints: user.loyalityPoints,
         isBlocked: user.isBlocked,
-        isAdmin: user.isAdmin,
+        role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       });
@@ -136,7 +136,7 @@ export class AuthRepository implements IAuthRepository {
         },
         newUser.loyalityPoints,
         newUser.isBlocked,
-        newUser.isAdmin,
+        newUser.role,
         newUser.createdAt,
         newUser.updatedAt,
       );
@@ -163,7 +163,7 @@ export class AuthRepository implements IAuthRepository {
             moviePass: user.moviePass,
             loyalityPoints: user.loyalityPoints,
             isBlocked: user.isBlocked,
-            isAdmin: user.isAdmin,
+            role: user.role,
             updatedAt: user.updatedAt,
           },
           { new: true },
@@ -188,7 +188,7 @@ export class AuthRepository implements IAuthRepository {
         },
         updatedUser.loyalityPoints,
         updatedUser.isBlocked,
-        updatedUser.isAdmin,
+        updatedUser.role,
         updatedUser.createdAt,
         updatedUser.updatedAt,
       );

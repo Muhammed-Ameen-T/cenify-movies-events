@@ -3,7 +3,7 @@ import { ILoginUserUseCase } from '../../../domain/interfaces/useCases/User/logi
 import { IUserRepository } from '../../../domain/interfaces/repositories/user.repository';
 import { LoginDTO, AuthResponseDTO } from '../../dtos/auth.dto';
 import { JwtService } from '../../../infrastructure/services/jwt.service';
-import { CustomError } from '../../../utils/errors/custome.error';
+import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import bcrypt from 'bcrypt';
@@ -39,7 +39,7 @@ export class LoginAdminUseCase implements ILoginUserUseCase {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.UNAUTHORIZED);
     }
 
-    if (!admin.isAdmin) {
+    if (admin.role!=='admin') {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.YOUR_NOT_ADMIN, HttpResCode.FORBIDDEN);
     }
 
@@ -64,7 +64,7 @@ export class LoginAdminUseCase implements ILoginUserUseCase {
       name: admin.name,
       phone: admin.phone || 0,
       profileImage: admin.profileImage,
-      role: 'admin',
+      role: admin.role,
     });
   }
 }

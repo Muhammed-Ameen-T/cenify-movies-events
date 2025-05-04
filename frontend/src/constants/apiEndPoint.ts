@@ -11,7 +11,10 @@ export const USER_AUTH_ENDPOINTS = {
 };
 
 export const ADMIN_ENDPOINTS = {
-  login: `/auth/admin/login`
+  login: `/auth/admin/login`,
+  forgotPassSendOtp: '/auth/fg-send-otp',
+  forgotPassVerifyOtp: '/auth/fg-verify-otp',
+  forgotPassUpdate: '/auth/fg-update-pass',
 }
 
 export const VENDOR_ENDPOINTS = {

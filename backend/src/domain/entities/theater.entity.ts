@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongoose';
 
-export class Vendor {
+export class Theater {
   constructor(
     public _id: string,
     public screens: string[] | null,
@@ -24,9 +24,8 @@ export class Vendor {
     public gallery: string[] | null,
     public email: string | null,
     public phone: number | null,
-    public password: string | null,
+    public description: string | null,
     public rating: number | null,
-    public accountType: string,
   ) {}
 
   isValidEmail(): boolean {

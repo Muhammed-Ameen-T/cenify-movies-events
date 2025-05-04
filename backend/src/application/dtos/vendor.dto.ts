@@ -23,7 +23,6 @@ export class VerifyOtpVendorDTO {
     public email: string,
     public password: string,
     public phone: number,
-    public accountType: string,
     public otp: string,
   ) {}
 }
@@ -105,7 +104,7 @@ export class VendorResponseDTO {
     public email: string | null,
     public phone: number | null,
     public rating: number | null,
-    public accountType: string,
+    public description: string | null,
     public createdAt: Date | null,
     public updatedAt: Date | null,
   ) {}

@@ -44,3 +44,61 @@ input[type="radio"]:disabled {
   background-color: #4b5563; /* gray-600 */
   cursor: not-allowed;
 }
+
+
+
+/* Define Custom Colors */
+:root {
+  --primary-50: #e6f1fe;
+  --primary-100: #cce3fd;
+  --primary-200: #99c8fb;
+  --primary-300: #66acf9;
+  --primary-400: #3391f7;
+  --primary-500: #0066F5;
+  --primary-600: #0052c4;
+  --primary-700: #003d93;
+  --primary-800: #002962;
+  --primary-900: #001431;
+
+  --dark-50: #e6e6e6;
+  --dark-100: #cccccc;
+  --dark-200: #999999;
+  --dark-300: #666666;
+  --dark-400: #333333;
+  --dark-500: #1E1E2D;
+  --dark-600: #18181f;
+  --dark-700: #121218;
+  --dark-800: #0c0c10;
+  --dark-900: #060608;
+
+  --accent-50: #fee6ef;
+  --accent-100: #fdccdf;
+  --accent-200: #fb99bf;
+  --accent-300: #f9669f;
+  --accent-400: #f7337f;
+  --accent-500: #f5005f;
+  --accent-600: #c4004c;
+  --accent-700: #930039;
+  --accent-800: #620026;
+  --accent-900: #310013;
+}
+
+/* Apply Custom Colors */
+.bg-primary {
+  background-color: var(--primary-500);
+}
+
+.bg-dark {
+  background-color: var(--dark-500);
+}
+
+.bg-accent {
+  background-color: var(--accent-500);
+}
+
+/* Define Custom Font */
+body {
+  font-family: "Inter", sans-serif;
+}
+
+

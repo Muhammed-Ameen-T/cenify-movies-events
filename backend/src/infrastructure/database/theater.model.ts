@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
-import { IVendor } from '../../domain/interfaces/vendor.interface';
+import { ITheater } from '../../domain/interfaces/thaeter.interface';
 
-const VendorSchema: Schema<IVendor> = new Schema(
+const TheaterSchema: Schema<ITheater> = new Schema(
   {
     screens: [{ type: Schema.Types.ObjectId }],
     name: { type: String, required: true },
@@ -22,11 +22,10 @@ const VendorSchema: Schema<IVendor> = new Schema(
     gallery: [{ type: String }],
     email: { type: String },
     phone: { type: Number },
-    password: { type: String },
+    description: { type: String },
     rating: { type: Number },
-    accountType: { type: String, enum: ['theater', 'event'], required: true },
   },
   { timestamps: true },
 );
 
-export const VendorModel = mongoose.model<IVendor>('Vendor', VendorSchema);
+export const TheaterModel = mongoose.model<ITheater>('Vendor', TheaterSchema);

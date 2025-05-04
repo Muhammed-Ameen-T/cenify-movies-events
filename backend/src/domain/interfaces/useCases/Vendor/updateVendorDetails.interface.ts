@@ -1,5 +1,5 @@
 import { TheaterDetailsDTO, UpdateTheaterDetailsDTO } from '../../../../application/dtos/vendor.dto';
-import { Vendor } from '../../../entities/vendor.entity';
+import { Vendor } from '../../../entities/theater.entity';
 
 // Interface for the use case
 export interface IUpdateVendorDetailsUseCase {

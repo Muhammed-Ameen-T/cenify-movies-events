@@ -58,7 +58,7 @@ export class GoogleAuthUseCase {
         { buyDate: null, expiryDate: null, isPass: null },
         0,
         false,
-        false,
+        'user',
         new Date(),
         new Date(),
       );
@@ -87,7 +87,7 @@ export class GoogleAuthUseCase {
         email: user.email,
         phone: 9876543210,
         profileImage: user.profileImage,
-        role: user.isAdmin ? 'admin' : 'user',
+        role: user.role,
       },
     };
   }

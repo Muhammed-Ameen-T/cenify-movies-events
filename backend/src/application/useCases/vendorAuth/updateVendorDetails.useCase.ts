@@ -1,23 +1,23 @@
 import { inject, injectable } from 'tsyringe';
-import { Vendor } from '../../../domain/entities/vendor.entity';
-import { IVendorRepository } from '../../../domain/interfaces/repositories/vendor.repository';
+import { Theater } from '../../../domain/entities/theater.entity';
+import { ITheaterRepository } from '../../../domain/interfaces/repositories/theater.repository';
 import { UpdateTheaterDetailsDTO } from '../../dtos/vendor.dto';
-import { CustomError } from '../../../utils/errors/custome.error';
+import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode, HttpResMsg } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { IUpdateVendorDetailsUseCase } from '../../../domain/interfaces/useCases/Vendor/updateVendorDetails.interface';
 
 @injectable()
 export class UpdateVendorDetailsUseCase implements IUpdateVendorDetailsUseCase {
-  constructor(@inject('VendorRepository') private vendorRepository: IVendorRepository) {}
+  constructor(@inject('TheaterRepository') private vendorRepository: ITheaterRepository) {}
 
-  async execute(dto: UpdateTheaterDetailsDTO): Promise<Vendor> {
+  async execute(dto: UpdateTheaterDetailsDTO): Promise<Theater> {
     const existingTheater = await this.vendorRepository.findById(dto._id);
     if (!existingTheater) {
       throw new CustomError(ERROR_MESSAGES.DATABASE.RESOURCE_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
 
-    const updatedTheater = new Vendor(
+    const updatedTheater = new Theater(
       existingTheater._id,
       existingTheater.screens,
       existingTheater.name,
@@ -30,13 +30,12 @@ export class UpdateVendorDetailsUseCase implements IUpdateVendorDetailsUseCase {
       dto.gallery || existingTheater.gallery,
       existingTheater.email,
       existingTheater.phone,
-      existingTheater.password,
+      existingTheater.description,
       existingTheater.rating,
-      existingTheater.accountType,
     );
 
     try {
-      const savedTheater = await this.vendorRepository.updateVendorDetails(updatedTheater);
+      const savedTheater = await this.vendorRepository.updateTheaterDetails(updatedTheater);
       return savedTheater;
     } catch (error) {
       throw new CustomError(HttpResMsg.INTERNAL_SERVER_ERROR, HttpResCode.INTERNAL_SERVER_ERROR);

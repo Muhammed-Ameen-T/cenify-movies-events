@@ -6,7 +6,7 @@ import { injectable, inject, container } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
-import { CustomError } from '../../utils/errors/custome.error';
+import { CustomError } from '../../utils/errors/custom.error';
 
 import {
   SendOtpVendorDTO,
@@ -22,7 +22,7 @@ import { IVerifyOtpVendorUseCase } from '../../domain/interfaces/useCases/Vendor
 import { ILoginVendorUseCase } from '../../domain/interfaces/useCases/Vendor/loginVendor.interface';
 import { IUpdateVendorDetailsUseCase } from '../../domain/interfaces/useCases/Vendor/updateVendorDetails.interface';
 
-import { IVendorRepository } from '../../domain/interfaces/repositories/vendor.repository';
+import { ITheaterRepository } from '../../domain/interfaces/repositories/theater.repository';
 import { JwtService } from '../../infrastructure/services/jwt.service';
 import { SuccessMsg } from '../../utils/constants/commonSuccessMsg.constants';
 
@@ -33,7 +33,7 @@ export class VendorAuthController implements IVendorAuthController {
     @inject('VerifyOtpVendorUseCase') private verifyOtpUseCase: IVerifyOtpVendorUseCase,
     @inject('LoginVendorUseCase') private loginVendorUseCase: ILoginVendorUseCase,
     @inject('UpdateVendorDetailsUseCase') private updateVendorDetailsUseCase: IUpdateVendorDetailsUseCase,
-    @inject('VendorRepository') private vendorRepository: IVendorRepository,
+    @inject('TheaterRepository') private vendorRepository: ITheaterRepository,
   ) {}
 
   async sendOtp(req: Request, res: Response): Promise<void> {
@@ -53,7 +53,7 @@ export class VendorAuthController implements IVendorAuthController {
   async verifyOtp(req: Request, res: Response): Promise<void> {
     try {
       const { name, email, password,phone, accountType, otp } = req.body;
-      const dto = new VerifyOtpVendorDTO(name, email, password,phone, accountType, otp);
+      const dto = new VerifyOtpVendorDTO(name, email, password,phone, otp);
       const result = await this.verifyOtpUseCase.execute(dto);
       console.log("🚀 ~ VendorAuthController ~ verifyOtp ~ result:", result)
       
@@ -103,45 +103,44 @@ export class VendorAuthController implements IVendorAuthController {
       sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
     }
   }
-  
 
-  async refreshToken(req: Request, res: Response): Promise<void> {
-    try {
-      if (!req.cookies) {
-        sendResponse(
-          res,
-          HttpResCode.BAD_REQUEST,
-          ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-        );
-        return;
-      }
-      const refreshToken = req.cookies.refreshToken;
-      if (!refreshToken) {
-        sendResponse(
-          res,
-          HttpResCode.BAD_REQUEST,
-          ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-        );
-        return;
-      }
-      const jwtService = container.resolve<JwtService>('JwtService');
-      const theaterRepository = container.resolve<IVendorRepository>('ITheaterRepository');
-      const decoded = jwtService.verifyRefreshToken(refreshToken);
-      const theater = await theaterRepository.findById(decoded.userId);
-      if (!theater) {
-        sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
-        return;
-      }
-      const newAccessToken = jwtService.generateAccessToken(theater._id, theater.accountType);
-      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { accessToken: newAccessToken });
-    } catch (error) {
-      const errorMessage =
-        error instanceof CustomError
-          ? error.message
-          : ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN;
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
-    }
-  }
+  // async refreshToken(req: Request, res: Response): Promise<void> {
+  //   try {
+  //     if (!req.cookies) {
+  //       sendResponse(
+  //         res,
+  //         HttpResCode.BAD_REQUEST,
+  //         ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
+  //       );
+  //       return;
+  //     }
+  //     const refreshToken = req.cookies.refreshToken;
+  //     if (!refreshToken) {
+  //       sendResponse(
+  //         res,
+  //         HttpResCode.BAD_REQUEST,
+  //         ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
+  //       );
+  //       return;
+  //     }
+  //     const jwtService = container.resolve<JwtService>('JwtService');
+  //     const theaterRepository = container.resolve<ITheaterRepository>('ITheaterRepository');
+  //     const decoded = jwtService.verifyRefreshToken(refreshToken);
+  //     const theater = await theaterRepository.findById(decoded.userId);
+  //     if (!theater) {
+  //       sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
+  //       return;
+  //     }
+  //     const newAccessToken = jwtService.generateAccessToken(theater._id, theater.accountType);
+  //     sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { accessToken: newAccessToken });
+  //   } catch (error) {
+  //     const errorMessage =
+  //       error instanceof CustomError
+  //         ? error.message
+  //         : ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN;
+  //     sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+  //   }
+  // }
 
   async getCurrentUser(req: Request, res: Response): Promise<void> {
     const token = req.headers.authorization?.split(' ')[1];

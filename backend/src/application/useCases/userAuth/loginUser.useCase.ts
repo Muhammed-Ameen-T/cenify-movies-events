@@ -3,7 +3,7 @@ import { ILoginUserUseCase } from '../../../domain/interfaces/useCases/User/logi
 import { IUserRepository } from '../../../domain/interfaces/repositories/user.repository';
 import { LoginDTO, AuthResponseDTO } from '../../dtos/auth.dto';
 import { JwtService } from '../../../infrastructure/services/jwt.service';
-import { CustomError } from '../../../utils/errors/custome.error';
+import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import bcrypt from 'bcrypt';
@@ -42,8 +42,8 @@ export class LoginUserUseCase implements ILoginUserUseCase {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.BLOCKED_USER, HttpResCode.UNAUTHORIZED);
     }
 
-    if (user.isAdmin) {
-      throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.ADMIN_BLOCKED, HttpResCode.UNAUTHORIZED);
+    if (user.role != 'user') {
+      throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.YOUR_NOT_USER, HttpResCode.UNAUTHORIZED);
     }
 
     console.log(dto.password, user.password);
@@ -61,7 +61,7 @@ export class LoginUserUseCase implements ILoginUserUseCase {
       name: user.name,
       phone: user.phone || 0,
       profileImage: user.profileImage,
-      role: user.isAdmin ? 'admin' : 'user',
+      role: user.role,
     });
   }
 }

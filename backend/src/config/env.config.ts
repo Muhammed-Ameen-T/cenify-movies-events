@@ -1,6 +1,6 @@
 import { EnvErrMsg } from '.././utils/constants/envErrorMsg.constants';
 import { HttpResCode } from '.././utils/constants/httpResponseCode.utils';
-import { CustomError } from '../utils/errors/custome.error';
+import { CustomError } from '../utils/errors/custom.error';
 import dotenv from 'dotenv';
 dotenv.config();
 

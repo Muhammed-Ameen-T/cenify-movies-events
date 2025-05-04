@@ -69,3 +69,48 @@ export const otpSchema = z.object({
 
 
 
+
+// Schema for email input (request password reset)
+export const resetPasswordSchema = z.object({
+  email: z
+    .string()
+    .email('Please enter a valid email address')
+    .nonempty('Email is required'),
+});
+
+
+
+// Schema for new password and confirm password
+export const newPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .nonempty('Password is required'),
+    confirmPassword: z
+      .string()
+      .min(8, 'Confirm password must be at least 8 characters')
+      .nonempty('Confirm password is required'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+
+
+
+  export const eventSchema = z.object({
+    name: z.string().min(1, 'Event name is required'),
+    date: z.string().min(1, 'Date is required'),
+    time: z.string().min(1, 'Time is required'),
+    theaterId: z.string().min(1, 'Theater is required'),
+    ticketPrice: z.number().min(0, 'Ticket price must be non-negative'),
+  });
+  
+  export const theaterSchema = z.object({
+    name: z.string().min(1, 'Theater name is required'),
+    location: z.string().min(1, 'Location is required'),
+    rows: z.number().min(1, 'At least 1 row required'),
+    seatsPerRow: z.number().min(1, 'At least 1 seat per row required'),
+  });

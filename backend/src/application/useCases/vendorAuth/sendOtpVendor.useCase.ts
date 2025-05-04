@@ -1,24 +1,24 @@
 import { injectable, inject } from 'tsyringe';
-import { IVendorRepository } from '../../../domain/interfaces/repositories/vendor.repository';
 import { RedisService } from '../../../infrastructure/services/redis.service';
-import { CustomError } from '../../../utils/errors/custome.error';
+import { CustomError } from '../../../utils/errors/custom.error';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import { SendOtpVendorDTO } from '../../dtos/vendor.dto';
 import { generateOtp } from '../../../utils/helpers/otp.utils';
 import { sendOtp } from '../../../infrastructure/services/sendOtp.service';
+import { IUserRepository } from '../../../domain/interfaces/repositories/user.repository';
 
 
 @injectable()
 export class sendOtpVendorUseCase {
   constructor(
-    @inject('VendorRepository') private vendorRepository: IVendorRepository,
+    @inject('IUserRepository') private userRepository: IUserRepository,
     @inject('RedisService') private redisService: RedisService,
   ) {}
 
   async execute(dto: SendOtpVendorDTO) {
-    const existingTheater = await this.vendorRepository.findByEmail(dto.email);
-    if (existingTheater) {
+    const existingVendor = await this.userRepository.findByEmail(dto.email);
+    if (existingVendor) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.USER_ALREADY_EXISTS, HttpResCode.BAD_REQUEST);
     }
 

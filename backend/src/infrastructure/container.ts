@@ -37,14 +37,20 @@ import { ILoginVendorUseCase } from '../domain/interfaces/useCases/Vendor/loginV
 import { LoginVendorUseCase } from '../application/useCases/vendorAuth/loginVendor.useCase';
 import { IUpdateVendorDetailsUseCase } from '../domain/interfaces/useCases/Vendor/updateVendorDetails.interface';
 import { UpdateVendorDetailsUseCase } from '../application/useCases/vendorAuth/updateVendorDetails.useCase';
-import { IVendorRepository } from '../domain/interfaces/repositories/vendor.repository';
-import { VendorRepository } from './repositories/vendor.repository';
+import { ITheaterRepository } from '../domain/interfaces/repositories/theater.repository';
+import { TheaterRepository } from './repositories/theater.repository';
 import { ITheaterManagementController } from '../presentation/controllers/interface/theaterMng.controller.interface';
 import { TheaterManagementController } from '../presentation/controllers/theaterMng.controller';
 import { IFetchTheatersUseCase } from '../domain/interfaces/useCases/Vendor/fetchTheaters.interface';
 import { FetchTheatersUseCase } from '../application/useCases/vendorAuth/fetchTheaters.useCase';
 import { IUpdateTheaterStatusUseCase } from '../domain/interfaces/useCases/Vendor/updateTheaterStatus.interface';
 import { UpdateTheaterStatusUseCase } from '../application/useCases/vendorAuth/updateTheaterStatus.useCase';
+import { IForgotPasswordSendOtpUseCase } from '../domain/interfaces/useCases/Admin/forgotPasswordSendOtp.interface';
+import { ForgotPasswordSendOtpUseCase } from '../application/useCases/adminAuth/forgotPassSendOtp.useCase';
+import { IForgotPasswordUpdateUseCase } from '../domain/interfaces/useCases/Admin/forgotPasswordUpdate.interface';
+import { ForgotPasswordUpdateUseCase } from '../application/useCases/adminAuth/forgotPassUpdate.useCase';
+import { ForgotPasswordVerifyOtpUseCase } from '../application/useCases/adminAuth/forgotPassVerifyOtp.useCase';
+import { IForgotPasswordVerifyOtpUseCase } from '../domain/interfaces/useCases/Admin/forgotPasswordVerifyOtp.interface';
 
 //Controller Registration
 container.register<IUserAuthController>('UserAuthController', { useClass: UserAuthController });
@@ -63,6 +69,9 @@ container.register<ILoginUserUseCase>('LoginUserUseCase', { useClass: LoginUserU
 // container.register<IVerifyOtpUseCase>('VerifyOtpUserUseCase', { useClass: VerifyOtpUseCase });
 
 container.register<ILoginAdminUseCase>('LoginAdminUseCase', { useClass: LoginAdminUseCase });
+container.register<IForgotPasswordSendOtpUseCase>('ForgotPassSendOtp', { useClass: ForgotPasswordSendOtpUseCase });
+container.register<IForgotPasswordUpdateUseCase>('ForgotPassUpdate', {useClass: ForgotPasswordUpdateUseCase});
+container.register<IForgotPasswordVerifyOtpUseCase>('ForgotPassVerifyOtp', {useClass: ForgotPasswordVerifyOtpUseCase});
 
 container.register<ISendOtpVendorUseCase>('SendOtpVendorUseCase', { useClass: sendOtpVendorUseCase });
 container.register<IVerifyOtpVendorUseCase>('VerifyOtpVendorUseCase', { useClass: VerifyOtpVendorUseCase});
@@ -73,7 +82,7 @@ container.register<IUpdateTheaterStatusUseCase>('UpdateTheaterStatus', {useClass
 
 // Repository Registration
 container.register<IAuthRepository>('AuthRepository', { useClass: AuthRepository });
-container.register<IVendorRepository>('VendorRepository', { useClass: VendorRepository });
+container.register<ITheaterRepository>('TheaterRepository', { useClass: TheaterRepository });
 container.register<IUserRepository>('IUserRepository', { useClass: UserRepositoryImpl });
 
 // Services Registration

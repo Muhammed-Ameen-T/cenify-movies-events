@@ -3,7 +3,7 @@ import { IVerifyOtpUseCase } from '../../../domain/interfaces/useCases/User/veri
 import { IUserRepository } from '../../../domain/interfaces/repositories/user.repository';
 import { JwtService } from '../../../infrastructure/services/jwt.service';
 import { RedisService } from '../../../infrastructure/services/redis.service';
-import { CustomError } from '../../../utils/errors/custome.error';
+import { CustomError } from '../../../utils/errors/custom.error';
 import { AuthResponseDTO } from '../../dtos/auth.dto';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
@@ -65,7 +65,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       { buyDate: null, expiryDate: null, isPass: null },
       0,
       false,
-      false,
+      'user',
       new Date(),
       new Date(),
     );
@@ -90,7 +90,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       name: createdUser.name,
       phone: createdUser.phone,
       profileImage: createdUser.profileImage,
-      role: createdUser.isAdmin ? 'admin' : 'user',
+      role: createdUser.role,
     });
   }
 }

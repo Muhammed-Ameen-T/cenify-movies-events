@@ -16,7 +16,7 @@ export interface IUser extends Document {
   };
   loyalityPoints: number | null;
   isBlocked: boolean | null;
-  isAdmin: boolean | null;
+  role: string;
   createdAt: Date;
   updatedAt: Date;
 }

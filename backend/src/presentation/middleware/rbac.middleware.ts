@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserModel } from '../../infrastructure/database/user.model';
-import { VendorModel } from '../../infrastructure/database/vendor.model';
+import { VendorModel } from '../../infrastructure/database/theater.model';
 
 /**
  * Defines role-based access control permissions for various user roles.
@@ -32,7 +32,7 @@ export const rbacMiddleware = async (req: Request, res: Response, next: NextFunc
     // Check Users Collection (Admins & Normal Users)
     const user = await UserModel.findById(userId);
     if (user) {
-      role = user.isAdmin ? 'admin' : 'user';
+      role = user.role
     }
 
     // Check Vendors Collection (Theater Owners & Event Organizers)

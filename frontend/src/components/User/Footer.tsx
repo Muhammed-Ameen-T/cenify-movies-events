@@ -1,81 +1,147 @@
-import {Facebook} from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Facebook, Twitter, Instagram, ArrowRight, Film, Download } from 'lucide-react';
 
-const Footer = () => {
+const Footer: React.FC = () => {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+
   return (
-    <>
-        {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 px-4 mt-auto">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-lg font-bold mb-4">CENIFY</h3>
-              <p className="text-sm text-gray-300">
-                Your one-stop destination for movies, events, and entertainment tickets.
-              </p>
+    <motion.footer 
+      className="bg-gray-900 text-white py-12 px-4 mt-auto"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={containerVariants}
+    >
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <motion.div variants={itemVariants}>
+            <h3 className="text-xl font-bold mb-4 text-yellow-400">CENIFY</h3>
+            <p className="text-sm text-gray-300">
+              Your one-stop destination for movies, events, and entertainment tickets.
+              Experience the best of cinema and live events with premium comfort.
+            </p>
+            <div className="mt-4 flex space-x-3">
+              <SocialButton icon={<Facebook size={18} />} />
+              <SocialButton icon={<Twitter size={18} />} />
+              <SocialButton icon={<Instagram size={18} />} />
             </div>
-            <div>
-              <h3 className="text-lg font-bold mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li>About Us</li>
-                <li>Contact Us</li>
-                <li>Terms & Conditions</li>
-                <li>Privacy Policy</li>
-              </ul>
+          </motion.div>
+          
+          <motion.div variants={itemVariants}>
+            <h3 className="text-lg font-bold mb-4">Quick Links</h3>
+            <ul className="space-y-2 text-sm text-gray-300">
+              {['About Us', 'Contact Us', 'Terms & Conditions', 'Privacy Policy'].map((item) => (
+                <FooterLink key={item} text={item} />
+              ))}
+            </ul>
+          </motion.div>
+          
+          <motion.div variants={itemVariants}>
+            <h3 className="text-lg font-bold mb-4">Help</h3>
+            <ul className="space-y-2 text-sm text-gray-300">
+              {['FAQ', 'Cancellation Policy', 'Payment Options', 'Support'].map((item) => (
+                <FooterLink key={item} text={item} />
+              ))}
+            </ul>
+          </motion.div>
+          
+          <motion.div variants={itemVariants}>
+            <h3 className="text-lg font-bold mb-4">Download Our App</h3>
+            <p className="text-sm text-gray-300 mb-3">Get exclusive offers and seamless booking experience on our mobile app</p>
+            <div className="flex flex-col space-y-2">
+              <AppStoreButton 
+                store="App Store"
+                icon={<Film size={18} className="mr-2" />}
+              />
+              <AppStoreButton 
+                store="Play Store"
+                icon={<Download size={18} className="mr-2" />}
+              />
             </div>
-            <div>
-              <h3 className="text-lg font-bold mb-4">Help</h3>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li>FAQ</li>
-                <li>Cancellation Policy</li>
-                <li>Payment Options</li>
-                <li>Support</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold mb-4">Connect With Us</h3>
-              <div className="flex space-x-4 mb-4">
-                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                  <Facebook size={16} />
-                </div>
-                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M23.643 4.937c-.866.4-1.8.692-2.787.823a4.987 4.987 0 0 0 2.184-2.797 9.89 9.89 0 0 1-3.095 1.193 4.96 4.96 0 0 0-8.465 4.534A14.05 14.05 0 0 1 1.67 3.8a4.942 4.942 0 0 0-.673 2.5c0 1.729.882 3.25 2.224 4.147a4.93 4.93 0 0 1-2.248-.616v.061a4.965 4.965 0 0 0 3.984 4.868 4.97 4.97 0 0 1-2.241.086 4.98 4.98 0 0 0 4.644 3.456 9.96 9.96 0 0 1-6.172 2.126c-.398 0-.797-.025-1.189-.075a14.067 14.067 0 0 0 7.613 2.23c9.137 0 14.137-7.572 14.137-14.137 0-.214-.005-.429-.014-.642a10.066 10.066 0 0 0 2.473-2.583z" />
-                  </svg>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2.162c3.197 0 3.584.012 4.85.07 1.17.054 1.805.249 2.227.415.560.217.960.477 1.382.896.419.420.679.819.896 1.381.164.422.36 1.057.413 2.227.058 1.265.07 1.645.07 4.85 0 3.197-.012 3.584-.07 4.849-.054 1.170-.249 1.805-.415 2.227a3.81 3.81 0 0 1-.896 1.382c-.42.419-.819.679-1.381.896-.42.164-1.057.36-2.227.413-1.265.058-1.645.07-4.85.07-3.197 0-3.584-.012-4.849-.07-1.17-.054-1.805-.249-2.227-.415a3.81 3.81 0 0 1-1.382-.896 3.808 3.808 0 0 1-.896-1.382c-.164-.42-.36-1.057-.413-2.227-.058-1.265-.07-1.645-.07-4.849 0-3.197.012-3.584.07-4.85.054-1.17.249-1.805.415-2.227.217-.56.477-.96.896-1.381.42-.419.819-.679 1.381-.896.42-.164 1.057-.36 2.227-.413 1.265-.058 1.645-.07 4.85-.07zm0 2.124c-3.147 0-3.513.012-4.767.07-.952.043-1.472.202-1.815.336-.455.176-.781.385-1.123.724-.346.336-.552.67-.723 1.123-.13.343-.293.856-.336 1.815-.058 1.249-.07 1.620-.07 4.767 0 3.146.012 3.513.07 4.766.043.952.202 1.472.336 1.815.176.455.385.781.724 1.123.336.346.67.552 1.123.723.343.13.856.293 1.815.336 1.249.058 1.620.07 4.767.07s3.513-.012 4.766-.07c.952-.043 1.472-.202 1.815-.336.455-.176.781-.385 1.123-.724.346-.336.552-.67.723-1.123.13-.343.293-.856.336-1.815.058-1.249.07-1.620.07-4.766 0-3.147-.012-3.513-.07-4.767-.043-.952-.202-1.472-.336-1.815a3.037 3.037 0 0 0-.723-1.123c-.336-.346-.67-.552-1.123-.723-.343-.13-.856-.293-1.815-.336-1.249-.058-1.62-.07-4.767-.07z" />
-                    <path d="M12 7.38a4.62 4.62 0 1 0 0 9.24 4.62 4.62 0 0 0 0-9.24zm0 7.62a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
-                    <circle cx="16.806" cy="7.194" r="1.194" />
-                  </svg>
-                </div>
-              </div>
-              <p className="text-sm text-gray-300">Download our app</p>
-              <div className="flex space-x-2 mt-2">
-                <div className="border border-gray-500 rounded px-2 py-1 text-xs flex items-center">
-                <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.999 12C18.001 8.687 21.179 6.124 21.179 6.124C21.179 6.124 21.162 6.112 21.15 6.112C21.049 6.05 20.948 5.982 20.853 5.92C20.2 5.436 19.463 5.069 18.683 4.826C17.902 4.582 17.085 4.462 16.261 4.462C15.47 4.462 14.599 4.576 13.753 4.802C13.236 4.95 12.648 5.169 12.029 5.463C11.693 5.62 11.361 5.795 11.036 5.992C10.736 6.174 10.453 6.367 10.189 6.572C9.816 6.862 9.483 7.183 9.2 7.526C8.917 7.87 8.686 8.224 8.51 8.586C8.334 8.949 8.214 9.311 8.15 9.674C8.086 10.035 8.055 10.394 8.057 10.746C8.057 11.09 8.097 11.434 8.175 11.773C8.254 12.113 8.373 12.448 8.531 12.778C8.69 13.108 8.887 13.429 9.122 13.74C9.389 14.094 9.678 14.393 9.988 14.64C10.329 14.911 10.703 15.13 11.109 15.295C11.515 15.46 11.951 15.571 12.416 15.625C12.881 15.679 13.369 15.671 13.878 15.601C14.388 15.531 14.918 15.396 15.466 15.196C16.015 14.996 16.58 14.73 17.16 14.399C17.74 14.068 18.28 13.716 18.28 13.716L18.254 13.69L18.266 13.673C18.266 13.673 17.997 13.111 17.997 12.002C17.997 12.002 17.999 12 17.999 12Z" />
-                  </svg>
-                  <span>App Store</span>
-                </div>
-                <div className="border border-gray-500 rounded px-2 py-1 text-xs flex items-center">
-                  <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3.609 1.814L13.792 12 3.609 22.186a.996.996 0 0 1-1.688-.72V2.534a.996.996 0 0 1 1.688-.72z" />
-                    <path d="M14.33 12.542l3.875-2.125-9.793-5.375a1 1 0 0 0-1.322.334L14.33 12.542z" />
-                    <path d="M14.33 11.458l-7.24 7.166a1 1 0 0 0 1.322.334l9.793-5.375-3.875-2.125z" />
-                  </svg>
-                  <span>Play Store</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-gray-700 text-center text-sm text-gray-400">
-            <p>© 2025 CENIFY. All rights reserved.</p>
-          </div>
+          </motion.div>
         </div>
-      </footer>
-    </>
-  )
+        
+        <motion.div 
+          className="mt-10 pt-6 border-t border-gray-800 text-center text-sm text-gray-400"
+          variants={itemVariants}
+        >
+          <p>© 2025 CENIFY. All rights reserved.</p>
+        </motion.div>
+      </div>
+    </motion.footer>
+  );
+};
+
+interface SocialButtonProps {
+  icon: React.ReactNode;
 }
 
-export default Footer
+const SocialButton: React.FC<SocialButtonProps> = ({ icon }) => (
+  <motion.a 
+    href="#" 
+    className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center hover:bg-yellow-500 hover:text-gray-900 transition-colors"
+    whileHover={{ scale: 1.1, backgroundColor: "#FACC15" }}
+    whileTap={{ scale: 0.9 }}
+  >
+    {icon}
+  </motion.a>
+);
+
+interface FooterLinkProps {
+  text: string;
+}
+
+const FooterLink: React.FC<FooterLinkProps> = ({ text }) => (
+  <li>
+    <motion.a 
+      href="#" 
+      className="hover:text-yellow-400 transition-colors flex items-center"
+      whileHover={{ x: 5, color: "#FACC15" }}
+    >
+      <span>{text}</span>
+      <motion.span
+        initial={{ opacity: 0, x: -5 }}
+        whileHover={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <ArrowRight size={14} className="ml-1" />
+      </motion.span>
+    </motion.a>
+  </li>
+);
+
+interface AppStoreButtonProps {
+  store: string;
+  icon: React.ReactNode;
+}
+
+const AppStoreButton: React.FC<AppStoreButtonProps> = ({ store, icon }) => (
+  <motion.button 
+    className="border border-gray-700 rounded-lg px-4 py-2 text-sm flex items-center justify-center hover:border-yellow-400 transition-colors"
+    whileHover={{ scale: 1.03, borderColor: "#FACC15" }}
+    whileTap={{ scale: 0.97 }}
+  >
+    {icon}
+    <span>{store}</span>
+  </motion.button>
+);
+
+export default Footer;

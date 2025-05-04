@@ -1,22 +1,22 @@
 // src/application/useCases/Vendor/fetchTheaters.useCase.ts
 import { injectable, inject } from 'tsyringe';
-import { IVendorRepository } from '../../../domain/interfaces/repositories/vendor.repository';
+import { ITheaterRepository } from '../../../domain/interfaces/repositories/theater.repository';
 import { IFetchTheatersUseCase } from '../../../domain/interfaces/useCases/Vendor/fetchTheaters.interface';
 import { VendorResponseDTO } from '../../dtos/vendor.dto';
-import { Vendor } from '../../../domain/entities/vendor.entity';
+import { Theater } from '../../../domain/entities/theater.entity';
 
 @injectable()
 export class FetchTheatersUseCase implements IFetchTheatersUseCase {
   constructor(
-    @inject('VendorRepository') private vendorRepository: IVendorRepository,
+    @inject('TheaterRepository') private vendorRepository: ITheaterRepository,
   ) {}
 
   async execute(): Promise<VendorResponseDTO[]> {
     const theaters = await this.vendorRepository.findTheaters();
-    return theaters.map((theater: Vendor) => this.mapToDTO(theater));
+    return theaters.map((theater: Theater) => this.mapToDTO(theater));
   }
 
-  private mapToDTO(vendor: Vendor): VendorResponseDTO {
+  private mapToDTO(vendor: Theater): VendorResponseDTO {
     return new VendorResponseDTO(
       vendor._id,
       vendor.name,
@@ -28,7 +28,7 @@ export class FetchTheatersUseCase implements IFetchTheatersUseCase {
       vendor.email,
       vendor.phone,
       vendor.rating,
-      vendor.accountType,
+      vendor.description  ,
       vendor.createdAt,
       vendor.updatedAt,
     );

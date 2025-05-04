@@ -1,33 +1,18 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { ToastContainer, toast } from 'react-toastify';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash ,FaCheck} from 'react-icons/fa';
+import 'react-toastify/dist/ReactToastify.css';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheck } from 'react-icons/fa';
 import { resetPasswordSchema, otpSchema, newPasswordSchema } from '../../validation/schema';
 import { requestPasswordReset, verifyResetOtp, updatePassword } from '../../services/Vendor/api';
 
 type EmailFormData = z.infer<typeof resetPasswordSchema>;
 type OtpFormData = z.infer<typeof otpSchema>;
 type PasswordFormData = z.infer<typeof newPasswordSchema>;
-
-const containerVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.6, staggerChildren: 0.1 }
-  },
-  exit: { opacity: 0, y: -20 }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-};
 
 const PasswordResetPage: React.FC = () => {
   const navigate = useNavigate();
@@ -37,6 +22,19 @@ const PasswordResetPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Debug stage changes
+  useEffect(() => {
+    console.log('Current stage:', stage);
+  }, [stage]);
+
+  // Resend timer countdown
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
+      return () => clearInterval(timer);
+    }
+  }, [resendTimer]);
 
   // Email Form
   const {
@@ -110,39 +108,54 @@ const PasswordResetPage: React.FC = () => {
   });
 
   // Handle OTP input change
-  const handleOtpChange = useCallback((index: number, value: string) => {
-    if (/^\d?$/.test(value)) {
-      const currentOtp = watchOtp('otp') || '';
-      const newOtp = currentOtp.padEnd(6, ' ').split('');
-      newOtp[index] = value;
-      const otpString = newOtp.join('').trim();
-      setOtpValue('otp', otpString);
+  const handleOtpChange = useCallback(
+    (index: number, value: string) => {
+      if (/^\d?$/.test(value)) {
+        const currentOtp = watchOtp('otp') || '';
+        const newOtp = currentOtp.padEnd(6, ' ').split('');
+        newOtp[index] = value;
+        const otpString = newOtp.join('').trim();
+        setOtpValue('otp', otpString);
 
-      if (value && index < 5) {
-        otpRefs.current[index + 1]?.focus();
+        if (value && index < 5) {
+          otpRefs.current[index + 1]?.focus();
+        }
       }
-    }
-  }, [watchOtp, setOtpValue]);
+    },
+    [watchOtp, setOtpValue]
+  );
 
   // Handle OTP paste
-  const handleOtpPaste = useCallback((e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (pastedData.length === 6) {
-      setOtpValue('otp', pastedData);
-      otpRefs.current[5]?.focus();
-    }
-  }, [setOtpValue]);
+  const handleOtpPaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      e.preventDefault();
+      const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+      if (pastedData.length === 6) {
+        setOtpValue('otp', pastedData);
+        otpRefs.current[5]?.focus();
+      }
+    },
+    [setOtpValue]
+  );
 
   // Handle OTP backspace
-  const handleOtpKeyDown = useCallback((index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace') {
-      const currentOtp = watchOtp('otp') || '';
-      if (!currentOtp[index] && index > 0) {
-        otpRefs.current[index - 1]?.focus();
+  const handleOtpKeyDown = useCallback(
+    (index: number, e: React.KeyboardEvent) => {
+      if (e.key === 'Backspace') {
+        const currentOtp = watchOtp('otp') || '';
+        if (!currentOtp[index] && index > 0) {
+          otpRefs.current[index - 1]?.focus();
+        }
       }
-    }
-  }, [watchOtp]);
+    },
+    [watchOtp]
+  );
+
+  // Handle resend code
+  const handleResendCode = () => {
+    requestResetMutation.mutate({ email });
+    setResendTimer(30);
+  };
 
   // Form submission handlers
   const onEmailSubmit = (data: EmailFormData) => {
@@ -162,335 +175,221 @@ const PasswordResetPage: React.FC = () => {
   };
 
   return (
-    <motion.div 
-      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-blue-900 py-12 px-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <ToastContainer />
-      <motion.div 
-        className="w-full max-w-md"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-      >
-        <motion.div 
-          className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl overflow-hidden"
-          variants={itemVariants}
-        >
-          <AnimatePresence mode="wait">
-            {stage === 'email' && (
-              <motion.div
-                key="email"
-                className="p-8"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-              >
-                <motion.h2 
-                  className="text-2xl font-bold text-white mb-2 text-center"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Reset Your Password
-                </motion.h2>
-                <motion.p 
-                  className="text-gray-400 text-center mb-8"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  Enter your email to receive a verification code
-                </motion.p>
-
-                <form onSubmit={handleEmailSubmit(onEmailSubmit)} className="space-y-6">
-                  <motion.div className="space-y-2" variants={itemVariants}>
-                    <label htmlFor="email" className="text-sm font-medium text-gray-300">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <FaEnvelope className="text-gray-400" />
-                      </div>
-                      <input
-                        {...emailRegister('email')}
-                        type="email"
-                        className={`w-full pl-10 pr-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none ${
-                          emailErrors.email ? 'border-red-500' : ''
-                        }`}
-                        placeholder="Enter your email"
-                      />
-                      {emailErrors.email && (
-                        <p className="mt-1 text-sm text-red-400">{emailErrors.email.message}</p>
-                      )}
+    <div className="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        theme="light"
+      />
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-8">
+          {stage === 'email' && (
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">Forgot Password</h2>
+              <p className="text-gray-600 text-center mb-8">
+                Enter your email to receive a verification code
+              </p>
+              <form onSubmit={handleEmailSubmit(onEmailSubmit)} className="space-y-6">
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <FaEnvelope className="text-gray-400 h-5 w-5" />
                     </div>
-                  </motion.div>
-
-                  <motion.button
-                    type="submit"
-                    className="w-full py-4 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center"
-                    disabled={requestResetMutation.isPending}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {requestResetMutation.isPending ? (
-                      <>
-                        <motion.div
-                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        />
-                        Sending...
-                      </>
-                    ) : (
-                      "Send Reset Code"
-                    )}
-                  </motion.button>
-                </form>
-              </motion.div>
-            )}
-
-            {stage === 'otp' && (
-              <motion.div
-                key="otp"
-                className="p-8"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-              >
-                <motion.h2 
-                  className="text-2xl font-bold text-white mb-2 text-center"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Enter Verification Code
-                </motion.h2>
-                <motion.p 
-                  className="text-gray-400 text-center mb-8"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  We've sent a 6-digit code to<br />
-                  <span className="font-medium text-blue-400">{email}</span>
-                </motion.p>
-
-                <form onSubmit={handleOtpSubmit(onOtpSubmit)} className="space-y-6">
-                  <motion.div className="flex justify-center space-x-3" variants={itemVariants}>
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <input
-                        key={index}
-                        ref={el => otpRefs.current[index] = el}
-                        type="text"
-                        maxLength={1}
-                        className="w-12 h-12 text-center text-xl font-bold rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
-                        onChange={e => handleOtpChange(index, e.target.value)}
-                        onKeyDown={e => handleOtpKeyDown(index, e)}
-                        onPaste={index === 0 ? handleOtpPaste : undefined}
-                      />
-                    ))}
-                  </motion.div>
-
-                  {otpErrors.otp && (
-                    <p className="text-red-400 text-sm text-center">{otpErrors.otp.message}</p>
+                    <input
+                      {...emailRegister('email')}
+                      type="email"
+                      className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border-2 border-gray-500 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none shadow-md ring-1 ring-gray-300"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  {emailErrors.email && (
+                    <p className="mt-1 text-sm text-red-500">{emailErrors.email.message}</p>
                   )}
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-3 px-4 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-opacity-50 flex items-center justify-center disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  disabled={requestResetMutation.isPending}
+                >
+                  {requestResetMutation.isPending ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Code'
+                  )}
+                </button>
+              </form>
+            </div>
+          )}
 
-                  <motion.button
-                    type="submit"
-                    className="w-full py-4 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center"
-                    disabled={verifyOtpMutation.isPending}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+          {stage === 'otp' && (
+            <div className="bg-blue-50"> {/* Temporary background for debugging */}
+              <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
+                Enter Verification Code
+              </h2>
+              <p className="text-gray-600 text-center mb-8">
+                We've sent a 6-digit code to<br />
+                <span className="font-medium text-yellow-500">{email}</span>
+              </p>
+              <form onSubmit={handleOtpSubmit(onOtpSubmit)} className="space-y-6">
+                <div className="flex justify-center space-x-3">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => (otpRefs.current[index] = el)}
+                      type="text"
+                      maxLength={1}
+                      className="w-12 h-12 text-center text-xl font-semibold rounded-lg bg-white border-2 border-gray-500 text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none shadow-md ring-1 ring-gray-300"
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      onPaste={index === 0 ? handleOtpPaste : undefined}
+                    />
+                  ))}
+                </div>
+                {otpErrors.otp && (
+                  <p className="text-red-500 text-sm text-center">{otpErrors.otp.message}</p>
+                )}
+                <button
+                  type="submit"
+                  className="w-full py-3 px-4 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-opacity-50 flex items-center justify-center disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  disabled={verifyOtpMutation.isPending}
+                >
+                  {verifyOtpMutation.isPending ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mr-2" />
+                      Verifying...
+                    </>
+                  ) : (
+                    'Verify Code'
+                  )}
+                </button>
+                <div className="text-center text-sm space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => setStage('email')}
+                    className="text-yellow-500 hover:text-yellow-600 transition-colors duration-200"
                   >
-                    {verifyOtpMutation.isPending ? (
-                      <>
-                        <motion.div
-                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        />
-                        Verifying...
-                      </>
-                    ) : (
-                      "Verify Code"
-                    )}
-                  </motion.button>
+                    Change Email
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    className={`${
+                      resendTimer > 0
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-yellow-500 hover:text-yellow-600'
+                    } transition-colors duration-200`}
+                    disabled={resendTimer > 0}
+                  >
+                    {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
-                  <motion.div className="text-center" variants={itemVariants}>
+          {stage === 'newPassword' && (
+            <div className="bg-green-50"> {/* Temporary background for debugging */}
+              <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
+                Create New Password
+              </h2>
+              <p className="text-gray-600 text-center mb-8">
+                Your password must be at least 8 characters
+              </p>
+              <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-6">
+                <div className="space-y-2">
+                  <label htmlFor="password" className="text-sm font-medium text-gray-700">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <FaLock className="text-gray-400 h-5 w-5" />
+                    </div>
+                    <input
+                      {...passwordRegister('password')}
+                      type={showPassword ? 'text' : 'password'}
+                      className="w-full pl-10 pr-12 py-3 rounded-lg bg-white border-2 border-gray-500 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none shadow-md ring-1 ring-gray-300"
+                      placeholder="Enter new password"
+                    />
                     <button
                       type="button"
-                      onClick={() => setStage('email')}
-                      className="text-sm text-blue-400 hover:text-blue-300 mr-4"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                     >
-                      Change Email
+                      {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
                     </button>
+                    {passwordErrors.password && (
+                      <p className="mt-1 text-sm text-red-500">{passwordErrors.password.message}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <FaLock className="text-gray-400 h-5 w-5" />
+                    </div>
+                    <input
+                      {...passwordRegister('confirmPassword')}
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      className="w-full pl-10 pr-12 py-3 rounded-lg bg-white border-2 border-gray-500 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none shadow-md ring-1 ring-gray-300"
+                      placeholder="Confirm new password"
+                    />
                     <button
                       type="button"
-                      className={`text-sm ${
-                        resendTimer > 0 ? 'text-gray-500 cursor-not-allowed' : 'text-blue-400 hover:text-blue-300'
-                      }`}
-                      disabled={resendTimer > 0}
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                     >
-                      {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code'}
+                      {showConfirmPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
                     </button>
-                  </motion.div>
-                </form>
-              </motion.div>
-            )}
-
-            {stage === 'newPassword' && (
-              <motion.div
-                key="password"
-                className="p-8"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-              >
-                <motion.h2 
-                  className="text-2xl font-bold text-white mb-2 text-center"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Create New Password
-                </motion.h2>
-                <motion.p 
-                  className="text-gray-400 text-center mb-8"
-                  initial={{ y: -20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  Your password must be at least 8 characters
-                </motion.p>
-
-                <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-6">
-                  <motion.div className="space-y-2" variants={itemVariants}>
-                    <label htmlFor="password" className="text-sm font-medium text-gray-300">
-                      New Password
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <FaLock className="text-gray-400" />
-                      </div>
-                      <input
-                        {...passwordRegister('password')}
-                        type={showPassword ? 'text' : 'password'}
-                        className={`w-full pl-10 pr-12 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none ${
-                          passwordErrors.password ? 'border-red-500' : ''
-                        }`}
-                        placeholder="Enter new password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white"
-                      >
-                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                      </button>
-                      {passwordErrors.password && (
-                        <p className="mt-1 text-sm text-red-400">{passwordErrors.password.message}</p>
-                      )}
-                    </div>
-                  </motion.div>
-
-                  <motion.div className="space-y-2" variants={itemVariants}>
-                    <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-300">
-                      Confirm Password
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <FaLock className="text-gray-400" />
-                      </div>
-                      <input
-                        {...passwordRegister('confirmPassword')}
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        className={`w-full pl-10 pr-12 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none ${
-                          passwordErrors.confirmPassword ? 'border-red-500' : ''
-                        }`}
-                        placeholder="Confirm new password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white"
-                      >
-                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                      </button>
-                      {passwordErrors.confirmPassword && (
-                        <p className="mt-1 text-sm text-red-400">{passwordErrors.confirmPassword.message}</p>
-                      )}
-                    </div>
-                  </motion.div>
-
-                  <motion.button
-                    type="submit"
-                    className="w-full py-4 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center"
-                    disabled={updatePasswordMutation.isPending}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {updatePasswordMutation.isPending ? (
-                      <>
-                        <motion.div
-                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        />
-                        Updating...
-                      </>
-                    ) : (
-                      "Update Password"
+                    {passwordErrors.confirmPassword && (
+                      <p className="mt-1 text-sm text-red-500">{passwordErrors.confirmPassword.message}</p>
                     )}
-                  </motion.button>
-                </form>
-              </motion.div>
-            )}
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-3 px-4 rounded-lg bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-opacity-50 flex items-center justify-center disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  disabled={updatePasswordMutation.isPending}
+                >
+                  {updatePasswordMutation.isPending ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mr-2" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Password'
+                  )}
+                </button>
+              </form>
+            </div>
+          )}
 
-            {stage === 'success' && (
-              <motion.div
-                key="success"
-                className="p-8 text-center"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-              >
-                <motion.div
-                  className="w-16 h-16 mx-auto mb-6 bg-green-500 rounded-full flex items-center justify-center"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
-                >
-                  <FaCheck className="w-8 h-8 text-white" />
-                </motion.div>
-
-                <motion.h2 
-                  className="text-2xl font-bold text-white mb-4"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  Password Reset Successful!
-                </motion.h2>
-                
-                <motion.p 
-                  className="text-gray-400 mb-8"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  Your password has been updated successfully.<br />
-                  Redirecting to login...
-                </motion.p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </motion.div>
-    </motion.div>
+          {stage === 'success' && (
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                <FaCheck className="w-8 h-8 text-gray-900" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Password Reset Successful!</h2>
+              <p className="text-gray-600 mb-8">
+                Your password has been updated successfully.<br />
+                Redirecting to login...
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

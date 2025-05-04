@@ -15,6 +15,8 @@ const ERROR_MESSAGES = {
     BLOCKED_USER: 'Your Blocked By admin',
     ADMIN_BLOCKED: 'Your account admin register your not have access',
     YOUR_NOT_ADMIN: 'Your do not have admin access!',
+    YOUR_NOT_USER: 'Your do not have user access!',
+    YOUR_NOT_VENDOR: 'Your do not have vendor access!',
     APPLICATION_UNDER_PROCESS: 'Your application is still being processed.',
   },
   VALIDATION: {
@@ -60,7 +62,8 @@ const ERROR_MESSAGES = {
     INVALID_QUERY_PARAMS: 'Invalid query parameters.',
     REDIS_CONNECTION_ERROR: 'Redis connection failed:',
     FAILED_SENDING_OTP: 'Failed to send OTP email.',
-    FAILED_FETCHING_THEATERS: 'Failed to fetch theaters data'
+    FAILED_FETCHING_THEATERS: 'Failed to fetch theaters data',
+    FAILED_TO_UPDATE_PASSWORD: 'Failed to update password',   
   },
   SECURITY: {
     ACCESS_DENIED: 'Access denied due to security restrictions.',

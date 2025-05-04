@@ -1,4 +1,4 @@
-import { ve } from '../domain/entities/vendor.entity';
+import { ve } from '../domain/entities/theater.entity';
 
 export class TempStore {
   private static store: Map<string, { theater: Theater; otp: string }> = new Map();

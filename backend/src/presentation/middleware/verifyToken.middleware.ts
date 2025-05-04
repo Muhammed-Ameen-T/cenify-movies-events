@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { container } from 'tsyringe';
 import jwt from 'jsonwebtoken';
 import { IJwtDecoded } from '../../domain/interfaces/repositories/jwtDecode.repository';
-import { CustomError } from '../../utils/errors/custome.error';
+import { CustomError } from '../../utils/errors/custom.error';
 import { HttpResCode } from '../../utils/constants/httpResponseCode.utils';
 import { env } from '../../config/env.config';
 import { IAuthRepository } from '../../domain/interfaces/repositories/userAuth.types';

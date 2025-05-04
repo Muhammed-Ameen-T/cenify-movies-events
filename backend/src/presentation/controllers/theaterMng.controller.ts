@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
-import { CustomError } from '../../utils/errors/custome.error';
+import { CustomError } from '../../utils/errors/custom.error';
 import { IFetchTheatersUseCase } from '../../domain/interfaces/useCases/Vendor/fetchTheaters.interface';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 import { ITheaterManagementController } from './interface/theaterMng.controller.interface';
