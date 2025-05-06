@@ -5,7 +5,7 @@ const TheaterSchema: Schema<ITheater> = new Schema(
   {
     screens: [{ type: Schema.Types.ObjectId }],
     name: { type: String, required: true },
-    status: { type: String, required: true, enum: ['pending', 'verified', 'blocked'] },
+    status: { type: String, required: true, enum: ['pending', 'verified', 'verifying' ,'blocked'] },
     location: {
       city: { type: String },
       coordinates: [{ type: Number }],
@@ -23,9 +23,10 @@ const TheaterSchema: Schema<ITheater> = new Schema(
     email: { type: String },
     phone: { type: Number },
     description: { type: String },
+    vendorId: { type: mongoose.Schema.Types.ObjectId, ref: "Vendor", required: true },
     rating: { type: Number },
   },
   { timestamps: true },
 );
 
-export const TheaterModel = mongoose.model<ITheater>('Vendor', TheaterSchema);
+export const TheaterModel = mongoose.model<ITheater>('Theaters', TheaterSchema);

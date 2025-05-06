@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
 import { Bell, Search, Moon, Sun, MessageSquare } from 'lucide-react';
 import Avatar from '../ui/Avatar';
-import { currentUser } from '../../utils/mockData';
+// import { currentUser } from '../../utils/mockData';
+import { RootState } from '../../store/store';
+import { useSelector,useDispatch } from 'react-redux';
+import axios from 'axios';
+import { clearAuth } from '../../store/slices/authSlice';
+import { showSuccessToast, showErrorToast } from '../../utils/toast';
+import { API_BASE_URL } from '../../constants/apiEndPoint';
+import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   sidebarOpen: boolean;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
+  const newUser = useSelector((state: RootState) => state.auth.user);
+  const user = newUser?.role === 'vendor' ? newUser : null;
   const [searchFocused, setSearchFocused] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
 
   const notifications = [
     {
@@ -36,6 +47,16 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
       unread: false,
     },
   ];
+  const handleLogout = () => {
+    axios.post(`${API_BASE_URL}/auth/logout`);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    dispatch(clearAuth());
+    showSuccessToast('Vendor Logout successfully!');
+    setTimeout(() => {
+      navigate('/vendor/login')
+    }, 2000);
+  };
 
   console.log('Rendering Navbar, sidebarOpen:', sidebarOpen);
 
@@ -129,14 +150,14 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
               className="flex items-center"
               onClick={() => setShowUserMenu(!showUserMenu)}
             >
-              <Avatar src={currentUser.avatar} name={currentUser.name} size="sm" />
+              <Avatar src={user? user.profileImage : 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'} name={user? user.name : 'Vendor'} size="sm" />
             </button>
 
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-60 bg-[#18181f] border border-[#333333] rounded-lg shadow-lg overflow-hidden z-50">
                 <div className="p-4 border-b border-[#333333]">
-                  <h3 className="font-medium text-white">{currentUser.name}</h3>
-                  <p className="text-xs text-gray-400 mt-1">{currentUser.email}</p>
+                  <h3 className="font-medium text-white">{user? user.name : 'Vendor'}</h3>
+                  <p className="text-xs text-gray-400 mt-1">{user? user.email : 'vendor@example.com'}</p>
                 </div>
                 <div>
                   <button className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-[#121218] transition-colors">
@@ -148,11 +169,13 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
                   <button className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-[#121218] transition-colors">
                     Help Center
                   </button>
-                  <div className="border-t border-[#333333] mt-1 pt-1">
-                    <button className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-[#121218] transition-colors">
-                      Logout
-                    </button>
-                  </div>
+                  {user && (
+                    <div className="border-t border-[#333333] mt-1 pt-1">
+                      <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-[#121218] transition-colors">
+                        Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

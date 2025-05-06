@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { startLoading, stopLoading } from "../../store/slices/loadingSlice";
 import { vendorRegisterSchema, otpSchema } from "../../validation/schema";
-import { registerVendor, verifyVendorOtp, resendVendorOtp } from "../../services/Vendor/api";
+import { registerVendor, verifyVendorOtp, resendVendorOtp } from "../../services/Vendor/authApi";
 
 type VendorRegisterFormData = z.infer<typeof vendorRegisterSchema>;
 type OtpFormData = z.infer<typeof otpSchema>;

@@ -20,7 +20,7 @@ import { IVendorAuthController } from './interface/theaterAuth.controller.interf
 import { ISendOtpVendorUseCase } from '../../domain/interfaces/useCases/Vendor/sendOtpVendor.interface';
 import { IVerifyOtpVendorUseCase } from '../../domain/interfaces/useCases/Vendor/verifyOtpVendor.interface';
 import { ILoginVendorUseCase } from '../../domain/interfaces/useCases/Vendor/loginVendor.interface';
-import { IUpdateVendorDetailsUseCase } from '../../domain/interfaces/useCases/Vendor/updateVendorDetails.interface';
+import { ICreateNewTheaterUseCase } from '../../domain/interfaces/useCases/Vendor/createNewTheater.interface';
 
 import { ITheaterRepository } from '../../domain/interfaces/repositories/theater.repository';
 import { JwtService } from '../../infrastructure/services/jwt.service';
@@ -32,7 +32,7 @@ export class VendorAuthController implements IVendorAuthController {
     @inject('SendOtpVendorUseCase') private sendOtpUseCase: ISendOtpVendorUseCase,
     @inject('VerifyOtpVendorUseCase') private verifyOtpUseCase: IVerifyOtpVendorUseCase,
     @inject('LoginVendorUseCase') private loginVendorUseCase: ILoginVendorUseCase,
-    @inject('UpdateVendorDetailsUseCase') private updateVendorDetailsUseCase: IUpdateVendorDetailsUseCase,
+    @inject('CreateTheaterUseCase') private createTheaterUseCase: ICreateNewTheaterUseCase,
     @inject('TheaterRepository') private vendorRepository: ITheaterRepository,
   ) {}
 
@@ -92,11 +92,13 @@ export class VendorAuthController implements IVendorAuthController {
     }
   }
 
-  async updateTheaterDetails(req: Request, res: Response): Promise<void> {
+  async createNewTheater(req: Request, res: Response): Promise<void> {
     try {
-      const { id, location, facilities, intervalTime, gallery } = req.body;
-      const dto = new UpdateTheaterDetailsDTO(id, location,facilities,intervalTime,gallery);
-      const theater = await this.updateVendorDetailsUseCase.execute(dto);
+      const vendorId = req.decoded?.userId;
+      console.log("🚀 ~ VendorAuthController ~ createNewTheater ~ userId:", vendorId)
+      const {name,location,facilities,intervalTime,gallery,email,phone,description} = req.body;
+      const dto = new TheaterDetailsDTO(name,location,facilities,intervalTime,gallery,email,phone,description,vendorId);
+      const theater = await this.createTheaterUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, 'Theater details updated successfully.', theater);
     } catch (error) {
       const errorMessage = error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_SAVED;

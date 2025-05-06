@@ -7,7 +7,7 @@ import Navbar from '../../components/Admin/Navbar';
 import Sidebar from '../../components/Admin/Sidebar';
 import TheaterCard from '../../components/Admin/TheaterCard';
 import TheaterModal from '../../components/Admin/TheaterModal';
-import { fetchTheaters, updateTheaterStatus } from '../../services/Vendor/api';
+import { fetchTheaters, updateTheaterStatus } from '../../services/Vendor/authApi';
 import { Theater } from '../../types/theater';
 
 const ITEMS_PER_PAGE = 6;

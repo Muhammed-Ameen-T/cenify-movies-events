@@ -3,10 +3,12 @@ import { container } from 'tsyringe';
 import jwt from 'jsonwebtoken';
 import { IJwtDecoded } from '../../domain/interfaces/repositories/jwtDecode.repository';
 import { CustomError } from '../../utils/errors/custom.error';
-import { HttpResCode } from '../../utils/constants/httpResponseCode.utils';
+import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import { env } from '../../config/env.config';
+import { JwtService } from '../../infrastructure/services/jwt.service';
 import { IAuthRepository } from '../../domain/interfaces/repositories/userAuth.types';
-import logger from '../../utils/logger.utils';
+
+const jwtService = container.resolve<JwtService>('JwtService'); 
 
 declare global {
   namespace Express {
@@ -17,70 +19,103 @@ declare global {
 }
 
 /**
- * Middleware to verify JWT access tokens and refresh tokens.
- * Attaches the decoded user data to the request object upon successful verification.
- *
- * @param {Request} req - Express request object containing the authorization header.
- * @param {Response} res - Express response object used to return errors or new tokens.
- * @param {NextFunction} next - Express function to proceed to the next middleware.
- * @throws {CustomError} If no token is provided, the token is invalid, or user is not found.
+ * Middleware to verify the access token from the request headers.
+ * If the access token is expired, attempts to refresh it using the refresh token.
+ * Attaches the decoded user information to `req.decoded` for further use in routes.
+ * 
+ * @param {Request} req - Express request object containing authorization header
+ * @param {Response} res - Express response object for setting headers or returning errors
+ * @param {NextFunction} next - Express next function to proceed to the next middleware or route handler
  */
-export const verifyAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyAccessToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    // Extract access token from Authorization header
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new CustomError('Access denied. No token provided.', HttpResCode.UNAUTHORIZED);
-    }
+    const accessToken = authHeader?.startsWith('Bearer ') 
+      ? authHeader.split(' ')[1] 
+      : null;
 
-    const accessToken = authHeader.split(' ')[1];
+    if (!accessToken) {
+      throw new CustomError(
+        HttpResMsg.NO_ACCESS_TOKEN,
+        HttpResCode.UNAUTHORIZED
+      );
+    }
 
     try {
       // Verify access token
-      const decoded = jwt.verify(accessToken, env.ACCESS_TOKEN_SECRET) as IJwtDecoded;
+      const decoded = jwt.verify(
+        accessToken,
+        env.ACCESS_TOKEN_SECRET
+      ) as IJwtDecoded;
+
+      // Attach decoded user data to request
       req.decoded = decoded;
       next();
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         // Handle expired access token
-        const refreshToken = req.cookies.refreshToken;
+        const refreshToken = req.cookies?.refreshToken;
+
         if (!refreshToken) {
-          throw new CustomError('Refresh token required.', HttpResCode.UNAUTHORIZED);
+          throw new CustomError(
+            HttpResMsg.REFRESH_TOKEN_REQUIRED,
+            HttpResCode.UNAUTHORIZED
+          );
         }
 
         try {
           // Verify refresh token
-          const decodedRefresh = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET) as IJwtDecoded;
+          const decodedRefresh = jwt.verify(
+            refreshToken,
+            env.REFRESH_TOKEN_SECRET
+          ) as IJwtDecoded;
 
+          // Fetch user details from the repository
           const authRepository = container.resolve<IAuthRepository>('AuthRepository');
-          const user = await authRepository.findById(decodedRefresh.userId);
+          const user = await authRepository.findByEmail(decodedRefresh.email);
 
           if (!user) {
-            throw new CustomError('User not found.', HttpResCode.UNAUTHORIZED);
+            throw new CustomError(
+              HttpResMsg.USER_NOT_FOUND,
+              HttpResCode.UNAUTHORIZED
+            );
           }
 
-          // Generate new access token (move to use case if possible)
-          const newAccessToken = jwt.sign(
-            { userId: user._id.toString(), email: user.email },
-            env.ACCESS_TOKEN_SECRET,
-            { expiresIn: parseInt(env.ACCESS_TOKEN_EXPIRY, 10) },
-          );
+          // Check if user is blocked
+          if (user.isBlocked) {
+            throw new CustomError(
+              'Your account is blocked. Please contact support.',
+              HttpResCode.FORBIDDEN
+            );
+          }
 
-          // Set new access token in response header (securely)
+          // Generate new access token
+          const newAccessToken = jwtService.generateAccessToken(user._id.toString(), user.role);
+
+          // Set new access token in response header
           res.setHeader('x-access-token', newAccessToken);
 
-          req.decoded = { userId: user._id.toString(), email: user.email };
+          req.decoded = decodedRefresh;
           next();
         } catch (refreshError) {
-          logger.error('Refresh token verification failed:', refreshError); // Log error
-          throw new CustomError('Invalid or expired refresh token.', HttpResCode.UNAUTHORIZED);
+          throw new CustomError(
+            HttpResMsg.INVALID_OR_EXPIRED_REFRESH_TOKEN,
+            HttpResCode.UNAUTHORIZED
+          );
         }
       } else {
-        logger.error('Access token verification failed:', error); // Log error
-        throw new CustomError('Invalid access token.', HttpResCode.UNAUTHORIZED);
+        throw new CustomError(
+          HttpResMsg.INVALID_ACCESS_TOKEN,
+          HttpResCode.UNAUTHORIZED
+        );
       }
     }
   } catch (error) {
-    logger.error('Authentication error:', error); // Log error
     next(error);
   }
 };

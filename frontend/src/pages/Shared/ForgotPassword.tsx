@@ -8,7 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheck } from 'react-icons/fa';
 import { resetPasswordSchema, otpSchema, newPasswordSchema } from '../../validation/schema';
-import { requestPasswordReset, verifyResetOtp, updatePassword } from '../../services/Vendor/api';
+import { requestPasswordReset, verifyResetOtp, updatePassword } from '../../services/Vendor/authApi';
 
 type EmailFormData = z.infer<typeof resetPasswordSchema>;
 type OtpFormData = z.infer<typeof otpSchema>;

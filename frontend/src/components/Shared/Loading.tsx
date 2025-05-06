@@ -1,56 +1,66 @@
-import styled from "styled-components";
+import React from 'react';
+import { motion } from 'framer-motion';
 
-const Loader = () => {
-  return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">
-      <StyledWrapper>
-        <div className="ticket-loader">
-          <span>Loading...</span>
-        </div>
-      </StyledWrapper>
-    </div>
-  );
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.3, ease: 'easeInOut' },
+  },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
 };
 
-const StyledWrapper = styled.div`
-  .ticket-loader {
-    width: 140px;
-    height: 60px;
-    background: linear-gradient(45deg, #ffcc00, #ff6600);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 18px;
-    font-weight: bold;
-    color: #fff;
-    border-radius: 10px;
-    box-shadow: 0px 0px 15px rgba(255, 102, 0, 0.5);
-    position: relative;
-    animation: flicker 1.5s infinite alternate ease-in-out;
-  }
+const spinnerVariants = {
+  animate: {
+    rotate: 360,
+    transition: {
+      repeat: Infinity,
+      duration: 1,
+      ease: 'linear',
+    },
+  },
+};
 
-  .ticket-loader::before,
-  .ticket-loader::after {
-    content: "";
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: #222;
-    border-radius: 50%;
-  }
+const pulseVariants = {
+  animate: {
+    scale: [1, 1.1, 1],
+    opacity: [0.7, 1, 0.7],
+    transition: {
+      repeat: Infinity,
+      duration: 1.5,
+      ease: 'easeInOut',
+    },
+  },
+};
 
-  .ticket-loader::before {
-    left: -5px;
-  }
-
-  .ticket-loader::after {
-    right: -5px;
-  }
-
-  @keyframes flicker {
-    0% { transform: scale(1); box-shadow: 0px 0px 10px rgba(255, 102, 0, 0.3); }
-    100% { transform: scale(1.1); box-shadow: 0px 0px 20px rgba(255, 102, 0, 0.7); }
-  }
-`;
+const Loader: React.FC = () => {
+  return (
+    <motion.div
+      className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      aria-label="Loading content"
+    >
+      <div className="flex flex-col items-center">
+        <motion.div
+          className="w-16 h-16 rounded-full border-4 border-yellow-500 border-t-transparent shadow-lg"
+          variants={spinnerVariants}
+          animate="animate"
+        />
+        <motion.p
+          className="mt-4 text-lg font-semibold text-yellow-600"
+          variants={pulseVariants}
+          animate="animate"
+        >
+          Loading...
+        </motion.p>
+      </div>
+    </motion.div>
+  );
+};
 
 export default Loader;

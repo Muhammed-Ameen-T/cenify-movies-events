@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Theater } from "../../types/theater";
+import { Theater, TheaterDetailsFormData } from "../../types/theater";
 import {ADMIN_ENDPOINTS, VENDOR_ENDPOINTS } from "../../constants/apiEndPoint";
 const API_BASE_URL = "http://localhost:3000/api/";
 // import api from "../../config/axios.config";
@@ -66,20 +66,8 @@ export const loginTheater = async (data: {
 };
 
 
-export const updateTheaterDetails = async (data: {
-  id: string;
-  location: { city: string; coordinates: number[]; type: string };
-  facilities: {
-    foodCourt: boolean;
-    lounges: boolean;
-    mTicket: boolean;
-    parking: boolean;
-    freeCancellation: boolean;
-  };
-  intervalTime: string;
-  gallery: string[];
-}): Promise<unknown> => {
-  const response = await api.post("/update-vendor", data);
+export const createNewTheater = async (data: Omit<TheaterDetailsFormData, 'id'>): Promise<unknown> => {
+  const response = await api.post(VENDOR_ENDPOINTS.createTheater, data);
   return response.data;
 };
 

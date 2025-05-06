@@ -11,13 +11,32 @@ export interface TheaterFacilities {
   freeCancellation: boolean;
 }
 
+// Define the theater details that will be sent
 export interface TheaterDetailsFormData {
-  facilities: TheaterFacilities;
+  id: string;
+  name: string;
+  location: { city: string; coordinates: number[]; type: string };
+  facilities: {
+    foodCourt: boolean;
+    lounges: boolean;
+    mTicket: boolean;
+    parking: boolean;
+    freeCancellation: boolean;
+  };
   intervalTime: string;
-  location: LocationData;
-  city: string;
-  images: string[];
+  gallery: string[];
+  description: string;
+  email: string;
+  phone: string;
 }
+
+// Define the expected structure of the API response
+export interface TheaterResponse {
+  success: boolean;
+  message: string;
+  theater: TheaterDetailsFormData;
+}
+
 
 export interface TheaterUpdatePayload {
   id: string;

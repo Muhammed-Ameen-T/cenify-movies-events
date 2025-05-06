@@ -25,4 +25,5 @@ export const VENDOR_ENDPOINTS = {
   updateDetails: `/vendor/update-vendor`,
   updateStatus: `/vendor/update-theater-status`,
   fetchTheaters: `/vendor/fetch-theaters`,
+  createTheater:`/vendor/create-theater`
 };

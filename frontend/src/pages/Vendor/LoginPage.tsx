@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMutation } from '@tanstack/react-query';
 import { loginSchema } from '../../validation/schema';
-import { loginTheater } from '../../services/Vendor/api';
+import { loginTheater } from '../../services/Vendor/authApi';
 import { useDispatch } from 'react-redux';
 import { setAuth } from '../../store/slices/authSlice';
 

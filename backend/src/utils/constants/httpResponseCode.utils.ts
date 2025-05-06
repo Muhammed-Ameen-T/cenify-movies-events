@@ -124,4 +124,9 @@ export enum HttpResMsg {
   LOOP_DETECTED = 'Loop detected',
   NOT_EXTENDED = 'Not extended',
   NETWORK_AUTHENTICATION_REQUIRED = 'Network authentication required',
+  INVALID_OR_EXPIRED_REFRESH_TOKEN = 'refresh token is invalid or expired!',
+  INVALID_ACCESS_TOKEN = 'invalid access token!',
+  USER_NOT_FOUND = 'User not found!',
+  REFRESH_TOKEN_REQUIRED = 'Refresh token required!',
+  NO_ACCESS_TOKEN = 'Access token not found!'
 }

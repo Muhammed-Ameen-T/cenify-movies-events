@@ -29,23 +29,25 @@ export class VerifyOtpVendorDTO {
 
 export class TheaterDetailsDTO {
   constructor(
-    public _id: string,
     public name: string,
-    public screens?: string[],
-    public location?: {
+    public location: {
       city: string;
       coordinates: number[];
       type: string;
     },
-    public facilities?: {
+    public facilities: {
       foodCourt: boolean;
       lounges: boolean;
       mTicket: boolean;
       parking: boolean;
       freeCancellation: boolean;
     },
-    public intervalTime?: string,
-    public gallery?: string[],
+    public intervalTime: string,
+    public gallery: string[],
+    public email: string,
+    public phone: string,
+    public description: string,
+    public vendorId: string | undefined,
   ) {}
 }
 
@@ -66,6 +68,7 @@ export class UpdateTheaterDetailsDTO {
     },
     public intervalTime?: string,
     public gallery?: string[],
+    public description?: string,
   ) {}
 }
 

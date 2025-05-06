@@ -50,4 +50,3 @@ app.use('/api/vendor', vendorRoutes);
 app.use(requestLogger);
 
 export default app;
-  

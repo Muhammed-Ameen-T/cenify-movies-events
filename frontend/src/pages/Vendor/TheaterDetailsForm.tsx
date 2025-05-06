@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import TheaterDetailsForm from '../../components/Vendor/TheaterDetailsForm';
 import { motion } from 'framer-motion';
 import { ToastContainer} from "react-toastify";
+import BackButton from '../../components/Buttons/BackButton';
 
 const TheaterDetailsPage: React.FC = () => {
   const [searchParams] = useSearchParams();

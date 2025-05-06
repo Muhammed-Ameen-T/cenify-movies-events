@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+
 import {
   LayoutDashboard,
   CalendarDays,
@@ -39,14 +40,15 @@ const NavItem: React.FC<NavItemProps> = ({
   submenuItems,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  
   const toggleSubmenu = (e: React.MouseEvent) => {
     if (hasSubmenu) {
       e.preventDefault();
       setIsOpen(!isOpen);
     }
   };
-
+  
+ 
   return (
     <div className="mb-1">
       <NavLink
@@ -106,7 +108,6 @@ const NavItem: React.FC<NavItemProps> = ({
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
   console.log('Rendering Sidebar, isOpen:', isOpen);
-
   return (
     <div
       className={`h-screen bg-[#121218] border-r border-[#333333] flex flex-col fixed top-0 left-0 z-50 transition-all duration-300 ${
@@ -121,7 +122,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
         {isOpen && (
           <div className="flex items-center">
             <Theater className="text-[#0066F5]" size={24} />
-            <span className="ml-2 font-bold text-white">TheaterX</span>
+            <span className="ml-2 font-bold text-white">Vendor Dashboard</span>
           </div>
         )}
         <button
@@ -142,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           )}
 
           <NavItem
-            path="/dashboard"
+            path="/vendor/dashboard"
             label="Dashboard"
             icon={<LayoutDashboard size={20} />}
             isCollapsed={!isOpen}
@@ -155,22 +156,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
             isCollapsed={!isOpen}
             hasSubmenu
             submenuItems={[
-              { path: '/events', label: 'All Events' },
-              { path: '/dashboard/events/create', label: 'Create Event' },
-              { path: '/events/categories', label: 'Categories' },
+              { path: '/vendor/events', label: 'All Events' },
+              { path: '/vendor/create-event', label: 'Create Event' },
+              { path: '/vendor/event-categories', label: 'Categories' },
             ]}
           />
 
           <NavItem
-            path="/theaters"
+            path="/vendor/theaters"
             label="Theaters"
             icon={<Theater size={20} />}
             isCollapsed={!isOpen}
             hasSubmenu
             submenuItems={[
-              { path: '/theaters', label: 'All Theaters' },
-              { path: '/dashboard/theaters/create', label: 'Add Theater' },
-              { path: '/theaters/maintenance', label: 'Maintenance' },
+              { path: '/vendor/theaters', label: 'All Theaters' },
+              { path: '/vendor/create-theater', label: 'Add Theater' },
+              { path: '/vendor/maintenance', label: 'Maintenance' },
             ]}
           />
 
@@ -231,17 +232,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
         />
       </div>
 
-      {isOpen && (
+      {/* {isOpen && (
         <div className="p-4 border-t border-[#333333] flex items-center">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0066F5] to-[#003d93] flex items-center justify-center text-white font-medium">
             TA
           </div>
           <div className="ml-3">
-            <div className="text-sm font-medium text-white">Theater Admin</div>
+            <div className="text-sm font-medium text-white">{user ? user.name : 'Theater Admin'}</div>
             <div className="text-xs text-gray-400">admin@theaterx.com</div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

@@ -16,22 +16,32 @@ export const registerSchema = z
 
 
 
-export const theaterDetailsSchema = z.object({
-  images: z.array(z.string()).min(3, 'At least 3 images are required').max(5, 'Maximum 5 images allowed'),
-  city: z.string().min(1, 'City is required'),
-  location: z.object({
-    lat: z.number(),
-    lng: z.number(),
-  }),
-  facilities: z.object({
-    foodCourt: z.boolean(),
-    lounges: z.boolean(),
-    mTicket: z.boolean(),
-    parking: z.boolean(),
-    freeCancellation: z.boolean(),
-  }),
-  intervalTime: z.enum(['5', '10', '15', '20', '30'], { message: 'Invalid interval time' }),
-});
+  export const theaterDetailsSchema = z.object({
+    name: z.string().min(1, 'Theater name is required'),
+    description: z.string().min(10, 'Description must be at least 10 characters long'),
+    email: z.string().email('Invalid email address').min(1, 'Email is required'),
+    phone: z
+      .string()
+      .min(1, 'Phone number is required')
+      .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format'),
+    facilities: z.object({
+      foodCourt: z.boolean(),
+      lounges: z.boolean(),
+      mTicket: z.boolean(),
+      parking: z.boolean(),
+      freeCancellation: z.boolean(),
+    }),
+    intervalTime: z.string().min(1, 'Interval time is required'),
+    location: z.object({
+      city: z.string().min(1, 'City is required'),
+      coordinates: z.array(z.number()).length(2, 'Coordinates must contain latitude and longitude'),
+      type: z.literal('point'),
+    }),
+    gallery: z
+      .array(z.string())
+      .min(3, 'At least 3 images are required')
+      .max(5, 'Maximum 5 images allowed'),
+  });
 
 export const loginSchema = z.object({
   email: z.string().email('Invalid email format'),

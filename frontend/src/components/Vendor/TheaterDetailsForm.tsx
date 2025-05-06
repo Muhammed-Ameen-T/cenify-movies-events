@@ -5,22 +5,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Upload, Info, CheckCircle2 } from 'lucide-react';
 import { theaterDetailsSchema } from '../../validation/schema';
-import { uploadToCloudinary, updateTheaterDetails } from '../../services/Vendor/api';
+import { uploadToCloudinary} from '../../services/Vendor/authApi';
+import { createNewTheater } from '../../services/Vendor/theaterApi';
 import MapSelector from '../Shared/MapSelector';
 import ImageCropper from '../Shared/ImageCropper';
 import ImageGallery from '../Shared/ImageGallery';
 import { useMutation } from '@tanstack/react-query';
 import { TheaterDetailsFormData } from '../../types/theater';
-import { toast } from "react-toastify";
-
-
-interface TheaterDetailsFormProps {
-  vendorId: string;
-}
+import { toast } from 'react-toastify';
+import BackButton from '../Buttons/BackButton';
 
 const THEATER_SUBMITTED_KEY = 'theaterDetailsSubmitted';
 
-const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => {
+const TheaterDetailsForm: React.FC = () => {
   const navigate = useNavigate();
   const {
     register,
@@ -33,17 +30,23 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
     resolver: zodResolver(theaterDetailsSchema),
     defaultValues: {
       name: '',
-      facilities: { 
-        foodCourt: false, 
-        lounges: false, 
-        mTicket: false, 
-        parking: false, 
+      description: '',
+      email: '',
+      phone: '',
+      facilities: {
+        foodCourt: false,
+        lounges: false,
+        mTicket: false,
+        parking: false,
         freeCancellation: false,
       },
       intervalTime: '10',
-      location: { lat: 20.5937, lng: 78.9629 }, // Default to center of India
-      city: '',
-      images: [],
+      location: {
+        city: '',
+        coordinates: [20.5937, 78.9629], // Default to center of India
+        type: 'point',
+      },
+      gallery: [],
     },
   });
 
@@ -54,50 +57,52 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
   const [formSubmitted, setFormSubmitted] = useState<boolean>(() => {
     return localStorage.getItem(THEATER_SUBMITTED_KEY) === 'true';
   });
+
   const handleClearForm = () => {
-    localStorage.removeItem(THEATER_SUBMITTED_KEY); // Remove the stored value
-    setFormSubmitted(false); // Reset state
-    navigate('/vendor/login')
+    localStorage.removeItem(THEATER_SUBMITTED_KEY);
+    setFormSubmitted(false);
+    reset();
+    navigate('/vendor/login');
   };
-  
 
   // Watch form values
-  const watchedImages = watch('images');
-  const watchedCity = watch('city');
+  const watchedGallery = watch('gallery');
+  const watchedCity = watch('location.city');
 
   // Use mutation for form submission
-  const updateTheaterMutation = useMutation({
-    mutationFn: updateTheaterDetails,
+  const createTheaterMutation = useMutation({
+    mutationFn: createNewTheater,
     onSuccess: () => {
       setFormSubmitted(true);
-      localStorage.setItem(THEATER_SUBMITTED_KEY, 'true'); 
+      localStorage.setItem(THEATER_SUBMITTED_KEY, 'true');
+      toast.success('Theater details saved successfully!');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to save theater details');
-    }
+    },
   });
 
   const validateImageFile = (file: File): boolean => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     const maxSize = 5 * 1024 * 1024; // 5MB
-    
+
     if (!validTypes.includes(file.type)) {
       toast.error('Only JPG, JPEG, and PNG image formats are accepted');
       return false;
     }
-    
+
     if (file.size > maxSize) {
       toast.error('Image size should not exceed 5MB');
       return false;
     }
-    
+
     return true;
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      
+
       if (validateImageFile(file)) {
         const reader = new FileReader();
         reader.onload = () => {
@@ -111,22 +116,19 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
   const handleCroppedImage = async (croppedImageBase64: string) => {
     setUploading(true);
     setCropImage(null);
-    
+
     try {
-      // Convert base64 to file
       const response = await fetch(croppedImageBase64);
       const blob = await response.blob();
       const file = new File([blob], `theater-image-${Date.now()}.jpg`, { type: 'image/jpeg' });
-      
-      // Add to files array
+
       const newFiles = [...imageFiles, file];
       setImageFiles(newFiles);
-      
-      // Upload to Cloudinary
+
       const url = await uploadToCloudinary(file);
       const updatedUrls = [...galleryUrls, url];
       setGalleryUrls(updatedUrls);
-      setValue('images', updatedUrls);
+      setValue('gallery', updatedUrls);
     } catch (error) {
       toast.error('Image upload failed');
       console.error('Upload error:', error);
@@ -136,7 +138,8 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
   };
 
   const handleLocationSelected = (location: { lat: number; lng: number }) => {
-    setValue('location', location);
+    setValue('location.coordinates', [location.lat, location.lng]);
+    setValue('location.type', 'point');
   };
 
   const removeImage = (index: number) => {
@@ -144,95 +147,112 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
     const newUrls = galleryUrls.filter((_, i) => i !== index);
     setImageFiles(newFiles);
     setGalleryUrls(newUrls);
-    setValue('images', newUrls);
+    setValue('gallery', newUrls);
   };
 
   const onSubmit = (data: TheaterDetailsFormData) => {
-    updateTheaterMutation.mutate({
-      id: vendorId,
-      location: { city: data.city, coordinates: [data.location.lat, data.location.lng], type: 'point' },
+    createTheaterMutation.mutate({
+      name: data.name,
+      description: data.description,
+      email: data.email,
+      phone: data.phone,
       facilities: data.facilities,
       intervalTime: data.intervalTime,
-      gallery: data.images,
+      location: {
+        city: data.location.city,
+        coordinates: data.location.coordinates,
+        type: data.location.type,
+      },
+      gallery: data.gallery,
     });
   };
 
-  // Check if we have the minimum required images
-  const hasMinimumImages = watchedImages && watchedImages.length >= 3;
+  const hasMinimumImages = watchedGallery && watchedGallery.length >= 3;
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { 
+      transition: {
         duration: 0.6,
         staggerChildren: 0.1,
-      }
+      },
     },
-    exit: { opacity: 0, y: -20 }
+    exit: { opacity: 0, y: -20 },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    visible: { opacity: 1, y: 0 },
   };
 
   return (
     <AnimatePresence mode="wait">
       {formSubmitted ? (
-            <motion.div 
-            className="max-w-3xl mx-auto bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl overflow-hidden p-10 text-center"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.5 }}
-        >
-            <motion.div
+        <motion.div
+          className="max-w-3xl mx-auto bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl overflow-hidden p-10 text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.5 }}
+          >
+          <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            >
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+          >
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            </motion.div>
-            <motion.h2 
+          </motion.div>
+          <motion.h2
             className="text-2xl font-bold text-white mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            >
+          >
             Theater Details Saved Successfully!
-            </motion.h2>
-            <motion.p 
+          </motion.h2>
+          <motion.p
             className="text-lg text-gray-300"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            >
+          >
             You will be able to edit your application soon. The application link will be sent to your registered email address.
-            </motion.p>
-            <motion.button>
-              <button 
-                onClick={handleClearForm} 
-                className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg shadow-md hover:bg-gray-700 hover:text-white transition-all mt-3"
-              >
-                OK
-              </button>
-            </motion.button>
+          </motion.p>
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+          >
+            <button
+              onClick={handleClearForm}
+              className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg shadow-md hover:bg-gray-700 hover:text-white transition-all mt-3"
+            >
+              OK
+            </button>
+          </motion.button>
         </motion.div>
-      
       ) : (
-        <motion.div 
+        <motion.div
           className="max-w-3xl mx-auto bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl overflow-hidden"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
         >
+          
           <div className="p-6 sm:p-10">
+            <BackButton/>
+            <motion.h1
+              className="text-2xl font-bold text-white mb-6"
+              variants={itemVariants}
+            >
+              Add Theater
+            </motion.h1>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               {/* Theater Name */}
-              {/* <motion.div className="space-y-2" variants={itemVariants}>
+              <motion.div className="space-y-2" variants={itemVariants}>
                 <label htmlFor="name" className="text-base font-medium text-gray-200">
                   Theater Name
                 </label>
@@ -246,8 +266,60 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
                   }`}
                 />
                 {errors.name && <p className="text-red-400 text-sm">{errors.name.message}</p>}
-              </motion.div> */}
-              
+              </motion.div>
+
+              {/* Theater Description */}
+              <motion.div className="space-y-2" variants={itemVariants}>
+                <label htmlFor="description" className="text-base font-medium text-gray-200">
+                  Theater Description
+                </label>
+                <textarea
+                  {...register('description')}
+                  id="description"
+                  placeholder="Describe your theater"
+                  className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none resize-y min-h-[100px] ${
+                    errors.description ? 'border-red-500' : ''
+                  }`}
+                />
+                {errors.description && (
+                  <p className="text-red-400 text-sm">{errors.description.message}</p>
+                )}
+              </motion.div>
+
+              {/* Email */}
+              <motion.div className="space-y-2" variants={itemVariants}>
+                <label htmlFor="email" className="text-base font-medium text-gray-200">
+                  Email
+                </label>
+                <input
+                  {...register('email')}
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none ${
+                    errors.email ? 'border-red-500' : ''
+                  }`}
+                />
+                {errors.email && <p className="text-red-400 text-sm">{errors.email.message}</p>}
+              </motion.div>
+
+              {/* Phone */}
+              <motion.div className="space-y-2" variants={itemVariants}>
+                <label htmlFor="phone" className="text-base font-medium text-gray-200">
+                  Phone Number
+                </label>
+                <input
+                  {...register('phone')}
+                  id="phone"
+                  type="tel"
+                  placeholder="Enter your phone number (e.g., +1234567890)"
+                  className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none ${
+                    errors.phone ? 'border-red-500' : ''
+                  }`}
+                />
+                {errors.phone && <p className="text-red-400 text-sm">{errors.phone.message}</p>}
+              </motion.div>
+
               {/* Theater Images */}
               <motion.div className="space-y-3" variants={itemVariants}>
                 <div className="flex justify-between items-center">
@@ -257,7 +329,7 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
                   </label>
                   <span className="text-sm text-gray-400">{galleryUrls.length}/5 uploaded</span>
                 </div>
-                
+
                 <AnimatePresence>
                   {galleryUrls.length > 0 && (
                     <motion.div
@@ -269,24 +341,27 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
                     </motion.div>
                   )}
                 </AnimatePresence>
-                
+
                 {galleryUrls.length < 5 && (
-                  <motion.div 
+                  <motion.div
                     className="mt-3"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <label 
-                      className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer
-                        ${uploading ? 'bg-gray-700 border-gray-600' : 'bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-blue-500'}`}
+                    <label
+                      className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer ${
+                        uploading
+                          ? 'bg-gray-700 border-gray-600'
+                          : 'bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-blue-500'
+                      }`}
                     >
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         {uploading ? (
                           <div className="text-center">
-                            <motion.div 
+                            <motion.div
                               className="w-8 h-8 border-4 border-t-blue-500 border-blue-500/30 rounded-full mx-auto mb-2"
                               animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                             ></motion.div>
                             <p className="text-sm text-gray-400">Uploading...</p>
                           </div>
@@ -300,18 +375,18 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
                           </>
                         )}
                       </div>
-                      <input 
-                        type="file" 
-                        className="hidden" 
-                        accept="image/jpeg,image/jpg,image/png" 
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/jpeg,image/jpg,image/png"
                         onChange={handleImageUpload}
                         disabled={uploading}
                       />
                     </label>
                   </motion.div>
                 )}
-                
-                {errors.images && <p className="text-red-400 text-sm mt-1">{errors.images.message}</p>}
+
+                {errors.gallery && <p className="text-red-400 text-sm mt-1">{errors.gallery.message}</p>}
               </motion.div>
 
               {/* City Selection */}
@@ -320,24 +395,21 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
                   City
                 </label>
                 <select
-                  {...register('city')}
+                  {...register('location.city')}
                   id="city"
                   className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none ${
-                    errors.city ? 'border-red-500' : ''
+                    errors.location?.city ? 'border-red-500' : ''
                   }`}
                 >
                   <option value="">Select a city</option>
-                  <option value="Kochi">Kochi</option>
-                  <option value="Calicut">Calicut</option>
                   <option value="Mumbai">Mumbai</option>
                   <option value="Delhi">Delhi</option>
                   <option value="Bangalore">Bangalore</option>
+                  <option value="Hyderabad">Hyderabad</option>
                   <option value="Chennai">Chennai</option>
                   <option value="Kolkata">Kolkata</option>
-                  <option value="Hyderabad">Hyderabad</option>
+                  <option value="Ahmedabad">Ahmedabad</option>
                   <option value="Pune">Pune</option>
-                  <option value="Ahmedabad">Ahmedabad</option>  
-                  <option value="Surat">Surat</option>
                   <option value="Jaipur">Jaipur</option>
                   <option value="Lucknow">Lucknow</option>
                   <option value="Kanpur">Kanpur</option>
@@ -349,8 +421,44 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
                   <option value="Patna">Patna</option>
                   <option value="Vadodara">Vadodara</option>
                   <option value="Ghaziabad">Ghaziabad</option>
+                  <option value="Surat">Surat</option>
+                  <option value="Ludhiana">Ludhiana</option>
+                  <option value="Agra">Agra</option>
+                  <option value="Nashik">Nashik</option>
+                  <option value="Ranchi">Ranchi</option>
+                  <option value="Faridabad">Faridabad</option>
+                  <option value="Coimbatore">Coimbatore</option>
+                  <option value="Rajkot">Rajkot</option>
+                  <option value="Meerut">Meerut</option>
+                  <option value="Srinagar">Srinagar</option>
+                  <option value="Aurangabad">Aurangabad</option>
+                  <option value="Dhanbad">Dhanbad</option>
+                  <option value="Amritsar">Amritsar</option>
+                  <option value="Allahabad">Allahabad</option>
+                  <option value="Howrah">Howrah</option>
+                  <option value="Gwalior">Gwalior</option>
+                  <option value="Jabalpur">Jabalpur</option>
+                  <option value="Madurai">Madurai</option>
+                  <option value="Vijayawada">Vijayawada</option>
+                  <option value="Jodhpur">Jodhpur</option>
+                  <option value="Salem">Salem</option>
+                  <option value="Raipur">Raipur</option>
+                  <option value="Kochi">Kochi</option>
+                  <option value="Kozhikode">Kozhikode</option>
+                  <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                  <option value="Calicut">Calicut</option>
+                  <option value="Guwahati">Guwahati</option>
+                  <option value="Bhubaneswar">Bhubaneswar</option>
+                  <option value="Noida">Noida</option>
+                  <option value="Chandigarh">Chandigarh</option>
+                  <option value="Mysore">Mysore</option>
+                  <option value="Dehradun">Dehradun</option>
+                  <option value="Shimla">Shimla</option>
+                  <option value="Vellore">Vellore</option>
                 </select>
-                {errors.city && <p className="text-red-400 text-sm">{errors.city.message}</p>}
+                {errors.location?.city && (
+                  <p className="text-red-400 text-sm">{errors.location.city.message}</p>
+                )}
               </motion.div>
 
               {/* Location Map */}
@@ -365,41 +473,52 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
                     <p className="text-base font-medium text-gray-200 mb-2">
                       Pinpoint Theater Location
                     </p>
-                    <MapSelector 
-                      initialLocation={watch('location')} 
-                      onLocationSelected={handleLocationSelected} 
+                    <MapSelector
+                      initialLocation={{
+                        lat: watch('location.coordinates')[0],
+                        lng: watch('location.coordinates')[1],
+                      }}
+                      onLocationSelected={handleLocationSelected}
                     />
-                    {errors.location && <p className="text-red-400 text-sm mt-1">{errors.location.message}</p>}
+                    {errors.location?.coordinates && (
+                      <p className="text-red-400 text-sm mt-1">{errors.location.coordinates.message}</p>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
 
               {/* Amenities */}
               <motion.div className="space-y-3" variants={itemVariants}>
-                <label className="text-base font-medium text-gray-200">Amenities & Facilities</label>
+                <label className="text-base font-medium text-gray-200">
+                  Amenities & Facilities
+                </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-2">
-                  {(['foodCourt', 'lounges', 'mTicket', 'parking', 'freeCancellation'] as const).map((amenity) => (
-                    <motion.div 
-                      key={amenity} 
-                      className="relative"
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <label className="flex items-center space-x-3 bg-gray-700 rounded-lg p-3 transition-colors cursor-pointer hover:bg-gray-650 hover:border-blue-500 border border-transparent">
-                        <input
-                          {...register(`facilities.${amenity}`)}
-                          type="checkbox"
-                          id={amenity}
-                          className="w-5 h-5 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-offset-gray-700"
-                        />
-                        <span className="text-sm text-gray-200 select-none">
-                          {amenity
-                            .replace(/([A-Z])/g, ' $1')
-                            .replace(/^./, (str) => str.toUpperCase())}
-                        </span>
-                      </label>
-                    </motion.div>
-                  ))}
+                  {(['foodCourt', 'lounges', 'mTicket', 'parking', 'freeCancellation'] as const).map(
+                    (amenity) => (
+                      <motion.div
+                        key={amenity}
+                        className="relative"
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                      >
+                        <label
+                          className="flex items-center space-x-3 bg-gray-700 rounded-lg p-3 transition-colors cursor-pointer hover:bg-gray-650 hover:border-blue-500 border border-transparent"
+                        >
+                          <input
+                            {...register(`facilities.${amenity}`)}
+                            type="checkbox"
+                            id={amenity}
+                            className="w-5 h-5 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-offset-gray-700"
+                          />
+                          <span className="text-sm text-gray-200 select-none">
+                            {amenity
+                              .replace(/([A-Z])/g, ' $1')
+                              .replace(/^./, (str) => str.toUpperCase())}
+                          </span>
+                        </label>
+                      </motion.div>
+                    )
+                  )}
                 </div>
               </motion.div>
 
@@ -421,34 +540,33 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
                   <option value="20">20 minutes</option>
                   <option value="30">30 minutes</option>
                 </select>
-                {errors.intervalTime && <p className="text-red-400 text-sm">{errors.intervalTime.message}</p>}
+                {errors.intervalTime && (
+                  <p className="text-red-400 text-sm">{errors.intervalTime.message}</p>
+                )}
               </motion.div>
 
               {/* Submit Button */}
-              <motion.div
-                variants={itemVariants}
-                className="pt-4"
-              >
+              <motion.div variants={itemVariants} className="pt-4">
                 <motion.button
                   type="submit"
-                  disabled={isSubmitting || !hasMinimumImages || updateTheaterMutation.isPending}
+                  disabled={isSubmitting || !hasMinimumImages || createTheaterMutation.isPending}
                   className={`w-full py-4 px-4 rounded-lg font-semibold text-white transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 ${
-                    isSubmitting || !hasMinimumImages || updateTheaterMutation.isPending
+                    isSubmitting || !hasMinimumImages || createTheaterMutation.isPending
                       ? 'bg-gray-600 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700'
                   }`}
                   whileHover={
-                    isSubmitting || !hasMinimumImages || updateTheaterMutation.isPending
+                    isSubmitting || !hasMinimumImages || createTheaterMutation.isPending
                       ? {}
                       : { scale: 1.02, backgroundColor: '#2563EB' }
                   }
                   whileTap={
-                    isSubmitting || !hasMinimumImages || updateTheaterMutation.isPending
+                    isSubmitting || !hasMinimumImages || createTheaterMutation.isPending
                       ? {}
                       : { scale: 0.98 }
                   }
                 >
-                  {updateTheaterMutation.isPending ? (
+                  {createTheaterMutation.isPending ? (
                     <div className="flex items-center justify-center">
                       <Loader2 className="w-5 h-5 mr-3 animate-spin" />
                       Processing...
@@ -457,9 +575,9 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
                     'Complete Registration'
                   )}
                 </motion.button>
-                
+
                 {!hasMinimumImages && (
-                  <motion.div 
+                  <motion.div
                     className="flex items-center justify-center mt-4 text-amber-400 text-sm"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -474,7 +592,7 @@ const TheaterDetailsForm: React.FC<TheaterDetailsFormProps> = ({ vendorId }) => 
           </div>
         </motion.div>
       )}
-      
+
       {/* Image Cropper Modal */}
       <AnimatePresence>
         {cropImage && (

@@ -7,34 +7,44 @@ import { ObjectId } from 'mongoose';
 export class TheaterRepository implements ITheaterRepository {
   // Create a new Theater in the database
   async create(theater: Theater): Promise<Theater> {
-    const theaterData = {
-      screens: theater.screens,
-      name: theater.name,
-      status: theater.status,
-      location: theater.location
-        ? {
-            city: theater.location.city,
-            coordinates: theater.location.coordinates,
-            type: theater.location.type,
-          }
-        : null,
-      facilities: theater.facilities,
-      createdAt: theater.createdAt,
-      updatedAt: theater.updatedAt,
-      intervalTime: theater.intervalTime,
-      gallery: theater.gallery,
-      email: theater.email,
-      phone: theater.phone,
-      password: theater.description,
-      rating: theater.rating,
-    };
-    console.log("🚀 ~ TheaterRepository ~ create ~ theaterData:", theaterData);
-
-    const newTheater = new TheaterModel(theaterData);
-    const savedTheater = await newTheater.save();
-
-    return this.mapToEntity(savedTheater);
+    try {
+      const theaterData = {
+        screens: theater.screens,
+        name: theater.name,
+        status: theater.status,
+        location: theater.location
+          ? {
+              city: theater.location.city,
+              coordinates: theater.location.coordinates,
+              type: theater.location.type,
+            }
+          : null,
+        facilities: theater.facilities,
+        createdAt: theater.createdAt,
+        updatedAt: theater.updatedAt,
+        intervalTime: theater.intervalTime,
+        gallery: theater.gallery,
+        email: theater.email,
+        phone: theater.phone,
+        description: theater.description,
+        vendorId: theater.vendorId,
+        rating: theater.rating,
+      };
+  
+      console.log("🚀 ~ TheaterRepository ~ create ~ theaterData:", theaterData);
+  
+      const newTheater = new TheaterModel(theaterData);
+      const savedTheater = await newTheater.save();
+  
+      const mappedTheater = this.mapToEntity(savedTheater);
+      if (!mappedTheater) throw new Error('Error mapping theater entity');
+      return mappedTheater;
+    } catch (error) {
+      console.error("❌ Error creating theater:", error);
+      throw new Error('Error creating theater'); // Throw an error to ensure a Theater object is always returned
+    }
   }
+  
 
   // Find a theater by ID
   async findById(id: string): Promise<Theater | null> {
@@ -78,7 +88,8 @@ export class TheaterRepository implements ITheaterRepository {
         gallery: theater.gallery,
         email: theater.email,
         phone: theater.phone,
-        password: theater.description,
+        description: theater.description,
+        vendorId : theater.vendorId,
         rating: theater.rating,
       },
       { new: true },
@@ -124,6 +135,7 @@ export class TheaterRepository implements ITheaterRepository {
       doc.email,
       doc.phone,
       doc.description,
+      doc.vendorId,
       doc.rating,
     );
   }

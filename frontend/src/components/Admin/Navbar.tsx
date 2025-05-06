@@ -12,8 +12,8 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ title }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const user = useSelector((state: RootState) => state.auth.user);
-  
+  const newUser = useSelector((state: RootState) => state.auth.user);
+  const user = newUser?.role === 'admin' ? newUser : null;
   return (
     <nav className="flex items-center justify-between px-6 py-3 bg-gray-900 border-b border-gray-800 shadow-md">
       <div className="flex items-center">
