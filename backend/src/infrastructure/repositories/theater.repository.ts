@@ -99,9 +99,22 @@ export class TheaterRepository implements ITheaterRepository {
   }
 
   async findTheaters(): Promise<Theater[]> {
-    const theaterDocs = await TheaterModel.find({ accountType: 'theater' });
-    return theaterDocs.map((doc) => this.mapToEntity(doc));
+    try {
+      const theaterDocs =  await TheaterModel.find() 
+      .populate({
+        path: "vendorId",
+        select: "name email phone",
+        model: "User" 
+      })
+      .lean();
+      console.log("🚀 ~ TheaterRepository ~ findTheaters ~ theaterDocs:", theaterDocs)
+      return theaterDocs.map((doc) => this.mapToEntity(doc));
+    } catch (error) {
+      console.error("Error fetching theaters:", error); // Log the error for debugging
+      throw new Error("Failed to retrieve theaters. Please try again later."); // Provide a meaningful error message
+    }
   }
+  
 
   async findEvents(): Promise<Theater[]> {
     const theaterDocs = await TheaterModel.find({ accountType: 'event' });

@@ -171,7 +171,7 @@ const LoginPage: React.FC = () => {
                 </div>
                 <div className="flex justify-end">
                   <Link
-                    to="/vendor/forgot-password"
+                    to="/forgot-password"
                     className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
                   >
                     Forgot password?

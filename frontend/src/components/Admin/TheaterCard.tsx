@@ -15,7 +15,7 @@ interface TheaterCardProps {
   status: string;
   onView: (id: string) => void;
   onBlock?: (id: string) => void;
-  onAccept?: (id: string) => void;
+  onAccept?: (id: string) => void;    
   onUnblock?: (id: string) => void;
 }
 

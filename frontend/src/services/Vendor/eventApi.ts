@@ -10,7 +10,7 @@ import axios from 'axios';
 import { z } from 'zod';
 
 // Base URL for the API (replace with your actual backend URL)
-const API_BASE_URL = import.meta.env.REACT_APP_API_BASE_URL || 'https://api.example.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Event schema for validation (matches the schema in EventsManagement)
 const eventSchema = z.object({

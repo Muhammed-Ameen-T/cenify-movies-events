@@ -28,4 +28,5 @@ export const SuccessMsg = {
   THIRD_PARTY_SERVICE_CONNECTED: 'Third-party service connected successfully',
   IMAGE_PROCESSED: 'Image processed successfully',
   REPORT_GENERATED: 'Report generated successfully',
+  STATUS_UPDATED: 'Status updated successfully',
 };

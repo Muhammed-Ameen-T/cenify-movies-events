@@ -4,11 +4,10 @@ import { useSwipeable } from 'react-swipeable';
 import axios from 'axios';
 
 // TMDB Credentials
-const API_KEY = 'd21f97c3fb4216dc1711eb7a01db3b2a';
-const ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkMjFmOTdjM2ZiNDIxNmRjMTcxMWViN2EwMWRiM2IyYSIsIm5iZiI6MTc0MTA2NDM4Ny4yMDMsInN1YiI6IjY3YzY4OGMzZGQ0NmJkMmZkMzkwNzc0ZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.r5lAUzTyzqPk0gjvg5E2ay8yYTknGy8OPLl1bNq0tPM';
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY
+const ACCESS_TOKEN = import.meta.env.VITE_TMDB_ACCESS_TOKEN;
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w1280';
-
 // Fallback image for movies without a poster
 const FALLBACK_IMAGE = 'https://via.placeholder.com/1280x720?text=No+Image+Available';
 

@@ -1,3 +1,5 @@
+import mongoose, { ObjectId,Schema } from "mongoose";
+
 export class RegisterVendorDTO {
   constructor(
     public name: string,
@@ -85,7 +87,7 @@ export class AuthResponseDTO {
 
 
 // src/application/dtos/vendor.dto.ts
-export class VendorResponseDTO {
+export class TheaterResponseDTO {
   constructor(
     public id: string,
     public name: string,
@@ -108,7 +110,20 @@ export class VendorResponseDTO {
     public phone: number | null,
     public rating: number | null,
     public description: string | null,
+    public vendorId: {
+      id: string;
+      name: string;
+      email: string;
+      phone: number;
+    } | null,
     public createdAt: Date | null,
     public updatedAt: Date | null,
   ) {}
+}
+
+export interface IVendorSM {
+  _id: string;
+  name: string;
+  email: string;
+  phone: number;
 }

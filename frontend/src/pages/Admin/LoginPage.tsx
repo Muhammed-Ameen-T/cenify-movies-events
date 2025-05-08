@@ -207,7 +207,7 @@ export default function AdminLogin() {
             <div className="flex items-center justify-between">
               <div className="flex items-center"></div>
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-400 hover:text-blue-300">
+                <a href="/forgot-password" className="font-medium text-blue-400 hover:text-blue-300">
                   Forgot password?
                 </a>
               </div>

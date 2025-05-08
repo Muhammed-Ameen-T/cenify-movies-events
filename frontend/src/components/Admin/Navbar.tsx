@@ -1,19 +1,33 @@
 import React, { useState } from 'react';
 import { Search, Bell, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
+import { API_BASE_URL } from '../../constants/apiEndPoint';
+import axios from 'axios';
+import { clearAuth } from '../../store/slices/authSlice';
+import { showSuccessToast } from '../../utils/toast';
+import { useNavigate } from 'react-router-dom';
 
-import LogoutButton from '../Buttons/LogoutButton';
 interface NavbarProps {
   title?: string;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ title }) => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const newUser = useSelector((state: RootState) => state.auth.user);
   const user = newUser?.role === 'admin' ? newUser : null;
+  const onLogout = () => {
+    axios.post(`${API_BASE_URL}/auth/logout`);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    dispatch(clearAuth());
+    navigate('/admin/login')
+    showSuccessToast('Vendor Logout successfully!');
+  };
   return (
     <nav className="flex items-center justify-between px-6 py-3 bg-gray-900 border-b border-gray-800 shadow-md">
       <div className="flex items-center">
@@ -57,8 +71,13 @@ const Navbar: React.FC<NavbarProps> = ({ title }) => {
       </div>
 
       <div className="flex items-center space-x-4">
-        <motion.button>
-          <LogoutButton/>
+        <motion.button
+          onClick={onLogout}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 transition duration-300"
+        >
+          Logout
         </motion.button>
         <motion.div className="relative">
           <motion.button 

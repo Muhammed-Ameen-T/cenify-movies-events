@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Upload, Info, CheckCircle2 } from 'lucide-react';
 import { theaterDetailsSchema } from '../../validation/schema';
-import { uploadToCloudinary} from '../../services/Vendor/authApi';
+import { uploadToCloudinary} from '../../services/Vendor/theaterApi';
 import { createNewTheater } from '../../services/Vendor/theaterApi';
 import MapSelector from '../Shared/MapSelector';
 import ImageCropper from '../Shared/ImageCropper';
@@ -62,7 +62,7 @@ const TheaterDetailsForm: React.FC = () => {
     localStorage.removeItem(THEATER_SUBMITTED_KEY);
     setFormSubmitted(false);
     reset();
-    navigate('/vendor/login');
+    navigate('/vendor/theaters');
   };
 
   // Watch form values

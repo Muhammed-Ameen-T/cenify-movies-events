@@ -182,7 +182,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
     setIsOtpLoading(true);
     dispatch(startLoading());
-
     try {
       const response = await verifyOtp(name, email, otp, password);
       dispatch(
@@ -370,7 +369,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="flex justify-center">
-              <GoogleOAuthProvider clientId="613444320769-rjcuif05i13je3gth1o494trk0nkkrnk.apps.googleusercontent.com">
+              <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}
@@ -494,7 +493,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="flex justify-center">
-              <GoogleOAuthProvider clientId="613444320769-rjcuif05i13je3gth1o494trk0nkkrnk.apps.googleusercontent.com">
+              <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}

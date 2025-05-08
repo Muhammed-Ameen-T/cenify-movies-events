@@ -32,6 +32,7 @@ const ERROR_MESSAGES = {
     EMPTY_EMAIL_OTP: 'Empty Email or OTP, Please try again!',
     INVALID_OTP: 'Invalid OTP, Please try again!',
     USER_ALREADY_EXISTS: 'User already exists!',
+    INVALID_STATUS: 'Invalid status',
   },
   DATABASE: {
     CONNECTION_FAILED: 'Database connection failed.',

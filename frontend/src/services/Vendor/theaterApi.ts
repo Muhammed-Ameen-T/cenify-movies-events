@@ -2,21 +2,15 @@ import axios from "axios";
 import { Theater, TheaterDetailsFormData } from "../../types/theater";
 import { VENDOR_ENDPOINTS } from "../../constants/apiEndPoint";
 import api from "../../config/axios.config";
-// const API_BASE_URL = "http://localhost:3000/api/";
 
 
 export const uploadToCloudinary = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", "olx-clone1");
-  const response = await axios.post(
-    "https://api.cloudinary.com/v1_1/djqsehax7/image/upload",
-    formData
-  );
+  const response = await axios.post(VENDOR_ENDPOINTS.imageUpload,formData);
   return response.data.secure_url;
 };
-
-
 
 
 export const createNewTheater = async (data: Omit<TheaterDetailsFormData, 'id'>): Promise<unknown> => {
@@ -26,7 +20,7 @@ export const createNewTheater = async (data: Omit<TheaterDetailsFormData, 'id'>)
 
 
 export const fetchTheaters = async (): Promise<Theater[]> => {
-  const response = await axios.get('http://localhost:3000/api/vendor/fetch-theaters');
+  const response = await api.get(VENDOR_ENDPOINTS.fetchTheaters);
   const theaters = response.data.data as Array<{
     id: string;
     name: string;
@@ -39,16 +33,23 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
       parking: boolean | null;
       freeCancellation: boolean | null;
     } | null;
+    description: string;
     intervalTime: number | null;
     gallery: string[] | null;
     email: string | null;
     phone: string | null;
     rating: number | null;
-    accountType: string;
+    vendorId: {
+      id: string;
+      name: string;
+      email: string;
+      phone: string;
+    } | null;
     createdAt: string | null;
     updatedAt: string | null;
   }>;
-
+  
+  console.log("🚀 ~ fetchTheaters ~ theaters:", theaters)
   // Map backend response to Theater type
   return theaters.map((theater) => ({
     id: theater.id,
@@ -75,22 +76,32 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
               : 'Free Cancellation',
           )
       : ['DOLBY ATMOS', '4K'], 
-    description: 'Premium theater with modern amenities.', 
+    description: theater.description, 
     images: theater.gallery?.length ? theater.gallery : ['/api/placeholder/600/400'],
     rating: theater.rating || 4, 
     reviewCount: 131, 
+    vendorId: theater.vendorId ? {
+      id: theater.vendorId.id,
+      name: theater.vendorId.name,
+      email: theater.vendorId.email,
+      phone: theater.vendorId.phone,
+    } : undefined,
     screens: [
       { name: 'Screen 1', capacity: 200, features: ['DOLBY ATMOS', '4K'] },
       { name: 'Screen 2', capacity: 150, features: ['3D'] },
     ],
     coordinates: Array.isArray(theater.location?.coordinates) && theater.location.coordinates.length === 2
       ? (theater.location.coordinates as [number, number])
-      : undefined
+      : undefined,
+    createdAt: theater.createdAt ? new Date(theater.createdAt) : new Date(),
+    updatedAt: theater.updatedAt ? new Date(theater.updatedAt) : new Date()
   }));
 };
 
+
+
 export const updateTheaterStatus = async (id: string, status: string): Promise<void> => {
-  await axios.patch(`http://localhost:3000/api/vendor/update-theater-status/${id}`, { status });
+  await api.patch(`${VENDOR_ENDPOINTS.updateStatus}${id}`, { status });
 };
 
 

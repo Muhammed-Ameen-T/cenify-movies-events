@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+export const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const USER_AUTH_ENDPOINTS = {
   facebookLogin: `/auth/facebook/callback`,
@@ -23,7 +23,8 @@ export const VENDOR_ENDPOINTS = {
   resendOtp: `/vendor/send-otp`,
   login: `/vendor/login`,
   updateDetails: `/vendor/update-vendor`,
-  updateStatus: `/vendor/update-theater-status`,
+  updateStatus: `/vendor/update-theater-status/`,
   fetchTheaters: `/vendor/fetch-theaters`,
-  createTheater:`/vendor/create-theater`
+  createTheater:`/vendor/create-theater`,
+  imageUpload: `https://api.cloudinary.com/v1_1/djqsehax7/image/upload`,  
 };

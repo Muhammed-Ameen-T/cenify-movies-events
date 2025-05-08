@@ -1,6 +1,6 @@
 // components/Admin/TheaterModal.tsx
 import React, { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, MapPin, Phone, Mail, Globe, Clock, Star } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, MapPin, Phone, Mail, Globe, Clock, Star,User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import { Theater } from '../../types/theater';
@@ -11,7 +11,7 @@ interface TheaterModalProps {
   theater: Theater | null;
 }
 
-const googleMapsApiKey: string = import.meta.env.REACT_APP_GOOGLE_MAPS_API_KEY ; 
+const googleMapsApiKey: string = import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY ; 
 
 const TheaterModal: React.FC<TheaterModalProps> = ({ isOpen, onClose, theater }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -215,6 +215,27 @@ const TheaterModal: React.FC<TheaterModalProps> = ({ isOpen, onClose, theater })
                       </li>
                     </ul>
                   </motion.div>
+                  <motion.div
+                    className="p-4 bg-gray-800 rounded-lg border border-gray-700"
+                    whileHover={{ y: -5 }}
+                  >
+                    <h4 className="text-lg font-semibold text-white">Vendor Information</h4>
+                    <ul className="mt-3 space-y-3">
+                      <li className="flex">
+                        <User className="w-5 h-5 mr-3 text-purple-400" />
+                        <span className="text-gray-300">{theater.vendorId?.name || 'Unknown Vendor'}</span>
+                      </li>
+                      <li className="flex">
+                        <Mail className="w-5 h-5 mr-3 text-red-400" />
+                        <span className="text-gray-300">{theater.vendorId?.email || 'Not Available'}</span>
+                      </li>
+                      <li className="flex">
+                        <Phone className="w-5 h-5 mr-3 text-green-400" />
+                        <span className="text-gray-300">{theater.vendorId?.phone || 'Not Available'}</span>
+                      </li>
+                    </ul>
+                  </motion.div>
+
 
                   <motion.div
                     className="p-4 bg-gray-800 rounded-lg border border-gray-700"

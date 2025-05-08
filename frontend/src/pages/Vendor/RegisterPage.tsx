@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { startLoading, stopLoading } from "../../store/slices/loadingSlice";
 import { vendorRegisterSchema, otpSchema } from "../../validation/schema";
 import { registerVendor, verifyVendorOtp, resendVendorOtp } from "../../services/Vendor/authApi";
+import { setAuth } from "../../store/slices/authSlice";
 
 type VendorRegisterFormData = z.infer<typeof vendorRegisterSchema>;
 type OtpFormData = z.infer<typeof otpSchema>;
@@ -112,11 +113,19 @@ const VendorRegisterPage: React.FC = () => {
       resetRegisterForm();
       setRegisterFormData(null);
       setEmail("");
-      console.log(data)    
-        setTimeout(() => {
-          navigate('/vendor/dashboard'); 
-        }, 3000);  
-  
+      dispatch(
+        setAuth({
+          user: {
+            ...data.user,
+          },
+          accessToken: data.accessToken,
+        })
+      );
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setTimeout(() => {
+        navigate('/vendor/dashboard'); 
+      }, 2000);  
       dispatch(stopLoading());
     },
     onError: (error: any) => {
@@ -421,7 +430,7 @@ const VendorRegisterPage: React.FC = () => {
                       )}
                   </motion.div>
 
-                  <motion.div className="space-y-2" variants={itemVariants}>
+                  {/* <motion.div className="space-y-2" variants={itemVariants}>
                     <label className="text-sm font-medium text-gray-300">
                       Account Type <span className="text-red-400">*</span>
                     </label>
@@ -448,7 +457,7 @@ const VendorRegisterPage: React.FC = () => {
                     {registerErrors.accountType && (
                       <p className="text-red-400 text-sm mt-1">{registerErrors.accountType.message}</p>
                     )}
-                  </motion.div>
+                  </motion.div> */}
 
                   <motion.button
                     type="submit"

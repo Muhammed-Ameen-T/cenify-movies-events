@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react';
 import Loader from '../components/Shared/Loading.tsx';
 import Layout from '../layout/DashboardLayout.tsx';
 import TheaterDetailsForm from '../components/Vendor/TheaterDetailsForm.tsx';
+import PrivateRoute from '../components/Auth/PrivateRoutes.tsx';
 
 const LoginPage = lazy(() => import('../pages/Vendor/LoginPage.tsx'));
 const RegisterPage = lazy(() => import('../pages/Vendor/RegisterPage.tsx'));
@@ -19,12 +20,14 @@ const VendorRoutes = () => {
       <Routes>
         <Route path="/vendor/login" element={<LoginPage />} />
         <Route path="/vendor/register" element={<RegisterPage />} />
-        <Route path="/vendor" element={<Layout />}>
-          <Route path="dashboard" element={<VendorDashboard />} />
-          <Route path="create-theater" element={<TheaterDetailsForm />} />
-          <Route path="theaters" element={<TheaterManagement />} />
-          <Route path="events-create" element={<VendorDashboard />} />
-          <Route path="events" element={<EventManagement />} />
+        <Route element={<PrivateRoute allowedRoles={["vendor"]} />}>
+          <Route path="/vendor" element={<Layout />}>
+            <Route path="dashboard" element={<VendorDashboard />} />
+            <Route path="create-theater" element={<TheaterDetailsForm />} />
+            <Route path="theaters" element={<TheaterManagement />} />
+            <Route path="events-create" element={<VendorDashboard />} />
+            <Route path="events" element={<EventManagement />} />
+          </Route>
         </Route>
       </Routes>
     </Suspense>

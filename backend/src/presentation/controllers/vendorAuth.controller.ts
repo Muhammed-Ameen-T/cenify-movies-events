@@ -55,7 +55,6 @@ export class VendorAuthController implements IVendorAuthController {
       const { name, email, password,phone, accountType, otp } = req.body;
       const dto = new VerifyOtpVendorDTO(name, email, password,phone, otp);
       const result = await this.verifyOtpUseCase.execute(dto);
-      console.log("🚀 ~ VendorAuthController ~ verifyOtp ~ result:", result)
       
       sendResponse(res, HttpResCode.OK, SuccessMsg.USER_REGISTERED, {
         accessToken: result.accessToken,
@@ -72,7 +71,6 @@ export class VendorAuthController implements IVendorAuthController {
       const { email, password } = req.body;
       const dto = new LoginVendorDTO(email, password);
       const result = await this.loginVendorUseCase.execute(dto);
-      console.log("🚀 ~ VendorAuthController ~ login ~ result:", result.refreshToken)
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -95,7 +93,6 @@ export class VendorAuthController implements IVendorAuthController {
   async createNewTheater(req: Request, res: Response): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
-      console.log("🚀 ~ VendorAuthController ~ createNewTheater ~ userId:", vendorId)
       const {name,location,facilities,intervalTime,gallery,email,phone,description} = req.body;
       const dto = new TheaterDetailsDTO(name,location,facilities,intervalTime,gallery,email,phone,description,vendorId);
       const theater = await this.createTheaterUseCase.execute(dto);

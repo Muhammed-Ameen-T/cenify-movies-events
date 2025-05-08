@@ -71,4 +71,11 @@ export interface Theater {
   screens?: Array<{ name: string; capacity: number; features: string[] }>;
   coordinates?: [number, number];
   createdAt: Date;
+  updatedAt: Date;
+  vendorId?: { // ✅ Updated vendor type
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+  } | null; // ✅ Now allows null values
 }

@@ -7,7 +7,8 @@ import Navbar from '../../components/Admin/Navbar';
 import Sidebar from '../../components/Admin/Sidebar';
 import TheaterCard from '../../components/Admin/TheaterCard';
 import TheaterModal from '../../components/Admin/TheaterModal';
-import { fetchTheaters, updateTheaterStatus } from '../../services/Vendor/authApi';
+import {updateTheaterStatus } from '../../services/Vendor/theaterApi';
+import { fetchTheaters} from '../../services/Vendor/theaterApi';
 import { Theater } from '../../types/theater';
 
 const ITEMS_PER_PAGE = 6;
@@ -76,6 +77,7 @@ const Theaters: React.FC = () => {
     queryKey: ['theaters'],
     queryFn: fetchTheaters,
   });
+  console.log("🚀 ~ allTheaters:", allTheaters)
 
   // Apply filters to theaters
   const filteredTheaters = React.useMemo(() => {

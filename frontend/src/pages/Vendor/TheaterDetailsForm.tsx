@@ -36,7 +36,7 @@ const TheaterDetailsPage: React.FC = () => {
           Add details about your theater to help customers find you easily and understand what you offer
         </motion.p>
         
-        <TheaterDetailsForm vendorId={vendorId} />
+        <TheaterDetailsForm  />
       </div>
     </motion.div>
   );

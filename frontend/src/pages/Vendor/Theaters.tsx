@@ -6,7 +6,7 @@ import { Theater, Grid, Search, Filter, Trash2, Edit, Eye, X } from 'lucide-reac
 import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { createTheater } from '../../services/Vendor/authApi';
+import { createNewTheater } from '../../services/Vendor/theaterApi';
 import { useNavigate } from 'react-router-dom';
 import BackButton from '../../components/Buttons/BackButton';
 
@@ -47,7 +47,7 @@ const TheaterManagement: React.FC = () => {
   const navigate = useNavigate()
 
   const createTheaterMutation = useMutation({
-    mutationFn: createTheater,
+    mutationFn: createNewTheater,
     onSuccess: () => toast.success('Theater created successfully!'),
     onError: (error: any) => toast.error(error.response?.data?.message || 'Failed to create theater'),
   });

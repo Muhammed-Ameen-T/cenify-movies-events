@@ -18,14 +18,8 @@ const LogoutButton = () => {
       localStorage.removeItem('user');
 
       // Dispatch Redux action to reset authentication state
+      navigate(`/admin/login`)
       dispatch(clearAuth());
-      if(accountType=='theater' || accountType=='event'){
-        navigate(`/vendor/login`)
-      }else if(accountType=='admin'){
-        navigate(`/admin/login`)
-      }else{
-        navigate(`/`)
-      }
 
       console.log("User successfully logged out!");
     } catch (error) {

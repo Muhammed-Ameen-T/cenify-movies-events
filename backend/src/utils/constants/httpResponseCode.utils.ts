@@ -112,6 +112,7 @@ export enum HttpResMsg {
   TOO_MANY_REQUESTS = 'Too many requests',
   REQUEST_HEADER_FIELDS_TOO_LARGE = 'Request header fields too large',
   UNAVAILABLE_FOR_LEGAL_REASONS = 'Unavailable for legal reasons',
+  THEATER_NOT_FOUND = 'Theater not found!',
 
   INTERNAL_SERVER_ERROR = 'Internal server error',
   NOT_IMPLEMENTED = 'Not implemented',

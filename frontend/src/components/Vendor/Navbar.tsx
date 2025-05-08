@@ -53,9 +53,7 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
     localStorage.removeItem('user');
     dispatch(clearAuth());
     showSuccessToast('Vendor Logout successfully!');
-    setTimeout(() => {
-      navigate('/vendor/login')
-    }, 2000);
+    navigate('/vendor/login')
   };
 
   console.log('Rendering Navbar, sidebarOpen:', sidebarOpen);

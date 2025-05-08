@@ -4,7 +4,7 @@ export interface User{
     email: string | null;
     phone: number | null;
     profileImage: string | null;
-    role: string | null;
+    role: 'user' | 'admin' | 'vendor';
 }
 
 export interface AuthState {
