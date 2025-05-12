@@ -77,7 +77,6 @@ const Theaters: React.FC = () => {
     queryKey: ['theaters'],
     queryFn: fetchTheaters,
   });
-  console.log("🚀 ~ allTheaters:", allTheaters)
 
   // Apply filters to theaters
   const filteredTheaters = React.useMemo(() => {
@@ -299,7 +298,7 @@ const Theaters: React.FC = () => {
 
         <main className="flex-1 overflow-y-auto p-6">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-white">Theaters</h1>
+            <h1 className="text-3xl font-bold text-white">Theater Management</h1>
             
             <div className="relative">
               <div className="flex items-center bg-gray-800 rounded-full px-4 py-2">

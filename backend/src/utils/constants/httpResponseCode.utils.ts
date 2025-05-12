@@ -129,5 +129,6 @@ export enum HttpResMsg {
   INVALID_ACCESS_TOKEN = 'invalid access token!',
   USER_NOT_FOUND = 'User not found!',
   REFRESH_TOKEN_REQUIRED = 'Refresh token required!',
-  NO_ACCESS_TOKEN = 'Access token not found!'
+  NO_ACCESS_TOKEN = 'Access token not found!',
+  USER_BLOCKED = 'User is blocked, please contact support!',
 }

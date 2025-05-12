@@ -8,7 +8,6 @@ import AdminRoutes from "./routes/AdminRoutes";
 import VendorRoutes from "./routes/VendorRoutes";
 import UserRoutes from "./routes/UserRoutes";
 import "./App.css";
-
 const App: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   console.log("new user", user);
@@ -17,8 +16,8 @@ const App: React.FC = () => {
     <Suspense fallback={<Loader />}>
       <Toast />
       <Router>
-        <AdminRoutes />
         <VendorRoutes />
+        <AdminRoutes />
         <UserRoutes />
       </Router>
     </Suspense>

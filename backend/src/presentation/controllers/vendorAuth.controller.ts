@@ -6,7 +6,7 @@ import { injectable, inject, container } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
-import { CustomError } from '../../utils/errors/custom.error';
+import { CustomError } from '../../utils/errors/custom.error';  
 
 import {
   SendOtpVendorDTO,
@@ -15,7 +15,7 @@ import {
   TheaterDetailsDTO,
   UpdateTheaterDetailsDTO,
 } from '../../application/dtos/vendor.dto';
-import { IVendorAuthController } from './interface/theaterAuth.controller.interface';
+import { IVendorAuthController } from './interface/vendorAuth.controller.interface';
 
 import { ISendOtpVendorUseCase } from '../../domain/interfaces/useCases/Vendor/sendOtpVendor.interface';
 import { IVerifyOtpVendorUseCase } from '../../domain/interfaces/useCases/Vendor/verifyOtpVendor.interface';
@@ -102,44 +102,6 @@ export class VendorAuthController implements IVendorAuthController {
       sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
     }
   }
-
-  // async refreshToken(req: Request, res: Response): Promise<void> {
-  //   try {
-  //     if (!req.cookies) {
-  //       sendResponse(
-  //         res,
-  //         HttpResCode.BAD_REQUEST,
-  //         ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-  //       );
-  //       return;
-  //     }
-  //     const refreshToken = req.cookies.refreshToken;
-  //     if (!refreshToken) {
-  //       sendResponse(
-  //         res,
-  //         HttpResCode.BAD_REQUEST,
-  //         ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-  //       );
-  //       return;
-  //     }
-  //     const jwtService = container.resolve<JwtService>('JwtService');
-  //     const theaterRepository = container.resolve<ITheaterRepository>('ITheaterRepository');
-  //     const decoded = jwtService.verifyRefreshToken(refreshToken);
-  //     const theater = await theaterRepository.findById(decoded.userId);
-  //     if (!theater) {
-  //       sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
-  //       return;
-  //     }
-  //     const newAccessToken = jwtService.generateAccessToken(theater._id, theater.accountType);
-  //     sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { accessToken: newAccessToken });
-  //   } catch (error) {
-  //     const errorMessage =
-  //       error instanceof CustomError
-  //         ? error.message
-  //         : ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN;
-  //     sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
-  //   }
-  // }
 
   async getCurrentUser(req: Request, res: Response): Promise<void> {
     const token = req.headers.authorization?.split(' ')[1];

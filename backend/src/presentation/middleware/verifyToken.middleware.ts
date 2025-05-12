@@ -89,7 +89,7 @@ export const verifyAccessToken = async (
           // Check if user is blocked
           if (user.isBlocked) {
             throw new CustomError(
-              'Your account is blocked. Please contact support.',
+              HttpResMsg.USER_BLOCKED,
               HttpResCode.FORBIDDEN
             );
           }
@@ -103,6 +103,12 @@ export const verifyAccessToken = async (
           req.decoded = decodedRefresh;
           next();
         } catch (refreshError) {
+          if (error instanceof jwt.TokenExpiredError) {
+            console.log('Refresh token expired');
+          }else{
+            console.log('Invalid refresh token');
+          }
+
           throw new CustomError(
             HttpResMsg.INVALID_OR_EXPIRED_REFRESH_TOKEN,
             HttpResCode.UNAUTHORIZED

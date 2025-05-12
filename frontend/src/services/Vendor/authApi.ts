@@ -17,7 +17,7 @@ export const registerVendor = async (data: {
 export const verifyVendorOtp = async (data: {
   name: string;
   email: string;
-  password: string;
+  password: string; 
   phone?: string;
   accountType: "theater" | "event";
   otp: string;

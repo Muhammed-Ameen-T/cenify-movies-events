@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { IVendorAuthController } from '../controllers/interface/theaterAuth.controller.interface';
+import { IVendorAuthController } from '../controllers/interface/vendorAuth.controller.interface';
 import { container } from 'tsyringe';
 import { verifyAccessToken } from '../middleware/verifyToken.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
