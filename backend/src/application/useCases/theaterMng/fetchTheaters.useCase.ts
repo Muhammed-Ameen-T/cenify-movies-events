@@ -14,8 +14,6 @@ export class FetchTheatersUseCase implements IFetchTheatersUseCase {
   async execute(): Promise<TheaterResponseDTO[]> {
     try {
       const theaters = await this.theaterRepository.findTheaters();
-      console.log("🚀 ~ FetchTheatersUseCase ~ execute ~ theaters:", theaters);
-
       return theaters.map((theater: Theater) => this.mapToDTO(theater));
     } catch (error) {
       console.error("Error fetching theaters:", error);

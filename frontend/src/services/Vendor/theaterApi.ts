@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Theater, TheaterDetailsFormData } from "../../types/theater";
+import { Theater,ITheater, TheaterDetailsFormData } from "../../types/theater";
 import { VENDOR_ENDPOINTS } from "../../constants/apiEndPoint";
 import api from "../../config/axios.config";
 
@@ -56,11 +56,11 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
     name: theater.name,
     status: theater.status, 
     location: theater.location?.city ? `${theater.location.city}` : 'Unknown Location',
-    address: 'Not provided', // Mocked, extend backend DTO if needed
+    address: 'Not provided',
     phone: theater.phone || 'Not provided',
     email: theater.email || 'Not provided',
-    website: 'www.example.com', // Mocked
-    openingHours: '10:00 AM - 12:00 AM', // Mocked
+    website: 'www.example.com', 
+    openingHours: '10:00 AM - 12:00 AM',
     features: theater.facilities
       ? Object.entries(theater.facilities)
           .filter(([_, value]) => value)
@@ -98,15 +98,34 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
   }));
 };
 
+interface FetchTheatersResponse {
+  theaters: ITheater[];
+  totalCount: number;
+  totalPages: number;
+}
 
+export const fetchTheatersByVendor = async (params: {
+  vendorId: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string[];
+  location?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}): Promise<FetchTheatersResponse> => {
+  const response = await api.get(`${VENDOR_ENDPOINTS.fetchTheater}/${params.vendorId}`, { params });
+  return response.data.data;
+};
 
 export const updateTheaterStatus = async (id: string, status: string): Promise<void> => {
   await api.patch(`${VENDOR_ENDPOINTS.updateStatus}${id}`, { status });
 };
 
-
-
-
+export const updateTheater = async (id: string, data: Partial<Theater>): Promise<Theater> => {
+  const response = await api.patch(`${VENDOR_ENDPOINTS.updateTheater}/${id}`, data);
+  return response.data.data;
+};
 
 
 export default api; 

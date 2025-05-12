@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
     "@hookform/resolvers": "^5.0.1",
     "@react-google-maps/api": "^2.20.6",
     "@react-oauth/google": "^0.12.1",
@@ -22,11 +24,16 @@
     "classnames": "^2.5.1",
     "framer-motion": "^12.9.4",
     "gsap": "^3.13.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "leaflet": "^1.9.4",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.487.0",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",
     "react-easy-crop": "^5.4.1",
     "react-feather": "^2.0.10",
@@ -51,6 +58,7 @@
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@types/leaflet": "^1.9.17",
+    "@types/lodash.debounce": "^4.0.9",
     "@types/node": "^22.14.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",

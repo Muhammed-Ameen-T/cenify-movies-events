@@ -11,6 +11,8 @@ const TheaterMngController = container.resolve<ITheaterManagementController>('Th
 const router = Router();
 
 router.get('/fetch-theaters',TheaterMngController.getTheaters.bind(TheaterMngController));
+router.get('/fetch-theater/:vendorId', TheaterMngController.getTheatersOfVendor.bind(TheaterMngController));
 router.patch('/update-theater-status/:id',TheaterMngController.updateTheaterStatus.bind(TheaterMngController));
+router.patch('/update-theater/:id',TheaterMngController.updateTheater.bind(TheaterMngController));
 
 export default router;      

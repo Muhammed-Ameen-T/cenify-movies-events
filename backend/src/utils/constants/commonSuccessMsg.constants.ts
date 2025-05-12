@@ -29,4 +29,9 @@ export const SuccessMsg = {
   IMAGE_PROCESSED: 'Image processed successfully',
   REPORT_GENERATED: 'Report generated successfully',
   STATUS_UPDATED: 'Status updated successfully',
+  MOVIE_UPDATED: 'Movie updated successfully',
+  MOVIE_STATUS_UPDATED: 'Movie status updated successfully',
+  MOVIE_DELETED: 'Movie deleted successfully',
+  MOVIE_ADDED: 'Movie added successfully',
+  THEATER_UPDATED: 'Theater Updated Successfully',  
 };

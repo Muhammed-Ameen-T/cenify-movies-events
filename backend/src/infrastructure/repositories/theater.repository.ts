@@ -20,7 +20,7 @@ export class TheaterRepository implements ITheaterRepository {
             }
           : null,
         facilities: theater.facilities,
-        createdAt: theater.createdAt,
+        createdAt: theater.createdAt, 
         updatedAt: theater.updatedAt,
         intervalTime: theater.intervalTime,
         gallery: theater.gallery,
@@ -69,7 +69,7 @@ export class TheaterRepository implements ITheaterRepository {
 
   // Update theater details
   async updateTheaterDetails(theater: Theater): Promise<Theater> {
-    const updatedTheater = await TheaterModel.findByIdAndUpdate(
+    const updatedTheater = await TheaterModel.findByIdAndUpdate(  
       theater._id,
       {
         screens: theater.screens,
@@ -107,7 +107,6 @@ export class TheaterRepository implements ITheaterRepository {
         model: "User" 
       })
       .lean();
-      console.log("🚀 ~ TheaterRepository ~ findTheaters ~ theaterDocs:", theaterDocs)
       return theaterDocs.map((doc) => this.mapToEntity(doc));
     } catch (error) {
       console.error("Error fetching theaters:", error); // Log the error for debugging
@@ -120,6 +119,68 @@ export class TheaterRepository implements ITheaterRepository {
     const theaterDocs = await TheaterModel.find({ accountType: 'event' });
     return theaterDocs.map((doc) => this.mapToEntity(doc));
   }
+
+
+  async findTheatersByVendor(params: {
+    vendorId: string;
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string[];
+    location?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ theaters: Theater[]; totalCount: number }> {
+    try {
+      const { vendorId, page = 1, limit = 8, search, status, location, sortBy, sortOrder } = params;
+      const skip = (page - 1) * limit;
+
+      // Build query
+      const query: any = { vendorId };
+
+      if (search) {
+        query.name = { $regex: search, $options: 'i' }; 
+      }
+
+      if (status && status.length > 0) {
+        query.status = { $in: status };
+      }
+
+      if (location) {
+        query["location.city"] = { $regex: location, $options: 'i' };
+      }
+
+      // Build sorting options
+      const sort: any = {};
+      if (sortBy && sortOrder) {
+        sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+      }
+
+      // Fetch theaters with pagination and filters
+      const theaterDocs = await TheaterModel.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: "vendorId",
+          select: "name email phone",
+          model: "User"
+        })
+        .lean();
+
+      // Count total documents matching the query
+      const totalCount = await TheaterModel.countDocuments(query);
+
+      return {
+        theaters: theaterDocs.map((doc) => this.mapToEntity(doc)),
+        totalCount,
+      };
+    } catch (error) {
+      console.error('❌ Error fetching theaters:', error);
+      throw new Error('Failed to retrieve theaters: Please try again later.');
+    }
+  }
+
 
   private mapToEntity(doc: ITheater): Theater {
     return new Theater(

@@ -15,7 +15,21 @@ export const ADMIN_ENDPOINTS = {
   forgotPassSendOtp: '/auth/fg-send-otp',
   forgotPassVerifyOtp: '/auth/fg-verify-otp',
   forgotPassUpdate: '/auth/fg-update-pass',
-}
+
+  fetchMovies: `/admin/fetch-movies`,
+  fetchMovieById: `/admin/get-movie`, // Fetch a specific movie by ID
+  editMovie: `/admin/edit-movie`,
+  createMovie: `/admin/create-movie`,
+  updateMovieStatus: `/admin/movie-status`,
+  deleteMovie: `/admin/delete-movie`, // Delete a movie
+  updateMovie: `/admin/edit-movie`, // Upload movie poster
+
+  fetchUsers: `/admin/fetch-users`, // Fetch all users
+  fetchUserById: `/admin/fetch-user`, // Fetch a specific user
+  updateUserStatus: `/admin/update-user-status`, // Update user account status
+  deleteUser: `/admin/delete-user`, // Delete a user account
+};
+
 
 export const VENDOR_ENDPOINTS = {
   register: `/vendor/register`,
@@ -26,5 +40,7 @@ export const VENDOR_ENDPOINTS = {
   updateStatus: `/vendor/update-theater-status/`,
   fetchTheaters: `/vendor/fetch-theaters`,
   createTheater:`/vendor/create-theater`,
+  fetchTheater:`/vendor/fetch-theater`,
+  updateTheater:`/vendor/update-theater`,
   imageUpload: `https://api.cloudinary.com/v1_1/djqsehax7/image/upload`,  
 };

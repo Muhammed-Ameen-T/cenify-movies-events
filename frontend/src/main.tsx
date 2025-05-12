@@ -12,11 +12,11 @@ import './index.css';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1, // Retry failed queries once
-      staleTime: 5 * 60 * 1000, // Cache queries for 5 minutes
+      retry: 1, 
+      staleTime: 5 * 60 * 1000, 
     },
     mutations: {
-      retry: 1, // Retry failed mutations once
+      retry: 1, 
     },
   },
 });

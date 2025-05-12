@@ -9,7 +9,6 @@ interface PrivateRouteProps {
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ allowedRoles }) => {
   const currentUser  = useSelector((state: RootState) => state.auth.user);
   
-  console.log('current user',currentUser)
   if (!currentUser) {
     return <Navigate to="/" />;
   }

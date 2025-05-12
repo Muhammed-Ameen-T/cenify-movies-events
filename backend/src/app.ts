@@ -14,7 +14,7 @@ dotenv.config();
 // 🔹 Initialize Express app
 const app = express();
 
-// 🔹 Middleware setup
+// 🔹 Middleware setup;
 app.use(cors({
   origin: [
     'http://localhost:5173',
@@ -41,11 +41,12 @@ import vendorRoutes from './presentation/routes/vendorAuth.routes';
 import authRoutes from './presentation/routes/userAuth.routes';
 import adminAuthRoutes from './presentation/routes/adminAuth.routes';
 import vendorMngRoutes from './presentation/routes/vendorMng.routes'
+import adminMngRoutes from './presentation/routes/adminMng.routes'
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/admin', adminAuthRoutes);
 app.use('/api/vendor', vendorMngRoutes);
 app.use('/api/vendor', vendorRoutes);
-
+app.use('/api/admin',adminMngRoutes)
 
 app.use(requestLogger);
 
