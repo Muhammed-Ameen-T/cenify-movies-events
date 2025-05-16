@@ -4,7 +4,8 @@ export const USER_AUTH_ENDPOINTS = {
   facebookLogin: `/auth/facebook/callback`,
   googleLogin: `/auth/google/callback`,
   refreshToken: `/auth/refresh-token`,
-  getUser: `/me`,
+  getUser: `/profile/me`,
+  updateProfile: `/profile/update`,
   sendOtp: `/auth/send-otp`,
   verifyOtp: `/auth/verify-otp`,
   login: `/auth/login`,
@@ -42,5 +43,6 @@ export const VENDOR_ENDPOINTS = {
   createTheater:`/vendor/create-theater`,
   fetchTheater:`/vendor/fetch-theater`,
   updateTheater:`/vendor/update-theater`,
+  createLayout:`/vendor/create-seat-layout`,
   imageUpload: `https://api.cloudinary.com/v1_1/djqsehax7/image/upload`,  
 };

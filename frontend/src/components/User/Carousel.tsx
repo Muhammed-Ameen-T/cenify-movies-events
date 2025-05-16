@@ -198,7 +198,7 @@ const Carousel: React.FC = () => {
 
   return (
     <div
-      className="relative w-full h-72 md:h-[600px] mt-16 overflow-hidden"
+      className="relative w-full h-72 md:h-[600px] overflow-hidden"
       {...swipeHandlers}
       role="region"
       aria-label="Movie carousel"

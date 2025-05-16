@@ -144,7 +144,7 @@ export class UserRepositoryImpl implements IUserRepository {
       doc.profileImage,
       doc.dob,
       doc.moviePass,
-      doc.loyalityPoints,
+      doc.loyaltyPoints,
       doc.isBlocked,
       doc.role,
       doc.createdAt,

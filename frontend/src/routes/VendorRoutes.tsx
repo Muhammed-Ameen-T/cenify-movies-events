@@ -15,6 +15,7 @@ const TheaterManagement = lazy(() => import('../pages/Vendor/Theaters.tsx'));
 const EventDetails = lazy(() => import('../pages/Vendor/EventDetails.tsx'));
 const EventManagement = lazy(() => import('../pages/Vendor/Events.tsx'));
 import Appii from '../pages/Vendor/RealSeatLayoutPage.tsx';
+import SeatLayoutMain from '../pages/SeatLayout.tsx/MainSeat.tsx';
 
 const VendorRoutes = () => {
   return (
@@ -29,7 +30,7 @@ const VendorRoutes = () => {
             <Route path="theaters" element={<TheaterManagement />} />
             <Route path="events-create" element={<VendorDashboard />} />
             <Route path="events" element={<EventManagement />} />
-            <Route path="seats" element={<Appii />} />
+            <Route path="seats" element={<SeatLayoutMain />} />
           </Route>
         </Route>
       </Routes>

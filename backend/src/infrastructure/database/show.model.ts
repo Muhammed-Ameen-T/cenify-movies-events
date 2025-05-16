@@ -22,6 +22,8 @@ const SeatSchema = new Schema<ISeat>({
 // Interface for Seat Layout
 export interface ISeatLayout extends Document {
   vendorId: mongoose.Types.ObjectId;
+  layoutName: string;
+  seatPrice:{regular: number; premium: number; vip: number};
   capacity: number; 
   seats: ISeat[][]; 
 }
@@ -29,6 +31,8 @@ export interface ISeatLayout extends Document {
 // Seat Layout Schema
 const SeatLayoutSchema = new Schema<ISeatLayout>({
   vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor', required: true, index: true },
+  layoutName: { type: String, required: true },
+  seatPrice: { regular: { type: Number, required: true }, premium: { type: Number, required: true }, vip: { type: Number, required: true } },
   capacity: { type: Number, required: true },
   seats: { type: [[SeatSchema]], required: true },
 });

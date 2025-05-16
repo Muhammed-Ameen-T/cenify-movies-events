@@ -34,6 +34,7 @@ export const verifyAccessToken = async (
 ) => {
   try {
     // Extract access token from Authorization header
+    console.log('verifyAccessToken: Cookies received:', req.cookies);
     const authHeader = req.headers.authorization;
     const accessToken = authHeader?.startsWith('Bearer ') 
       ? authHeader.split(' ')[1] 

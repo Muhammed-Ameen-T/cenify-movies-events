@@ -106,3 +106,44 @@
       direction: 'asc' | 'desc';
     };
   }
+
+
+
+
+
+  // User profile types
+export type TabType = "account" | "bookings" | "notifications" | "rewards" | "loyalty" | "moviepass";
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  joinedDate: string;
+  loyaltyPoints: number;
+  profileImage: string;
+}
+
+export interface Booking {
+  id: string;
+  movieTitle: string;
+  date: string;
+  time: string;
+  theater: string;
+  seats: string[];
+  poster: string;
+  upcoming: boolean;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  date: string;
+  read: boolean;
+}
+
+export interface PasswordChange {
+  oldPassword: string;
+  newPassword: string;
+}

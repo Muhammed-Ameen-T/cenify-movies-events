@@ -239,12 +239,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onMenuToggle, showMenu })
 
   // Menu items with icons
   const menuItems = [
-    { label: 'Account', action: () => navigate('/account'), icon: <User size={16} /> },
-    { label: 'Bookings', action: () => navigate('/bookings'), icon: <Ticket size={16} /> },
+    { label: 'Account', action: () => navigate('/account?tab=account'), icon: <User size={16} /> },
+    { label: 'Bookings', action: () => navigate('/account?tab=bookings'), icon: <Ticket size={16} /> },
     { label: 'Wallet', action: () => navigate('/wallet'), icon: <Wallet size={16} /> },
     {
       label: 'Loyalty Points',
-      action: () => navigate('/loyalty'),
+      action: () => navigate('/account?tab=loyalty'),
       icon: <Star size={16} />,
     },
     {
@@ -254,10 +254,10 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onMenuToggle, showMenu })
     },
     {
       label: 'Notification',
-      action: () => navigate('/notifications'),
+      action: () => navigate('/account?tab=notifications'),
       icon: <Bell size={16} />,
     },
-    { label: 'Reward', action: () => navigate('/rewards'), icon: <Gift size={16} /> },
+    { label: 'Reward', action: () => navigate('/account?tab=rewards'), icon: <Gift size={16} /> },
   ];
 
   if (user) {
@@ -267,10 +267,15 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onMenuToggle, showMenu })
       icon: <LogOut size={16} />,
     });
   }
+  const toHome = () => {
+    navigate('/'); // Navigate to home page
+    setIsProfileMenuOpen(false); // Close profile menu if open
+  }
+
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white shadow-lg z-50 h-16 flex items-center justify-between px-4 md:px-6">
-      <div className="flex items-center">
+      <div className="flex items-center" onClick={toHome}>
         <img src={logo} alt="Cenify" className="h-10 w-auto object-contain" />
       </div>
 

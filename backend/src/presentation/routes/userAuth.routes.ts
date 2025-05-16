@@ -13,7 +13,7 @@ const   router = Router();
 
 router.post('/google/callback', userAuthController.googleCallback.bind(userAuthController));
 router.post('/refresh-token', userAuthController.refreshToken.bind(userAuthController));
-router.get('/me', verifyAccessToken, userAuthController.getCurrentUser.bind(userAuthController));
+// router.get('/me', verifyAccessToken, userAuthController.getCurrentUser.bind(userAuthController));
 router.post(
   '/send-otp',
   validateRequest(SendOtpSchema),

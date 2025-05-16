@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   LogOut,
+  Layout
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -203,9 +204,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           />
 
           <NavItem
-            path="/finance"
-            label="Finance"
-            icon={<DollarSign size={20} />}
+            path="/vendor/seats"
+            label="Seat Layout"
+            icon={<Layout size={20} />}
             isCollapsed={!isOpen}
           />
         </div>
@@ -224,12 +225,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           isCollapsed={!isOpen}
         />
 
-        <NavItem
+        {/* <NavItem
           path="/logout"
           label="Logout"
           icon={<LogOut size={20} />}
           isCollapsed={!isOpen}
-        />
+        /> */}
       </div>
 
       {/* {isOpen && (

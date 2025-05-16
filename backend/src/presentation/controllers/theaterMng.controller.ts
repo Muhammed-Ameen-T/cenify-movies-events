@@ -9,11 +9,13 @@ import { ITheaterManagementController } from './interface/theaterMng.controller.
 import { IUpdateTheaterStatusUseCase } from '../../domain/interfaces/useCases/Vendor/updateTheaterStatus.interface';
 import { IFetchTheaterOfVendorUseCase } from '../../domain/interfaces/useCases/Vendor/fetchTheatersOfVendor.interface';
 import { IUpdateTheaterUseCase } from '../../domain/interfaces/useCases/Vendor/updateTheater.interfase';
+import { IFetchTheatersUseCase } from '../../domain/interfaces/useCases/Vendor/fetchTheaters.interface';
 
 @injectable()
 export class TheaterManagementController implements ITheaterManagementController {
   constructor(
-    @inject('FetchTheaterOfVendorUseCase') private fetchTheatersUseCase: IFetchTheaterOfVendorUseCase,
+    @inject('FetchTheaterOfVendorUseCase') private fetchTheaterUseCase: IFetchTheaterOfVendorUseCase,
+    @inject('FetchTheatersUseCase') private fetchTheatersUseCase: IFetchTheatersUseCase,
     @inject('UpdateTheaterStatus') private updateTheaterStatusUseCase: IUpdateTheaterStatusUseCase,
     @inject('UpdateTheater') private updateTheaterUseCase: IUpdateTheaterUseCase,
   ) {}
@@ -76,7 +78,7 @@ export class TheaterManagementController implements ITheaterManagementController
       };
 
       // Fetch theaters using the use case
-      const result = await this.fetchTheatersUseCase.execute(params);
+      const result = await this.fetchTheaterUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       const errorMessage =

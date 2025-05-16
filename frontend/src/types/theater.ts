@@ -80,7 +80,36 @@ export interface  Theater {
     phone: string;
   } | null; // ✅ Now allows null values
 }
+export interface Seat {
+  id: string;
+  row: number;
+  col: number;
+  type: SeatType;
+  price: number;
+  label: string;
+  occupied: boolean;
+}
 
+export interface SeatPrice {
+  regular: number;
+  premium: number;
+  vip: number;
+}
+
+export interface PriceEditData {
+  seatType: SeatType;
+  price: number;
+}
+
+export interface LayoutMetadata {
+  name: string;
+  seatPrices: SeatPrice;
+  capacity: number;
+}
+
+// export type SeatType = 'REGULAR' | 'PREMIUM' | 'VIP' | 'UNAVAILABLE';
+
+export type SeatLayout = (Seat | null)[][];
 
 export interface ITheater {
   _id: string;
@@ -164,3 +193,5 @@ export interface PriceEditData {
   seatType: SeatType;
   price: number;
 }
+
+

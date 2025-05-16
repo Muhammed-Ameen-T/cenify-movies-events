@@ -87,7 +87,7 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <button
+          {/* <button
             className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#333333] transition-colors"
             onClick={() => setDarkMode(!darkMode)}
           >
@@ -96,7 +96,7 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
 
           <button className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#333333] transition-colors">
             <MessageSquare size={18} />
-          </button>
+          </button> */}
 
           <div className="relative">
             <button

@@ -11,36 +11,25 @@ interface SeatComponentProps {
 
 const SeatComponent: React.FC<SeatComponentProps> = ({ seat, onClick, onContextMenu, selected }) => {
   if (!seat) {
-    console.error('Seat prop is undefined or null');
-    return <div className="w-8 h-8 bg-gray-300 rounded-t-lg flex items-center justify-center">?</div>;
+    return <div className="w-10 h-10 opacity-0"></div>;
   }
 
   const seatTypeInfo = SEAT_TYPES[seat.type] || SEAT_TYPES.REGULAR;
 
-  const getSeatStyle = () => {
-    switch (seat.type) {
-      case 'RECLINER':
-        return 'w-10 h-9 rounded-lg';
-      case 'DISABLED':
-        return 'w-8 h-8 rounded-t-lg';
-      default:
-        return 'w-8 h-8 rounded-t-lg';
-    }
-  };
-
   return (
     <div
-      className={`${getSeatStyle()} flex items-center justify-center text-xs font-bold cursor-pointer
-        ${seatTypeInfo.color} ${selected ? 'ring-2 ring-white' : ''}
-        ${seat.occupied ? 'opacity-50' : 'hover:opacity-80'} transition-all duration-200`}
+      className={`w-10 h-10 ${seatTypeInfo.color} rounded-t-lg flex items-center justify-center text-xs font-bold 
+        cursor-pointer ${selected ? 'ring-2 ring-white shadow-lg scale-110' : ''}
+        ${seat.occupied ? 'opacity-50' : 'hover:opacity-80'} 
+        transition-all duration-200 touch-none select-none`}
       onClick={() => onClick(seat)}
-      onContextMenu={e => {
+      onContextMenu={(e) => {
         e.preventDefault();
         onContextMenu(seat);
       }}
       title={`${seat.label} - ${seatTypeInfo.name} (₹${seat.price})`}
     >
-      {seat.label}
+      <span className="text-white drop-shadow-sm">{seat.label}</span>
     </div>
   );
 };

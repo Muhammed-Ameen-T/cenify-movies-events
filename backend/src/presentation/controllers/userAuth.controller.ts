@@ -23,7 +23,9 @@ import { JwtService } from '../../infrastructure/services/jwt.service';
 import { IForgotPasswordSendOtpUseCase } from '../../domain/interfaces/useCases/Admin/forgotPasswordSendOtp.interface';
 import { IForgotPasswordUpdateUseCase } from '../../domain/interfaces/useCases/Admin/forgotPasswordUpdate.interface';
 import { IForgotPasswordVerifyOtpUseCase } from '../../domain/interfaces/useCases/Admin/forgotPasswordVerifyOtp.interface';
-
+import jwt from 'jsonwebtoken';
+import { IUserRepository } from '../../domain/interfaces/repositories/user.repository';
+import { IgetUserDetailsUseCase } from '../../domain/interfaces/useCases/User/getUserDetails.interface';
 @injectable()
 export class UserAuthController implements IUserAuthController {
   constructor(
@@ -34,6 +36,7 @@ export class UserAuthController implements IUserAuthController {
     @inject('ForgotPassSendOtp') private forgotPassSendOtpUseCase: IForgotPasswordSendOtpUseCase,
     @inject('ForgotPassUpdate') private forgotPassUpdatePassUseCase: IForgotPasswordUpdateUseCase,
     @inject('ForgotPassVerifyOtp') private forgotPassVerifyOtpUseCase: IForgotPasswordVerifyOtpUseCase,
+    @inject('GetUserDetailsUseCase') private getUserDetailsUseCase: IgetUserDetailsUseCase,
   ) {}
 
   async googleCallback(req: Request, res: Response): Promise<void> {
@@ -43,7 +46,7 @@ export class UserAuthController implements IUserAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000,
       });
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
         accessToken: result.accessToken,
@@ -60,61 +63,62 @@ export class UserAuthController implements IUserAuthController {
   async refreshToken(req: Request, res: Response): Promise<void> {
     try {
       console.log('AuthController.refreshToken: Checking cookies');
-      if (!req.cookies) {
-        console.log('AuthController.refreshToken: No cookies found');
-        sendResponse(
-          res,
-          HttpResCode.BAD_REQUEST,
-          ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-        );
+      
+      if (!req.cookies?.refreshToken) {
+        console.log('AuthController.refreshToken: No refresh token found');
+        sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN);
         return;
       }
+      
       const refreshToken = req.cookies.refreshToken;
-      console.log(
-        'AuthController.refreshToken: Received refreshToken:',
-        refreshToken ? 'present' : 'missing',
-      );
-      if (!refreshToken) {
-        sendResponse(
-          res,
-          HttpResCode.BAD_REQUEST,
-          ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-        );
+      console.log('AuthController.refreshToken: Received refresh token');
+
+      // Decode first to check expiration
+      const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
+      
+      if (!decoded || !decoded.exp || Date.now() >= decoded.exp * 1000) {
+        console.log('AuthController.refreshToken: Refresh token expired');
+        sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN);
         return;
       }
+
+      // Verify token
       const jwtService = container.resolve<JwtService>('JwtService');
-      const decoded = jwtService.verifyRefreshToken(refreshToken);
+      const verifiedDecoded = jwtService.verifyRefreshToken(refreshToken);
+      
       const authRepository = container.resolve<IAuthRepository>('AuthRepository');
-      const user = await authRepository.findById(decoded.userId);
+      const user = await authRepository.findById(verifiedDecoded.userId);
+
       if (!user) {
-        console.log('AuthController.refreshToken: User not found for ID:', decoded.userId);
+        console.log('AuthController.refreshToken: User not found');
         sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
         return;
       }
-      const newAccessToken = jwtService.generateAccessToken(user._id?.toString() || '', 'user');
+
+      // Generate new access token
+      const newAccessToken = jwtService.generateAccessToken(user._id.toString(), user.role);
       console.log('AuthController.refreshToken: New access token generated');
+
+      // Send new token response
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { accessToken: newAccessToken });
+
     } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN;
-      console.error('AuthController.refreshToken error:', errorMessage);
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+      console.error('AuthController.refreshToken error:', error || ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN);
+      sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN);
     }
   }
+
 
   async getCurrentUser(req: Request, res: Response): Promise<void> {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-      -sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
+      sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
       return;
     }
     try {
       const jwtService = container.resolve<JwtService>('JwtService');
-      const authRepository = container.resolve<IAuthRepository>('AuthRepository');
       const decoded = jwtService.verifyAccessToken(token);
-      const user = await authRepository.findById(decoded.userId);
+      const user = await this.getUserDetailsUseCase.execute(decoded.userId);
       if (!user) {
         sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
         return;
@@ -123,8 +127,12 @@ export class UserAuthController implements IUserAuthController {
         id: user._id?.toString() || '',
         name: user.name,
         email: user.email,
-        phone: user.phone,
+        phone: user.phone? user.phone : 'N/A',
         profileImage: user.profileImage,
+        role: user.role,
+        loyaltyPoints: user.loyalityPoints || 0,
+        dateOfBirth: user.dob ? user.dob : 'N/A',
+        joinedDate: user.createdAt.toDateString(),
       });
     } catch (error) {
       const errorMessage =
@@ -137,10 +145,8 @@ export class UserAuthController implements IUserAuthController {
   async sendOtp(req: Request, res: Response): Promise<void> {
     try {
       const { email } = req.body;
-      console.log('AuthController.sendOtp: Received request:', { email });
 
       if (!email || typeof email !== 'string' || !email.trim()) {
-        console.log('AuthController.sendOtp: Missing or invalid email:', email);
         sendResponse(res, HttpResCode.BAD_REQUEST, 'Email is required.');
         return;
       }
@@ -166,7 +172,7 @@ export class UserAuthController implements IUserAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000,
       });
       sendResponse(res, HttpResCode.OK, 'Register successful.', {
         accessToken: result.accessToken,

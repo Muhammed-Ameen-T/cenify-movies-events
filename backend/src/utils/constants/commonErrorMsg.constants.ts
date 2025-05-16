@@ -33,6 +33,7 @@ const ERROR_MESSAGES = {
     INVALID_OTP: 'Invalid OTP, Please try again!',
     USER_ALREADY_EXISTS: 'User already exists!',
     INVALID_STATUS: 'Invalid status',
+    INVALID_VENDOR_ID: 'Invalid vendorId format',
   },
   DATABASE: {
     CONNECTION_FAILED: 'Database connection failed.',
@@ -70,6 +71,7 @@ const ERROR_MESSAGES = {
     FAILED_UPDATING_BLOCK_STATUS: 'Failed to update user status',
     FAILED_FETCHING_USERS: 'Failed to fetching users',
     FAILED_UPDATING_THEATER: 'Failed to updating theater',
+    FAILED_UPDATING_PROFILE: 'Failed to update user profile',
   },
   SECURITY: {
     ACCESS_DENIED: 'Access denied due to security restrictions.',

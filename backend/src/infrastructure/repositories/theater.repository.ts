@@ -1,7 +1,7 @@
 import { Theater } from '../../domain/entities/theater.entity';
 import { ITheaterRepository } from '../../domain/interfaces/repositories/theater.repository';
 import { TheaterModel } from '../database/theater.model'
-import { ITheater } from '../../domain/interfaces/thaeter.interface';
+import { ITheater } from '../../domain/interfaces/model/thaeter.interface';
 import { ObjectId } from 'mongoose';
 
 export class TheaterRepository implements ITheaterRepository {

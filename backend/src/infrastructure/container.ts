@@ -75,6 +75,18 @@ import { IFetchTheaterOfVendorUseCase } from '../domain/interfaces/useCases/Vend
 import { FetchTheaterOfVendorUseCase } from '../application/useCases/theaterMng/fetchTheaterOfVendor.useCase';
 import { IUpdateTheaterUseCase } from '../domain/interfaces/useCases/Vendor/updateTheater.interfase';
 import { UpdateTheaterUseCase } from '../application/useCases/theaterMng/updateTheater.useCase';
+import { SeatLayoutRepository } from './repositories/seatLayout.repository';
+import { CreateSeatLayoutUseCase } from '../application/useCases/seatLayoutMng/createSeatLayout.useCase';
+import { ICreateSeatLayoutUseCase } from '../domain/interfaces/useCases/Vendor/createSeatLayout.interface';
+import { ISeatLayoutRepository } from '../domain/interfaces/repositories/seatLayout.repository';
+import { SeatLayoutController } from '../presentation/controllers/seatLayoutsMng.controller';
+import { ISeatLayoutController } from '../presentation/controllers/interface/seatLayoutMng.controller.interface';
+import { getUserDetailsUseCase } from '../application/useCases/userProfile/getUserDetail.useCase';
+import { IgetUserDetailsUseCase } from '../domain/interfaces/useCases/User/getUserDetails.interface';
+import { IupdateUserProfileUseCase } from '../domain/interfaces/useCases/User/updateUserProfile.interface';
+import { updateUserProfileUseCase } from '../application/useCases/userProfile/updateUserProfile.useCase';
+import { IUserProfileController } from '../presentation/controllers/interface/userProfile.controller.interface';
+import { UserProfileController } from '../presentation/controllers/userProfile.controller';
 
 //Controller Registration
 container.register<IUserAuthController>('UserAuthController', { useClass: UserAuthController });
@@ -134,5 +146,15 @@ container.register<IFetchTheatersUseCase>('FetchTheatersUseCase', {useClass: Fet
 container.register<IUpdateTheaterStatusUseCase>('UpdateTheaterStatus', {useClass: UpdateTheaterStatusUseCase});
 container.register<IUpdateTheaterUseCase>('UpdateTheater', {useClass: UpdateTheaterUseCase});
 container.register<IFetchTheaterOfVendorUseCase>('FetchTheaterOfVendorUseCase', { useClass: FetchTheaterOfVendorUseCase });
+
+// Seat Layout UseCases and Controller Registration
+container.register<ICreateSeatLayoutUseCase>('CreateSeatLayoutUseCase', { useClass: CreateSeatLayoutUseCase });
+container.register<ISeatLayoutRepository>('SeatLayoutRepository', { useClass: SeatLayoutRepository});
+container.register<ISeatLayoutController>('SeatLayoutController', { useClass: SeatLayoutController });
+
+// User Profile UseCase Registration
+container.register<IupdateUserProfileUseCase>('UpdateUserProfileUseCase', { useClass: updateUserProfileUseCase });
+container.register<IgetUserDetailsUseCase>('GetUserDetailsUseCase', { useClass: getUserDetailsUseCase });
+container.register<IUserProfileController>('UserProfileController', { useClass: UserProfileController });
 
 export { container };

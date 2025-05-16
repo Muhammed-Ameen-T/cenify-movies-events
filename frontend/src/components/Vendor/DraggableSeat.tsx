@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import SeatComponent from './SeatComponent';
 import { Seat } from '../../types/theater';
 
@@ -17,11 +18,21 @@ const DraggableSeat: React.FC<DraggableSeatProps> = ({ seat, onClick, onContextM
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: seat.id });
+    isDragging,
+  } = useSortable({ 
+    id: seat.id,
+    data: {
+      type: 'seat',
+      seat
+    }
+  });
 
   const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : undefined,
+    zIndex: isDragging ? 10 : 'auto',
+    touchAction: 'none',
   };
 
   return (
@@ -30,7 +41,7 @@ const DraggableSeat: React.FC<DraggableSeatProps> = ({ seat, onClick, onContextM
       style={style}
       {...attributes}
       {...listeners}
-      className="transition-transform"
+      className="transition-transform touch-none select-none"
     >
       <SeatComponent 
         seat={seat} 

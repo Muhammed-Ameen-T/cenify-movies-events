@@ -34,4 +34,5 @@ export const SuccessMsg = {
   MOVIE_DELETED: 'Movie deleted successfully',
   MOVIE_ADDED: 'Movie added successfully',
   THEATER_UPDATED: 'Theater Updated Successfully',  
+  SEAT_LAYOUT_CREATED: 'Seat layout created successfully',
 };

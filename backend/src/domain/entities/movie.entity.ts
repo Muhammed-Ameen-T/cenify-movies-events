@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongoose';
-import { ICast, ICrew, IDuration, IMovie, IReview } from '../interfaces/movie.interface';
+import { ICast, ICrew, IDuration, IMovie, IReview } from '../interfaces/model/movie.interface';
 
 export class Movie {
   constructor(
