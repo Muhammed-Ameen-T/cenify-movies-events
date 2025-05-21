@@ -18,7 +18,7 @@ const UserRoutes = () => {
           <Route path="/account" element={<TheaterProfilePage />} />
           <Route path="/user" element={<Navigate to="/" />} />
         </Route>
-          <Route path="*" element={<PageNotFound />} />
+        <Route path="*" element={<PageNotFound />} />
         {/* Route without Navbar */}
         <Route path="/forgot-password" element={<PasswordResetPage />} />
       </Routes>

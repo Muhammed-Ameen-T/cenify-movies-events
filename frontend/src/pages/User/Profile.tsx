@@ -192,7 +192,7 @@ export default function TheaterProfilePage() {
         dob: editedProfile.dateOfBirth || null,
       });
     } else if (!hasChanges(editedProfile, data || mockUser)) {
-      toast.info('No changes to save');
+      toast.error('No changes to save');
     }
   };
 

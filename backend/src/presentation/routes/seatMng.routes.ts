@@ -17,5 +17,9 @@ router.post(
   authorizeRoles(['vendor']),
   (req, res) => seatLayoutController.createSeatLayout(req, res)
 );
-
+router.get(
+  '/fetch-seats',
+  verifyAccessToken,
+  (req, res) => seatLayoutController.findSeatLayoutsByVendor(req, res)
+);
 export default router;

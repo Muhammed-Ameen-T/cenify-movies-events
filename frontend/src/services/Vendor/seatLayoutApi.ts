@@ -28,3 +28,36 @@ export const createNewSeatLayout = async (data: any): Promise<unknown> => {
     throw new ApiError(ERROR_MESSAGES.NETWORK_ERROR, 500);
   }
 };
+
+export const fetchSeatLayouts = async (params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}): Promise<SeatLayoutResponse[]> => {
+  try {
+    const response = await api.get(VENDOR_ENDPOINTS.fetchSeatLayouts, { params });
+    console.log("🚀 ~ fetchSeatLayouts ~ response:", response.data.data);
+    return response.data.data.seatLayouts;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      const message = error.response.data?.message || ERROR_MESSAGES.FAILED_CREATE_LAYOUT;
+      throw new ApiError(message, error.response.status);
+    }
+    throw new ApiError(ERROR_MESSAGES.NETWORK_ERROR, 500);
+  }
+};
+
+export const updateSeatLayout = async (id: string, data: CreateSeatLayoutRequest): Promise<unknown> => {
+  try {
+    const response = await api.put(`${VENDOR_ENDPOINTS.updateLayout}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      const message = error.response.data?.message || ERROR_MESSAGES.FAILED_CREATE_LAYOUT;
+      throw new ApiError(message, error.response.status);
+    }
+    throw new ApiError(ERROR_MESSAGES.NETWORK_ERROR, 500);
+  }
+};

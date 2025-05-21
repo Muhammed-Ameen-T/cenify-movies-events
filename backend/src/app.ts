@@ -44,6 +44,7 @@ import adminAuthRoutes from './presentation/routes/adminAuth.routes';
 import vendorMngRoutes from './presentation/routes/vendorMng.routes'
 import adminMngRoutes from './presentation/routes/adminMng.routes'
 import seatLayoutRoutes from './presentation/routes/seatMng.routes'
+import screenMngRoutes from './presentation/routes/screenMng.routes';
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/auth/admin', adminAuthRoutes);
@@ -51,6 +52,7 @@ app.use('/api/vendor', vendorMngRoutes);
 app.use('/api/vendor', vendorRoutes);
 app.use('/api/admin',adminMngRoutes)
 app.use('/api/vendor',seatLayoutRoutes)
+app.use('/api/screen', screenMngRoutes);
 
 app.use(requestLogger);
 

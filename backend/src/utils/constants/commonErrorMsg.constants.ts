@@ -34,6 +34,9 @@ const ERROR_MESSAGES = {
     USER_ALREADY_EXISTS: 'User already exists!',
     INVALID_STATUS: 'Invalid status',
     INVALID_VENDOR_ID: 'Invalid vendorId format',
+    SCREEN_NAME_ALREADY_EXISTS: 'Screen name already exists in this theater',
+    INVALID_THEATER_ID: 'Invalid theaterId format',
+    INVALID_SEAT_LAYOUT_ID: 'Invalid seatLayoutId format',
   },
   DATABASE: {
     CONNECTION_FAILED: 'Database connection failed.',
@@ -45,6 +48,8 @@ const ERROR_MESSAGES = {
     FAILED_STORING_OTP: 'Failed to store OTP in Redis.',
     RECORD_NOT_FOUND: 'Record not found in the database.',
     RECORD_NOT_UPDATED: 'Failed to update record in the database.',
+    FAILED_UPDATING_RECORD: 'Failed to update record in the database.',
+    FAILED_CREATING_RECORD: 'Failed to create record in the database.',
   },
   RATE_LIMITING: {
     TOO_MANY_REQUESTS: 'Too many requests, slow down!',
@@ -72,6 +77,7 @@ const ERROR_MESSAGES = {
     FAILED_FETCHING_USERS: 'Failed to fetching users',
     FAILED_UPDATING_THEATER: 'Failed to updating theater',
     FAILED_UPDATING_PROFILE: 'Failed to update user profile',
+    FAILED_FETCHING_RECORDS: 'Failed to fetch records from the database.',
   },
   SECURITY: {
     ACCESS_DENIED: 'Access denied due to security restrictions.',

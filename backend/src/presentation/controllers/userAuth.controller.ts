@@ -37,6 +37,7 @@ export class UserAuthController implements IUserAuthController {
     @inject('ForgotPassUpdate') private forgotPassUpdatePassUseCase: IForgotPasswordUpdateUseCase,
     @inject('ForgotPassVerifyOtp') private forgotPassVerifyOtpUseCase: IForgotPasswordVerifyOtpUseCase,
     @inject('GetUserDetailsUseCase') private getUserDetailsUseCase: IgetUserDetailsUseCase,
+    @inject('IUserRepository') private userRepository: IUserRepository,
   ) {}
 
   async googleCallback(req: Request, res: Response): Promise<void> {
@@ -64,7 +65,7 @@ export class UserAuthController implements IUserAuthController {
     try {
       console.log('AuthController.refreshToken: Checking cookies');
       
-      if (!req.cookies?.refreshToken) {
+      if (!req.cookies.refreshToken) {
         console.log('AuthController.refreshToken: No refresh token found');
         sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN);
         return;
@@ -86,8 +87,8 @@ export class UserAuthController implements IUserAuthController {
       const jwtService = container.resolve<JwtService>('JwtService');
       const verifiedDecoded = jwtService.verifyRefreshToken(refreshToken);
       
-      const authRepository = container.resolve<IAuthRepository>('AuthRepository');
-      const user = await authRepository.findById(verifiedDecoded.userId);
+      // const authRepository = container.resolve<IAuthRepository>('AuthRepository');
+      const user = await this.userRepository.findById(verifiedDecoded.userId);
 
       if (!user) {
         console.log('AuthController.refreshToken: User not found');

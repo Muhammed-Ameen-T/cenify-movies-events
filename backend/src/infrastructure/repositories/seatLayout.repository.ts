@@ -1,6 +1,6 @@
 // src/infrastructure/database/seatLayout.repository.ts
 import { injectable } from 'tsyringe';
-import mongoose from 'mongoose';
+import mongoose, { SortOrder } from 'mongoose';
 import SeatLayoutModel from '../database/seatLayout.model';
 import { ISeatLayout } from '../../domain/interfaces/model/seatLayout.interface';
 import SeatModel from '../database/seat.model';
@@ -39,10 +39,48 @@ export class SeatLayoutRepository implements ISeatLayoutRepository {
     );
   }
 
+  async findByVendor(params: {
+    vendorId: string;
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ seatLayouts: any[]; totalCount: number }> {
+    try {
+      const { vendorId, page = 1, limit = 10, search, sortBy = 'createdAt', sortOrder = 'desc' } = params;
+
+      const query: any = { vendorId: new mongoose.Types.ObjectId(vendorId) };
+      if (search) {
+        query.layoutName = { $regex: search, $options: 'i' };
+      }
+
+      const skip = (page - 1) * limit;
+      const sort: { [key: string]: SortOrder } = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+
+      const [seatLayouts, totalCount] = await Promise.all([
+        SeatLayoutModel.find(query)
+          .sort(sort)
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        SeatLayoutModel.countDocuments(query),
+      ]);
+
+      return {
+        seatLayouts: seatLayouts.map(this.mapToEntity),
+        totalCount,
+      };
+    } catch (error) {
+      console.error('❌ Error fetching seat layouts:', error);
+      throw new Error('Failed to fetch seat layouts');
+    }
+  }
+
   async create(seatLayout: SeatLayout): Promise<SeatLayout> {
     try {
       const seatLayoutDoc = await SeatLayoutModel.findOneAndUpdate(
-        { uuid: seatLayout.uuid }, // Find by uuid
+        { uuid: seatLayout.uuid }, 
         {
           $set: {
             vendorId: seatLayout.vendorId,
@@ -69,7 +107,7 @@ export class SeatLayoutRepository implements ISeatLayoutRepository {
     try {
       // Check for existing UUIDs
       const uuids = seats.map((seat) => seat.uuid);
-      const existingSeats = await SeatModel.find({ uuid: { $in: uuids } }).select('uuid');
+      const existingSeats = await SeatModel.find({ uuid: { $in: uuids } }).select('uuid');    
       const existingUuids = new Set(existingSeats.map((seat) => seat.uuid));
 
       // Filter out seats with duplicate UUIDs

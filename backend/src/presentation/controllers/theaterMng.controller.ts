@@ -63,7 +63,10 @@ export class TheaterManagementController implements ITheaterManagementController
   getTheatersOfVendor = async (req: Request, res: Response): Promise<void> => {
     try {
       const { page, limit, search, status, location, sortBy, sortOrder } = req.query;
-      const vendorId = req.params.vendorId;
+      const vendorId = req.decoded?.userId; 
+      if (!vendorId) {
+        throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
+      }
 
       // Convert query parameters directly
       const params = {
@@ -79,6 +82,7 @@ export class TheaterManagementController implements ITheaterManagementController
 
       // Fetch theaters using the use case
       const result = await this.fetchTheaterUseCase.execute(params);
+      console.log("🚀 ~ TheaterManagementController ~ getTheatersOfVendor= ~ result:", result)
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       const errorMessage =

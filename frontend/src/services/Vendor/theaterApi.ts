@@ -105,7 +105,6 @@ interface FetchTheatersResponse {
 }
 
 export const fetchTheatersByVendor = async (params: {
-  vendorId: string;
   page?: number;
   limit?: number;
   search?: string;
@@ -113,8 +112,9 @@ export const fetchTheatersByVendor = async (params: {
   location?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-}): Promise<FetchTheatersResponse> => {
-  const response = await api.get(`${VENDOR_ENDPOINTS.fetchTheater}/${params.vendorId}`, { params });
+}): Promise<FetchTheatersResponse> =>  {
+  const response = await api.get(`${VENDOR_ENDPOINTS.fetchTheater}`, { params });
+  console.log("🚀 ~ response:", response)
   return response.data.data;
 };
 

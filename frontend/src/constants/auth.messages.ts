@@ -1,6 +1,6 @@
 export const AUTH_MESSAGES = {
     SESSION_EXPIRED: "Your session has expired. Please log in again.",
-    BLOCKED_ACCOUNT: "Your account is blocked. Please contact support.",
+    BLOCKED_ACCOUNT: "User is blocked, please contact support!",
     LOGIN_FAILED: "Login failed. Please check your credentials.",
     OTP_FAILED: "Failed to send or verify OTP. Please try again.",
     REFRESH_FAILED: "Failed to refresh token. Please log in again.",
@@ -11,5 +11,20 @@ export const AUTH_MESSAGES = {
 
 export const ERROR_MESSAGES = {
     FAILED_CREATE_LAYOUT: "Failed to create seat layout",
-    NETWORK_ERROR: "Network error. Please try again later.",    
+    NETWORK_ERROR: "Network error. Please try again later.",
+    CAUGHT_ERROR : "Caught an error:",
+    SOMETHING_WENT_WRONG : "Oops! Something went wrong.",
+    UNEXPECTED_ISSUE_TRY_AGAIN : "We've encountered an unexpected issue . Please try again later.",
+    SERVER_ERROR : "Server error, please try again",
+    UNAUTHORIZED_ERROR : "Unauthorized access. Please log in.",
+    INTERCEPTOR_REQUEST_ERROR : "INTERCEPTOR REQUEST ERROR : ",
+    INTERCEPTOR_RESPONSE_ERROR : "INTERCEPTOR RESPONSE ERROR : ",
+    TRAINER_APPLICATION_SUBMIT_ERROR : "There was an error submitting your application. Please try again.",
+    PAYMENT_ERROR : "Payment system error. Please try again.",
+    UPVOTE_ARTICLE_ERROR : "Error upvoting article:",
+    NOT_AN_IMAGE_ERROR : "Please upload an image file",
+    MAX_IMAGE_SIZE_ERROR : "Image size should be less than 5MB",
+    TIMEOUT_IMAGE_UPLOAD : "Image upload took too long. Please try again with a smaller image or check your internet connection.",
+    CREATING_SCREEN_FAILED : "Failed to create screen",
+    UPDATING_SCREEN_FAILED : "Failed to update screen",
 };

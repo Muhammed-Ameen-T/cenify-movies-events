@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   LogOut,
+  Monitor,
   Layout
 } from 'lucide-react';
 
@@ -159,7 +160,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
             submenuItems={[
               { path: '/vendor/events', label: 'All Events' },
               { path: '/vendor/create-event', label: 'Create Event' },
-              { path: '/vendor/event-categories', label: 'Categories' },
             ]}
           />
 
@@ -172,20 +172,47 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
             submenuItems={[
               { path: '/vendor/theaters', label: 'All Theaters' },
               { path: '/vendor/create-theater', label: 'Add Theater' },
-              { path: '/vendor/maintenance', label: 'Maintenance' },
             ]}
           />
 
           <NavItem
-            path="/shows"
+            path="/vendor/screens"
+            label="Screens"
+            icon={<Monitor size={20} />}
+            isCollapsed={!isOpen}
+            hasSubmenu
+            submenuItems={[
+              { path: '/vendor/screens', label: 'All Screens' },
+              { path: '/vendor/create-screens', label: 'Add Screen' },
+            ]}
+          />
+          <NavItem
+            path="/vendor/seats"
+            label="Seat Layouts"
+            icon={<Layout size={20} />}
+            isCollapsed={!isOpen}
+            hasSubmenu
+            submenuItems={[
+              { path: '/vendor/seats', label: 'All Seats' },
+              { path: '/vendor/create-seats', label: 'Add Seats' },
+            ]}
+          />
+
+          {/* <NavItem
+            path="/vendor/seats"
+            label="Seat Layouts"
+            icon={<Layout size={20} />}
+            isCollapsed={!isOpen}
+          /> */}
+          <NavItem
+            path="/vendor/shows"
             label="Shows"
             icon={<Film size={20} />}
             isCollapsed={!isOpen}
             hasSubmenu
             submenuItems={[
-              { path: '/shows', label: 'All Shows' },
-              { path: '/shows/create', label: 'Create Show' },
-              { path: '/shows/schedule', label: 'Schedule' },
+              { path: '/vendor/shows', label: 'All Shows' },
+              { path: '/vendor/create-show', label: 'Create Show' },
             ]}
           />
 
@@ -203,12 +230,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
             isCollapsed={!isOpen}
           />
 
-          <NavItem
-            path="/vendor/seats"
-            label="Seat Layout"
-            icon={<Layout size={20} />}
-            isCollapsed={!isOpen}
-          />
         </div>
 
         {isOpen && (

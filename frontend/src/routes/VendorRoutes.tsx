@@ -16,6 +16,8 @@ const EventDetails = lazy(() => import('../pages/Vendor/EventDetails.tsx'));
 const EventManagement = lazy(() => import('../pages/Vendor/Events.tsx'));
 import Appii from '../pages/Vendor/RealSeatLayoutPage.tsx';
 import SeatLayoutMain from '../pages/SeatLayout.tsx/MainSeat.tsx';
+import ScreenManagement from '../pages/Vendor/ScreenManagement.tsx';
+import CreateScreenForm from '../components/Vendor/CreateScreenForm.tsx';
 
 const VendorRoutes = () => {
   return (
@@ -31,6 +33,8 @@ const VendorRoutes = () => {
             <Route path="events-create" element={<VendorDashboard />} />
             <Route path="events" element={<EventManagement />} />
             <Route path="seats" element={<SeatLayoutMain />} />
+            <Route path="screens" element={<ScreenManagement />} />
+            <Route path="create-screens" element={<CreateScreenForm />} />
           </Route>
         </Route>
       </Routes>

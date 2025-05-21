@@ -4,8 +4,8 @@ import { env } from '../../config/env.config';
 export class JwtService {
   private accessSecret: string = env.ACCESS_TOKEN_SECRET;
   private refreshSecret: string = env.REFRESH_TOKEN_SECRET;
-  private accessExpiry: string = '50m';
-  private refreshExpiry: string = '1d';
+  private accessExpiry: string = env.ACCESS_TOKEN_EXPIRY;
+  private refreshExpiry: string = env.REFRESH_TOKEN_EXPIRY;
 
   /**
    * Generates an access token for authentication.

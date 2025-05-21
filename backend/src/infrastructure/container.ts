@@ -1,7 +1,6 @@
 // src/infrastructure/container.ts
 import { container } from 'tsyringe';
 import { UserModel } from './database/user.model';
-
 import { SendOtpUseCase } from '../application/useCases/userAuth/sendOtpUser.useCase';
 import { VerifyOtpUseCase } from '../application/useCases/userAuth/verifyOtpUser.useCase';
 import { GoogleAuthUseCase } from '../application/useCases/userAuth/googleAuth.useCase';
@@ -10,21 +9,17 @@ import { IGoogleAuthUseCase } from '../domain/interfaces/useCases/User/googleAut
 import { ISendOtpUseCase } from '../domain/interfaces/useCases/User/sentOtpUser.interface';
 import { IVerifyOtpUseCase } from '../domain/interfaces/useCases/User/verifyOtpUser.interface';
 import { ILoginUserUseCase } from '../domain/interfaces/useCases/User/loginUser.interface';
-
 import { AuthRepository } from './repositories/auth.repository';
 import { IAuthRepository } from '../domain/interfaces/repositories/userAuth.types';
 import { UserRepositoryImpl } from './repositories/user.repository';
-
 import { LoginAdminUseCase } from '../application/useCases/adminAuth/adminLogin.useCase';
 import { ILoginAdminUseCase } from '../domain/interfaces/useCases/Admin/adminLogin.interface';
-
 import { AdminAuthController } from '../presentation/controllers/adminAuth.controller';
 import { UserAuthController } from '../presentation/controllers/userAuth.controller';
 import { VendorAuthController } from '../presentation/controllers/vendorAuth.controller';
 import { IUserAuthController } from '../presentation/controllers/interface/userAuth.controller.interface';
 import { IVendorAuthController } from '../presentation/controllers/interface/vendorAuth.controller.interface';
 import { IAdminAuthController } from '../presentation/controllers/interface/adminAuth.controller.interface';
-
 import { FacebookService } from './services/facebook.service';
 import { RedisService } from './services/redis.service';
 import { JwtService } from './services/jwt.service';
@@ -87,6 +82,18 @@ import { IupdateUserProfileUseCase } from '../domain/interfaces/useCases/User/up
 import { updateUserProfileUseCase } from '../application/useCases/userProfile/updateUserProfile.useCase';
 import { IUserProfileController } from '../presentation/controllers/interface/userProfile.controller.interface';
 import { UserProfileController } from '../presentation/controllers/userProfile.controller';
+import { IScreenRepository } from '../domain/interfaces/repositories/screen.repository';
+import { ICreateScreenUseCase } from '../domain/interfaces/useCases/Vendor/createScreen.interface';
+import { IFetchScreensOfVendorUseCase } from '../domain/interfaces/useCases/Vendor/fetchScreenOfVendor.interface';
+import { FetchScreensOfVendorUseCase } from '../application/useCases/screenMng/fetchScreensOfVendor.useCase';
+import { UpdateScreenUseCase } from '../application/useCases/screenMng/updateScreen.useCase';
+import { ScreenRepository } from './repositories/screen.repository';
+import { CreateScreenUseCase } from '../application/useCases/screenMng/createScreen.useCase';
+import { IScreenManagementController } from '../presentation/controllers/interface/screenMng.controller.interface';
+import { IUpdateScreenUseCase } from '../domain/interfaces/useCases/Vendor/updateScreen.interface';
+import { ScreenManagementController } from '../presentation/controllers/screenMng.controller';
+import { IFindSeatLayoutsByVendorUseCase } from '../domain/interfaces/useCases/Vendor/fetchLayoutsVendor.interface';
+import { FindSeatLayoutsByVendorUseCase } from '../application/useCases/seatLayoutMng/fetchLayoutsVendor.useCase';
 
 //Controller Registration
 container.register<IUserAuthController>('UserAuthController', { useClass: UserAuthController });
@@ -151,10 +158,18 @@ container.register<IFetchTheaterOfVendorUseCase>('FetchTheaterOfVendorUseCase', 
 container.register<ICreateSeatLayoutUseCase>('CreateSeatLayoutUseCase', { useClass: CreateSeatLayoutUseCase });
 container.register<ISeatLayoutRepository>('SeatLayoutRepository', { useClass: SeatLayoutRepository});
 container.register<ISeatLayoutController>('SeatLayoutController', { useClass: SeatLayoutController });
+container.register<IFindSeatLayoutsByVendorUseCase>('FindSeatLayoutsByVendorUseCase', { useClass: FindSeatLayoutsByVendorUseCase });
 
-// User Profile UseCase Registration
+// User Profile UseCase,Controller Registration
 container.register<IupdateUserProfileUseCase>('UpdateUserProfileUseCase', { useClass: updateUserProfileUseCase });
 container.register<IgetUserDetailsUseCase>('GetUserDetailsUseCase', { useClass: getUserDetailsUseCase });
 container.register<IUserProfileController>('UserProfileController', { useClass: UserProfileController });
+
+// Screen Management UseCase, Controller, Repository Registration
+container.register<IScreenRepository>('ScreenRepository', { useClass: ScreenRepository });
+container.register<ICreateScreenUseCase>('CreateScreenUseCase', { useClass: CreateScreenUseCase });
+container.register<IFetchScreensOfVendorUseCase>('FetchScreensOfVendorUseCase', { useClass: FetchScreensOfVendorUseCase });
+container.register<IUpdateScreenUseCase>('UpdateScreenUseCase', { useClass: UpdateScreenUseCase });
+container.register<IScreenManagementController>('ScreenManagementController', { useClass: ScreenManagementController });
 
 export { container };

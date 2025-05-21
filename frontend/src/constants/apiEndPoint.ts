@@ -1,3 +1,5 @@
+import { fetchScreensByVendor } from "../services/Vendor/screenApi";
+
 export const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const USER_AUTH_ENDPOINTS = {
@@ -44,5 +46,10 @@ export const VENDOR_ENDPOINTS = {
   fetchTheater:`/vendor/fetch-theater`,
   updateTheater:`/vendor/update-theater`,
   createLayout:`/vendor/create-seat-layout`,
+  fetchSeatLayouts: `/vendor/fetch-seats`,
+  updateLayout: `/vendor/update-layout`,
   imageUpload: `https://api.cloudinary.com/v1_1/djqsehax7/image/upload`,  
+  fetchScreensByVendor: `/screen/fetch`,
+  createScreen: `/screen/create`,
+  updateScreen: `/screen/update`,
 };

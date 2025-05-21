@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, ObjectId } from 'mongoose';
+import mongoose, { Schema} from 'mongoose';
 import { IScreen } from '../../domain/interfaces/model/screen.interface';
 
 const ScreenSchema: Schema = new Schema(

@@ -8,7 +8,7 @@ import { env } from '../../config/env.config';
 import { JwtService } from '../../infrastructure/services/jwt.service';
 import { IAuthRepository } from '../../domain/interfaces/repositories/userAuth.types';
 
-const jwtService = container.resolve<JwtService>('JwtService'); 
+const jwtService = container.resolve<JwtService>('JwtService');
 
 declare global {
   namespace Express {
@@ -18,27 +18,16 @@ declare global {
   }
 }
 
-/**
- * Middleware to verify the access token from the request headers.
- * If the access token is expired, attempts to refresh it using the refresh token.
- * Attaches the decoded user information to `req.decoded` for further use in routes.
- * 
- * @param {Request} req - Express request object containing authorization header
- * @param {Response} res - Express response object for setting headers or returning errors
- * @param {NextFunction} next - Express next function to proceed to the next middleware or route handler
- */
 export const verifyAccessToken = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // Extract access token from Authorization header
     console.log('verifyAccessToken: Cookies received:', req.cookies);
     const authHeader = req.headers.authorization;
-    const accessToken = authHeader?.startsWith('Bearer ') 
-      ? authHeader.split(' ')[1] 
-      : null;
+    const accessToken = authHeader?.split(" ")[1];
+    console.log("🚀 ~ accessToken:", accessToken);
 
     if (!accessToken) {
       throw new CustomError(
@@ -54,13 +43,12 @@ export const verifyAccessToken = async (
         env.ACCESS_TOKEN_SECRET
       ) as IJwtDecoded;
 
-      // Attach decoded user data to request
       req.decoded = decoded;
       next();
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        // Handle expired access token
-        const refreshToken = req.cookies?.refreshToken;
+        const refreshToken = req.cookies.refreshToken;
+        console.log("🚀 ~ refreshToken:", refreshToken);
 
         if (!refreshToken) {
           throw new CustomError(
@@ -78,7 +66,7 @@ export const verifyAccessToken = async (
 
           // Fetch user details from the repository
           const authRepository = container.resolve<IAuthRepository>('AuthRepository');
-          const user = await authRepository.findByEmail(decodedRefresh.email);
+          const user = await authRepository.findById(decodedRefresh.userId);
 
           if (!user) {
             throw new CustomError(
@@ -87,7 +75,6 @@ export const verifyAccessToken = async (
             );
           }
 
-          // Check if user is blocked
           if (user.isBlocked) {
             throw new CustomError(
               HttpResMsg.USER_BLOCKED,
@@ -95,8 +82,11 @@ export const verifyAccessToken = async (
             );
           }
 
-          // Generate new access token
-          const newAccessToken = jwtService.generateAccessToken(user._id.toString(), user.role);
+          // Generate new access token with userId and role
+          const newAccessToken = jwtService.generateAccessToken(
+            user._id.toString(),
+            user.role
+          );
 
           // Set new access token in response header
           res.setHeader('x-access-token', newAccessToken);
@@ -104,12 +94,7 @@ export const verifyAccessToken = async (
           req.decoded = decodedRefresh;
           next();
         } catch (refreshError) {
-          if (error instanceof jwt.TokenExpiredError) {
-            console.log('Refresh token expired');
-          }else{
-            console.log('Invalid refresh token');
-          }
-
+          console.error('Refresh token error:', refreshError);
           throw new CustomError(
             HttpResMsg.INVALID_OR_EXPIRED_REFRESH_TOKEN,
             HttpResCode.UNAUTHORIZED
