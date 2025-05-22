@@ -7,10 +7,14 @@ import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import mongoose from 'mongoose';
+import { ITheaterRepository } from '../../../domain/interfaces/repositories/theater.repository';
 
 @injectable()
 export class CreateScreenUseCase implements ICreateScreenUseCase {
-  constructor(@inject('ScreenRepository') private screenRepository: IScreenRepository) {}
+  constructor(
+    @inject('ScreenRepository') private screenRepository: IScreenRepository,
+    @inject('TheaterRepository') private theaterRepository: ITheaterRepository
+  ) {}
 
   async execute(dto: CreateScreenDTO): Promise<Screen> {
     const newScreen = new Screen(
@@ -30,10 +34,16 @@ export class CreateScreenUseCase implements ICreateScreenUseCase {
       );
     }
 
+    
     console.log("🚀 ~ CreateScreenUseCase ~ execute ~ newScreen:", newScreen);
-
+    
     try {
       const savedScreen = await this.screenRepository.create(newScreen);
+      await this.theaterRepository.updateScreens(
+        savedScreen.theaterId?.toString() || '',
+        savedScreen._id?.toString() || '',
+        'push'
+      );
       return savedScreen;
     } catch (error) {
       throw new CustomError(

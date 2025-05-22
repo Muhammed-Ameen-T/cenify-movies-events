@@ -1,70 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-// Interface for Seat
-export interface ISeat extends Document {
-  number: string;
-  type: 'VIP' | 'Regular' | 'Premium';
-  price: number;
-  position: { row: number; col: number };
-}
-
-// Seat Schema
-const SeatSchema = new Schema<ISeat>({
-  number: { type: String, required: true },
-  type: { type: String, enum: ['VIP', 'Regular', 'Premium'], required: true },
-  price: { type: Number, required: true },
-  position: {
-    row: { type: Number, required: true },
-    col: { type: Number, required: true },
-  },
-});
-
-// Interface for Seat Layout
-export interface ISeatLayout extends Document {
-  vendorId: mongoose.Types.ObjectId;
-  layoutName: string;
-  seatPrice:{regular: number; premium: number; vip: number};
-  capacity: number; 
-  seats: ISeat[][]; 
-}
-
-// Seat Layout Schema
-const SeatLayoutSchema = new Schema<ISeatLayout>({
-  vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor', required: true, index: true },
-  layoutName: { type: String, required: true },
-  seatPrice: { regular: { type: Number, required: true }, premium: { type: Number, required: true }, vip: { type: Number, required: true } },
-  capacity: { type: Number, required: true },
-  seats: { type: [[SeatSchema]], required: true },
-});
-
-// Interface for Screen
-export interface IScreen extends Document {
-  seatLayoutId: mongoose.Types.ObjectId;
-  theaterId: mongoose.Types.ObjectId;
-  vendorId: mongoose.Types.ObjectId;
-  filledTimes: {
-    startTime: Date;
-    endTime: Date;
-    showId: mongoose.Types.ObjectId;
-  }[];
-  amenities: string[];
-}
-
-// Screen Schema
-const ScreenSchema = new Schema<IScreen>({
-  seatLayoutId: { type: Schema.Types.ObjectId, ref: 'SeatLayout', required: true },
-  theaterId: { type: Schema.Types.ObjectId, ref: 'Theater', required: true, index: true },
-  vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor', required: true, index: true },
-  filledTimes: [
-    {
-      startTime: { type: Date, required: true },
-      endTime: { type: Date, required: true },
-      showId: { type: Schema.Types.ObjectId, ref: 'Shows', required: true },
-    },
-  ],
-  amenities: { type: [String], default: [] },
-});
-
 // Interface for Show
 export interface IShow extends Document {
   showTime: Date;
@@ -101,8 +36,4 @@ const ShowSchema = new Schema<IShow>({
   ],
 });
 
-// Model Exports
-export const Seat = mongoose.model<ISeat>('Seat', SeatSchema);
-export const SeatLayout = mongoose.model<ISeatLayout>('SeatLayout', SeatLayoutSchema);
-export const Screen = mongoose.model<IScreen>('Screen', ScreenSchema);
 export const Show = mongoose.model<IShow>('Show', ShowSchema);

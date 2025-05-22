@@ -7,6 +7,7 @@ import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.
 import { env } from '../../config/env.config';
 import { JwtService } from '../../infrastructure/services/jwt.service';
 import { IAuthRepository } from '../../domain/interfaces/repositories/userAuth.types';
+import { IUserRepository } from '../../domain/interfaces/repositories/user.repository';
 
 const jwtService = container.resolve<JwtService>('JwtService');
 
@@ -65,8 +66,8 @@ export const verifyAccessToken = async (
           ) as IJwtDecoded;
 
           // Fetch user details from the repository
-          const authRepository = container.resolve<IAuthRepository>('AuthRepository');
-          const user = await authRepository.findById(decodedRefresh.userId);
+          const userRepository = container.resolve<IUserRepository>('IUserRepository');
+          const user = await userRepository.findById(decodedRefresh.userId);
 
           if (!user) {
             throw new CustomError(

@@ -7,36 +7,32 @@ import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import mongoose, { Types } from 'mongoose';
+import { ITheaterRepository } from '../../../domain/interfaces/repositories/theater.repository';
 
 @injectable()
 export class UpdateScreenUseCase implements IUpdateScreenUseCase {
-  constructor(@inject('ScreenRepository') private screenRepository: IScreenRepository) {}
+  constructor(
+    @inject('ScreenRepository') private screenRepository: IScreenRepository,
+    @inject('TheaterRepository') private theaterRepository: ITheaterRepository,
+  ) {}
 
   async execute(id: string, dto: UpdateScreenDTO): Promise<Screen> {
     try {
       const existingScreen = await this.screenRepository.findById(id);
+      console.log("🚀 ~ UpdateScreenUseCase ~ execute ~ existingScreen:", existingScreen)
       if (!existingScreen) {
-        throw new CustomError(
-          ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND,
-          HttpResCode.NOT_FOUND
-        );
+        throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
       }
 
-      const existingScreenName = await this.screenRepository.findScreenByName(dto.name,dto.theaterId,id);
-      if(existingScreenName){
-        throw new CustomError(
-          ERROR_MESSAGES.VALIDATION.SCREEN_NAME_ALREADY_EXISTS,
-          HttpResCode.BAD_REQUEST
-        );
+      const existingScreenName = await this.screenRepository.findScreenByName(dto.name, dto.theaterId, id);
+      if (existingScreenName) {
+        throw new CustomError(ERROR_MESSAGES.VALIDATION.SCREEN_NAME_ALREADY_EXISTS, HttpResCode.BAD_REQUEST);
       }
 
       let theaterId: Types.ObjectId | null = existingScreen.theaterId;
-      if (dto.theaterId) {
+      if (dto.theaterId && dto.theaterId !== existingScreen.theaterId?.toString()) {
         if (!mongoose.Types.ObjectId.isValid(dto.theaterId)) {
-          throw new CustomError(
-            ERROR_MESSAGES.VALIDATION.INVALID_THEATER_ID,
-            HttpResCode.BAD_REQUEST
-          );
+          throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_THEATER_ID, HttpResCode.BAD_REQUEST);
         }
         theaterId = new mongoose.Types.ObjectId(dto.theaterId);
       }
@@ -44,13 +40,12 @@ export class UpdateScreenUseCase implements IUpdateScreenUseCase {
       let seatLayoutId: Types.ObjectId | null = existingScreen.seatLayoutId;
       if (dto.seatLayoutId) {
         if (!mongoose.Types.ObjectId.isValid(dto.seatLayoutId)) {
-          throw new CustomError(
-            ERROR_MESSAGES.VALIDATION.INVALID_SEAT_LAYOUT_ID,
-            HttpResCode.BAD_REQUEST
-          );
+          throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_SEAT_LAYOUT_ID, HttpResCode.BAD_REQUEST);
         }
         seatLayoutId = new mongoose.Types.ObjectId(dto.seatLayoutId);
       }
+
+      const oldTheaterId = existingScreen.theaterId?._id.toString() || '';
 
       const updatedScreen = new Screen(
         id,
@@ -68,15 +63,19 @@ export class UpdateScreenUseCase implements IUpdateScreenUseCase {
       );
 
       const savedScreen = await this.screenRepository.updateScreenDetails(updatedScreen);
+      console.log("🚀 ~ UpdateScreenUseCase ~ execute ~ savedScreen:", savedScreen)
+
+      if (oldTheaterId !== savedScreen.theaterId?._id.toString()) {
+        await this.theaterRepository.updateScreens(oldTheaterId, savedScreen._id?.toString() || '', 'pull'); 
+        await this.theaterRepository.updateScreens(savedScreen.theaterId?._id.toString() || '', savedScreen._id?.toString() || '', 'push'); 
+      }
+
       return savedScreen;
     } catch (error) {
       if (error instanceof CustomError) {
         throw error;
       }
-      throw new CustomError(
-        ERROR_MESSAGES.DATABASE.FAILED_UPDATING_RECORD,
-        HttpResCode.INTERNAL_SERVER_ERROR
-      );
+      throw new CustomError(ERROR_MESSAGES.DATABASE.FAILED_UPDATING_RECORD, HttpResCode.INTERNAL_SERVER_ERROR);
     }
   }
 }

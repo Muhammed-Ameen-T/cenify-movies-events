@@ -8,6 +8,7 @@ export interface ITheaterRepository {
   updateTheaterDetails(Theater: Theater): Promise<Theater>;
   findTheaters(): Promise<Theater[]>;
   findEvents(): Promise<Theater[]>; 
+  updateScreens(theaterId: string, screenId: string, action: 'push' | 'pull'): Promise<Theater|null>; 
   findTheatersByVendor(params: { 
     vendorId: string; 
     page?: number; 

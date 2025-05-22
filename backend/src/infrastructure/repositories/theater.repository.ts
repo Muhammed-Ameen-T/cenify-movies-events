@@ -2,7 +2,7 @@ import { Theater } from '../../domain/entities/theater.entity';
 import { ITheaterRepository } from '../../domain/interfaces/repositories/theater.repository';
 import { TheaterModel } from '../database/theater.model'
 import { ITheater } from '../../domain/interfaces/model/thaeter.interface';
-import { ObjectId } from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 
 export class TheaterRepository implements ITheaterRepository {
   // Create a new Theater in the database
@@ -119,6 +119,31 @@ export class TheaterRepository implements ITheaterRepository {
     const theaterDocs = await TheaterModel.find({ accountType: 'event' });
     return theaterDocs.map((doc) => this.mapToEntity(doc));
   }
+
+  async updateScreens(theaterId: string, screenId: string, action: 'push' | 'pull'): Promise<Theater | null> {
+    console.log("🚀 ~ TheaterRepository ~ updateScreens ~ action:", action)
+    console.log("🚀 ~ TheaterRepository ~ updateScreens ~ screenId:", screenId)
+    console.log("🚀 ~ TheaterRepository ~ updateScreens ~ theaterId:", theaterId)
+    try {
+      const updateQuery = action === 'push' 
+        ? { $addToSet: { screens: screenId } } 
+        : { $pull: { screens: screenId } }; 
+
+      const updatedTheater = await TheaterModel.findByIdAndUpdate(
+        theaterId,
+        updateQuery,
+        { new: true } 
+      ).lean();
+
+      if (!updatedTheater) throw new Error('Theater not found');
+      
+      return this.mapToEntity(updatedTheater);
+    } catch (error) {
+      console.error(`❌ Error ${action === 'push' ? 'adding' : 'removing'} screen:`, error);
+      throw new Error(`Failed to ${action === 'push' ? 'add' : 'remove'} screen from theater`);
+    }
+  }
+
 
 
   async findTheatersByVendor(params: {
