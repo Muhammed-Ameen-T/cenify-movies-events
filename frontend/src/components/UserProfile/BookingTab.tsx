@@ -385,7 +385,21 @@ const BookingsTab: React.FC<BookingsTabProps> = ({ initialBookings = [] }) => {
                           : 'border-gray-200/50 group-hover:border-gray-300/70'
                       }`}
                     >
-                      <div className="absolute top-4 right-4">
+                      <div className="absolute top-4 right-4 flex gap-4">
+                      {booking.paymentStatus === 'pending' && (
+                        <div
+                          className="text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 relative group bg-yellow-100 text-yellow-800 border border-yellow-300"
+                        >
+                          <X className="w-3 h-3 text-yellow-800" />
+                          Payment Pending
+
+                          {/* Tooltip */}
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-max bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            Booking will cancel if payment isn't completed.
+                          </div>
+                        </div>
+                      )}
+
                         <div
                           className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 ${
                             booking.status === 'confirmed'

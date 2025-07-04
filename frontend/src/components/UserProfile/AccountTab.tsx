@@ -456,7 +456,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
           <div className="space-y-4">
             {[
               { label: 'Change Password', desc: 'Update your account password', icon: Lock, action: onChangePassword, color: 'blue' },
-              { label: 'Delete Account', desc: 'Permanently remove your account', icon: Trash2, action: () => {}, color: 'red' },
+              // { label: 'Delete Account', desc: 'Permanently remove your account', icon: Trash2, action: () => {}, color: 'red' },
             ].map((item, index) => {
               const IconComponent = item.icon;
               return (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Film, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Film, Check, } from 'lucide-react';
 
 const PricingCard: React.FC = () => {
   const [showFAQ, setShowFAQ] = useState(false);

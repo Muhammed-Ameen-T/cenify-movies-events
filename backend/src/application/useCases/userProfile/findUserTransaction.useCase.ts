@@ -25,11 +25,11 @@ export class FindUserWalletTransactionsUseCase implements IFindUserWalletTransac
   }> {
     try {
       const result = await this.walletRepository.findTransactionsByUserId(userId, page, limit, filter);
-      if (!result.transactions.length && result.total === 0) {
-        throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
-      }
+      // if (!result.transactions.length && result.total === 0) {
+        
+      // }
       // Map raw transactions to domain Transaction entity
-      const transactions: Transaction[] = result.transactions.map((t: any) => new Transaction(
+      const transactions: Transaction[] = result?.transactions.map((t: any) => new Transaction(
         t.id,
         t.amount,
         t.type,

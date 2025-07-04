@@ -35,13 +35,13 @@ app.use(cookieParser());
 app.use(express.json());
 
 
-// app.use(
-//   helmet({
-//     crossOriginOpenerPolicy: { policy: "unsafe-none" },
-//     crossOriginResourcePolicy: { policy: "cross-origin" },
-//     crossOriginEmbedderPolicy: { policy: "require-corp" },
-//   })
-// );
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: { policy: "unsafe-none" },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginEmbedderPolicy: { policy: "require-corp" },
+  })
+);
 
 // 🔹 Routes
 import vendorRoutes from './presentation/routes/vendorAuth.routes';

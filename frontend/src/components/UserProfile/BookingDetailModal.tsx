@@ -113,14 +113,29 @@ const BookingDetailModal: React.FC<BookingDetailModalProps> = ({ booking, onClos
                 <div className="flex items-center gap-2 mb-3">
                   <CreditCard className="w-5 h-5 text-yellow-600" />
                   <span className="font-bold text-yellow-800">Payment</span>
-                  {booking.status=='cancelled' &&
+                  {booking.status=='cancelled' && booking.paymentStatus=='completed'?(
                     <span className="inline-block text-xs font-medium px-2 py-1 bg-green-100 text-green-800 rounded-full">
                       Refunded
                     </span>
-                  } 
+                  ):(
+                    <span className=""></span>
+                  )} 
+                  {booking.paymentStatus == 'pending' && (
+                    <div
+                      className="text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 relative group bg-yellow-100 text-yellow-800 border border-yellow-300"
+                    >
+                      <X className="w-3 h-3 text-yellow-800" />
+                      Pending
+
+                      {/* Tooltip */}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-max bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        Booking will cancel if payment isn't completed.
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {booking.status=='cancelled'?(
+                {booking.status=='cancelled' && booking.paymentStatus=='completed' ?(
                   <div className='flex'>
                     <p className="text-gray-900 font-semibold">Refund Amount</p>  
                     <span className='text-xs mt-1 ml-1'>(15% Charge)</span>
@@ -129,7 +144,7 @@ const BookingDetailModal: React.FC<BookingDetailModalProps> = ({ booking, onClos
                   <p className="text-gray-900 font-semibold">Total Amount</p> 
                 )}
 
-                {booking.status=='cancelled'?(
+                {booking.status=='cancelled' && booking.paymentStatus=='completed'?(
                   <>
                     <p className="text-yellow-600 font-bold text-lg">
                       {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(booking.totalAmount)}
