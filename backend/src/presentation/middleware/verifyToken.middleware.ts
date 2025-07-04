@@ -19,75 +19,47 @@ declare global {
   }
 }
 
-export const verifyAccessToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const verifyAccessToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log('verifyAccessToken: Cookies received:', req.cookies);
     const authHeader = req.headers.authorization;
-    const accessToken = authHeader?.split(" ")[1];
-    console.log("🚀 ~ accessToken:", accessToken);
+    const accessToken = authHeader?.split(' ')[1];
 
     if (!accessToken) {
-      throw new CustomError(
-        HttpResMsg.NO_ACCESS_TOKEN,
-        HttpResCode.UNAUTHORIZED
-      );
+      throw new CustomError(HttpResMsg.NO_ACCESS_TOKEN, HttpResCode.UNAUTHORIZED);
     }
 
     try {
       // Verify access token
-      const decoded = jwt.verify(
-        accessToken,
-        env.ACCESS_TOKEN_SECRET
-      ) as IJwtDecoded;
+      const decoded = jwt.verify(accessToken, env.ACCESS_TOKEN_SECRET) as IJwtDecoded;
 
       req.decoded = decoded;
       next();
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         const refreshToken = req.cookies.refreshToken;
-        console.log("🚀 ~ refreshToken:", refreshToken);
 
         if (!refreshToken) {
-          throw new CustomError(
-            HttpResMsg.REFRESH_TOKEN_REQUIRED,
-            HttpResCode.UNAUTHORIZED
-          );
+          throw new CustomError(HttpResMsg.REFRESH_TOKEN_REQUIRED, HttpResCode.UNAUTHORIZED);
         }
 
         try {
           // Verify refresh token
-          const decodedRefresh = jwt.verify(
-            refreshToken,
-            env.REFRESH_TOKEN_SECRET
-          ) as IJwtDecoded;
+          const decodedRefresh = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET) as IJwtDecoded;
 
           // Fetch user details from the repository
           const userRepository = container.resolve<IUserRepository>('IUserRepository');
           const user = await userRepository.findById(decodedRefresh.userId);
 
           if (!user) {
-            throw new CustomError(
-              HttpResMsg.USER_NOT_FOUND,
-              HttpResCode.UNAUTHORIZED
-            );
+            throw new CustomError(HttpResMsg.USER_NOT_FOUND, HttpResCode.UNAUTHORIZED);
           }
 
           if (user.isBlocked) {
-            throw new CustomError(
-              HttpResMsg.USER_BLOCKED,
-              HttpResCode.FORBIDDEN
-            );
+            throw new CustomError(HttpResMsg.USER_BLOCKED, HttpResCode.FORBIDDEN);
           }
 
           // Generate new access token with userId and role
-          const newAccessToken = jwtService.generateAccessToken(
-            user._id.toString(),
-            user.role
-          );
+          const newAccessToken = jwtService.generateAccessToken(user._id.toString(), user.role);
 
           // Set new access token in response header
           res.setHeader('x-access-token', newAccessToken);
@@ -98,14 +70,11 @@ export const verifyAccessToken = async (
           console.error('Refresh token error:', refreshError);
           throw new CustomError(
             HttpResMsg.INVALID_OR_EXPIRED_REFRESH_TOKEN,
-            HttpResCode.UNAUTHORIZED
+            HttpResCode.UNAUTHORIZED,
           );
         }
       } else {
-        throw new CustomError(
-          HttpResMsg.INVALID_ACCESS_TOKEN,
-          HttpResCode.UNAUTHORIZED
-        );
+        throw new CustomError(HttpResMsg.INVALID_ACCESS_TOKEN, HttpResCode.UNAUTHORIZED);
       }
     }
   } catch (error) {

@@ -8,7 +8,7 @@ import { useMutation, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import BackButton from '../Buttons/BackButton';
 import { createScreen } from '../../services/Vendor/screenApi';
-import { fetchSeatLayouts } from '../../services/Vendor/seatLayoutApi';
+import { fetchSeatLayoutsVendorCreateScreen } from '../../services/Vendor/seatLayoutApi';
 import { fetchTheatersByVendor } from '../../services/Vendor/theaterApi';
 import { screenFormSchema } from '../../types/screen';
 import '../../style/scroll.css';
@@ -119,10 +119,10 @@ const CreateScreenForm: React.FC = () => {
 
   // Query for seat layouts
   const { data: seatLayouts, isLoading: isLoadingLayouts } = useQuery({
-    queryKey: ['seatLayouts'],
-    queryFn: fetchSeatLayouts,
+    queryKey: ['fetchSeatLayoutsVendorCreateScreen'],
+    queryFn: fetchSeatLayoutsVendorCreateScreen,
   });
-
+  console.log("🚀 ~ seatLayouts:", seatLayouts)
   // Flatten theater data
   const theaters = theaterData?.pages.flatMap((page) => page.theaters) || [];
 
@@ -334,7 +334,7 @@ const CreateScreenForm: React.FC = () => {
                         }`}
                       >
                         <img
-                          src={theater.gallery?.[0] || '/placeholder-image.jpg'}
+                          src={theater.gallery?.[1] || '/placeholder-image.jpg'}
                           alt={theater.name}
                           className="w-full h-24 object-cover rounded-md mb-2"
                           onError={(e) => {

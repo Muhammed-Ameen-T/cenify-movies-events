@@ -11,5 +11,6 @@ import logger from '../../utils/logger.utils';
  */
 export function requestLogger(req: Request, res: Response, next: NextFunction) {
   logger.info(`${req.method} ${req.url}`);
+  console.log(req.headers);
   next();
 }

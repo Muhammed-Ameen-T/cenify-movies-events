@@ -11,7 +11,7 @@ export interface CreateScreenDTO {
 
 export interface UpdateScreenDTO {
   name?: string;
-  theaterId?: string; 
+  theaterId?: string;
   seatLayoutId?: string;
   amenities: {
     is3D: boolean;

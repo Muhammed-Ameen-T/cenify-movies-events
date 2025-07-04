@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Button from '../ui/Button';
 import { Screen, ScreenUpdateFormData, screenUpdateSchema } from '../../types/screen';
 import { fetchTheatersByVendor } from '../../services/Vendor/theaterApi';
-import { fetchSeatLayouts } from '../../services/Vendor/seatLayoutApi';
+import { fetchSeatLayoutsVendorCreateScreen } from '../../services/Vendor/seatLayoutApi';
 import { useQuery } from '@tanstack/react-query';
 
 // Shimmer component for loading state
@@ -40,7 +40,6 @@ const UpdateScreenModal: React.FC<UpdateScreenModalProps> = ({
   onSubmit,
   isLoading,
 }) => {
-  const vendorId = '68136be091d98d82eb9e9947';
   const [selectedTheater, setSelectedTheater] = useState<string | null>(screen.theaterId?._id || null);
   const [selectedLayout, setSelectedLayout] = useState<string | null>(screen.seatLayoutId?._id || null);
 
@@ -69,7 +68,7 @@ const UpdateScreenModal: React.FC<UpdateScreenModalProps> = ({
   // Fetch seat layouts
   const { data: seatLayouts, isLoading: isSeatLayoutsLoading } = useQuery({
     queryKey: ['seatLayouts'],
-    queryFn: () => fetchSeatLayouts(),
+    queryFn: () => fetchSeatLayoutsVendorCreateScreen({}),
   });
 
   useEffect(() => {
@@ -170,6 +169,43 @@ const UpdateScreenModal: React.FC<UpdateScreenModalProps> = ({
                   </p>
                 )}
               </div>
+              <div>
+                <label className="text-sm font-medium text-gray-300">Select Seat Layout</label>
+                <input type="hidden" {...register('seatLayoutId')} />
+                {isSeatLayoutsLoading ? (
+                  <Shimmer />
+                ) : (
+                  <div className="h-64 overflow-y-auto p-4">
+                    <div className="grid grid-cols-2 gap-4 mt-2">
+                      {seatLayouts?.length > 0 ? (
+                        seatLayouts.map((layout: any) => (
+                          <div
+                            key={layout._id}
+                            onClick={() => handleLayoutSelect(layout._id)}
+                            className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                              selectedLayout === layout._id
+                                ? 'border-indigo-500 bg-indigo-600/20'
+                                : 'border-gray-700 bg-gray-800/50 hover:bg-gray-700'
+                            }`}
+                          >
+                            <p className="text-sm text-white">{layout.layoutName}</p>
+                            <p className="text-xs text-gray-400">Capacity: {layout.capacity}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-red-400 text-sm">
+                          No seat layouts available. Please create a seat layout first.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {errors.seatLayoutId && (
+                  <p className="text-red-400 text-xs mt-1" role="alert">
+                    {errors.seatLayoutId.message}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="space-y-6">
               <div>
@@ -191,7 +227,7 @@ const UpdateScreenModal: React.FC<UpdateScreenModalProps> = ({
                           }`}
                         >
                           <img
-                            src={theater.gallery?.[0] || '/placeholder-image.jpg'}
+                            src={theater.gallery?.[1] || '/placeholder-image.jpg'}
                             alt={theater.name}
                             className="w-full h-24 object-cover rounded-md mb-2"
                             onError={(e) => {
@@ -212,41 +248,6 @@ const UpdateScreenModal: React.FC<UpdateScreenModalProps> = ({
                 {errors.theaterId && (
                   <p className="text-red-400 text-xs mt-1" role="alert">
                     {errors.theaterId.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-300">Select Seat Layout</label>
-                <input type="hidden" {...register('seatLayoutId')} />
-                {isSeatLayoutsLoading ? (
-                  <Shimmer />
-                ) : (
-                  <div className="grid grid-cols-2 gap-4 mt-2">
-                    {seatLayouts?.length > 0 ? (
-                      seatLayouts.map((layout: any) => (
-                        <div
-                          key={layout._id}
-                          onClick={() => handleLayoutSelect(layout._id)}
-                          className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                            selectedLayout === layout._id
-                              ? 'border-indigo-500 bg-indigo-600/20'
-                              : 'border-gray-700 bg-gray-800/50 hover:bg-gray-700'
-                          }`}
-                        >
-                          <p className="text-sm text-white">{layout.layoutName}</p>
-                          <p className="text-xs text-gray-400">Capacity: {layout.capacity}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-red-400 text-sm">
-                        No seat layouts available. Please create a seat layout first.
-                      </p>
-                    )}
-                  </div>
-                )}
-                {errors.seatLayoutId && (
-                  <p className="text-red-400 text-xs mt-1" role="alert">
-                    {errors.seatLayoutId.message}
                   </p>
                 )}
               </div>

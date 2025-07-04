@@ -7,7 +7,7 @@ export const mockUser: UserProfile = {
   phone: "+1 (555) 123-4567",
   dateOfBirth: "1992-05-15",
   joinedDate: "2023-02-10",
-  loyaltyPoints: 1250,
+  loyalityPoints: 1250,
   profileImage: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg"
 };
 

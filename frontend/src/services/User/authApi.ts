@@ -3,6 +3,7 @@ import { AUTH_MESSAGES } from "../../constants/auth.messages";
 import { USER_AUTH_ENDPOINTS } from "../../constants/apiEndPoint"
 import { AuthResponse } from "../../store/types/auth.type";
 import { handleAxiosError } from "../../utils/exios-error-handler";
+import axios from "axios";
 // export interface AuthResponse {
 //   accessToken: string;
 //   user: {

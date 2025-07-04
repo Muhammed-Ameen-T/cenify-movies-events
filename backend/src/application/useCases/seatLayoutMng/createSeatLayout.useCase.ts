@@ -11,7 +11,11 @@ import { SuccessMsg } from '../../../utils/constants/commonSuccessMsg.constants'
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { z } from 'zod';
 import { Seat, SeatLayout } from '../../../domain/entities/seatLayout.entity';
-import { CreateSeatLayoutDTO, CreateSeatLayoutDTOSchema, CreateSeatLayoutDTOType } from '../../dtos/seatLayout';
+import {
+  CreateSeatLayoutDTO,
+  CreateSeatLayoutDTOSchema,
+  CreateSeatLayoutDTOType,
+} from '../../dtos/seatLayout';
 import SeatLayoutModel from '../../../infrastructure/database/seatLayout.model';
 
 // Utility function to normalize seat types
@@ -33,7 +37,9 @@ const normalizeSeatType = (type: string): 'Regular' | 'Premium' | 'VIP' | 'Unava
 
 @injectable()
 export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
-  constructor(@inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository) {}
+  constructor(
+    @inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository,
+  ) {}
 
   async execute(dto: CreateSeatLayoutDTO, res: Response): Promise<void> {
     try {
@@ -54,14 +60,17 @@ export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
 
       const capacity = validatedData.seats.filter((seat) => seat.type !== 'Unavailable').length;
       if (capacity !== validatedData.capacity) {
-        throw new CustomError(`Capacity mismatch: expected ${capacity}, got ${validatedData.capacity}`, 400);
+        throw new CustomError(
+          `Capacity mismatch: expected ${capacity}, got ${validatedData.capacity}`,
+          400,
+        );
       }
 
       // Validate seat count
       if (validatedData.seats.length !== validatedData.rowCount * validatedData.columnCount) {
         throw new CustomError(
           `Seat count mismatch: expected ${validatedData.rowCount * validatedData.columnCount}, got ${validatedData.seats.length}`,
-          400
+          400,
         );
       }
 
@@ -77,7 +86,7 @@ export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
         validatedData.rowCount,
         validatedData.columnCount,
         new Date(),
-        new Date()
+        new Date(),
       );
 
       // Create or update SeatLayout document
@@ -88,25 +97,24 @@ export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
 
       // Map seats with correct seatLayoutId
       const seats = validatedData.seats.map((seat) => {
-        const normalizedType = seat.type.toLowerCase() as 'regular' | 'premium' | 'vip' | 'unavailable';
+        const normalizedType = seat.type.toLowerCase() as
+          | 'regular'
+          | 'premium'
+          | 'vip'
+          | 'unavailable';
         const type = seat.type as 'Regular' | 'Premium' | 'VIP' | 'Unavailable';
-        const price = normalizedType === 'unavailable' ? 0 : validatedData.seatPrice[normalizedType as 'regular' | 'premium' | 'vip'];
+        const price =
+          normalizedType === 'unavailable'
+            ? 0
+            : validatedData.seatPrice[normalizedType as 'regular' | 'premium' | 'vip'];
         if (price === undefined) {
           throw new CustomError(`Invalid price for seat type: ${seat.type}`, 400);
         }
 
-        return new Seat(
-          null,
-          seat.uuid,
-          savedSeatLayout._id!,
-          seat.number,
-          type,
-          price,
-          {
-            row: seat.position.row,
-            col: seat.position.col,
-          }
-        );
+        return new Seat(null, seat.uuid, savedSeatLayout._id!, seat.number, type, price, {
+          row: seat.position.row,
+          col: seat.position.col,
+        });
       });
 
       // Create Seat documents
@@ -116,7 +124,7 @@ export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
       // Update SeatLayout with seatIds
       await SeatLayoutModel.updateOne(
         { _id: savedSeatLayout._id },
-        { seatIds: seatLayout.seatIds }
+        { seatIds: seatLayout.seatIds },
       );
 
       // Prepare response
@@ -138,14 +146,18 @@ export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
 
       sendResponse(res, HttpResCode.OK, SuccessMsg.SEAT_LAYOUT_CREATED, responseData);
     } catch (error) {
-      console.error("🚀 ~ CreateSeatLayoutUseCase ~ execute ~ error:", error);
+      console.error('🚀 ~ CreateSeatLayoutUseCase ~ execute ~ error:', error);
       if (error instanceof z.ZodError) {
         sendResponse(res, HttpResCode.BAD_REQUEST, error.errors.map((e) => e.message).join(', '));
         return;
       }
       const errorMessage =
         error instanceof CustomError ? error.message : 'Failed to create seat layout';
-      sendResponse(res, error instanceof CustomError ? error.statusCode : HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+      sendResponse(
+        res,
+        error instanceof CustomError ? error.statusCode : HttpResCode.INTERNAL_SERVER_ERROR,
+        errorMessage,
+      );
     }
   }
 }

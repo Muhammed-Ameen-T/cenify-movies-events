@@ -7,6 +7,7 @@ export interface IUserRepository {
   findByAuthId(authId: string): Promise<User | null>;
   create(user: User): Promise<User>;
   update(user: User): Promise<User>;
+  updateMoviePass(userId: string, moviePass: any): Promise<User>;
   updatePassword(email: string, password: string): Promise<User>;
   findUsers(params: {
     page: number;
@@ -17,10 +18,14 @@ export interface IUserRepository {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{
-      hasPrevPage: boolean;
-      hasNextPage: boolean;
-      currentPage: number;
-      totalPages: number; users: User[]; totalCount: number 
-}>;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+    currentPage: number;
+    totalPages: number;
+    users: User[];
+    totalCount: number;
+  }>;
   updateBlockStatus(id: string, isBlocked: boolean): Promise<void>;
+  updatePasswordById(userId: string, password: string): Promise<User>;
+  incrementLoyalityPoints(userId: string, seatCount: number): Promise<User>;
 }

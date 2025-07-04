@@ -20,12 +20,11 @@ export class FetchScreensOfVendorUseCase implements IFetchScreensOfVendorUseCase
   }): Promise<{ screens: any[]; totalCount: number }> {
     try {
       const result = await this.screenRepository.findScreensByVendor(params);
-      console.log("🚀 ~ FetchScreensOfVendorUseCase ~ result:", result)
       return result;
     } catch (error) {
       throw new CustomError(
         ERROR_MESSAGES.GENERAL.FAILED_FETCHING_RECORDS,
-        HttpResCode.INTERNAL_SERVER_ERROR
+        HttpResCode.INTERNAL_SERVER_ERROR,
       );
     }
   }

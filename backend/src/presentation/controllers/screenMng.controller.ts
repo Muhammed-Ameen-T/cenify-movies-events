@@ -15,15 +15,15 @@ export class ScreenManagementController implements IScreenManagementController {
   constructor(
     @inject('CreateScreenUseCase') private createScreenUseCase: ICreateScreenUseCase,
     @inject('UpdateScreenUseCase') private updateScreenUseCase: IUpdateScreenUseCase,
-    @inject('FetchScreensOfVendorUseCase') private fetchScreensOfVendorUseCase: IFetchScreensOfVendorUseCase
+    @inject('FetchScreensOfVendorUseCase')
+    private fetchScreensOfVendorUseCase: IFetchScreensOfVendorUseCase,
   ) {}
 
   async createScreen(req: Request, res: Response): Promise<void> {
     try {
-      console.log("🚀 ~ ScreenManagementController ~ createScreen ~ req.body:", req.body)
       const screen = await this.createScreenUseCase.execute(req.body);
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, screen);
-    } catch (error:any) {
+    } catch (error: any) {
       sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
     }
   }
@@ -33,9 +33,8 @@ export class ScreenManagementController implements IScreenManagementController {
 
     try {
       const screen = await this.updateScreenUseCase.execute(id, req.body);
-      console.log("🚀 ~ ScreenManagementController ~ updateScreen ~ screen:", screen)
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, screen);
-    } catch (error:any) {
+    } catch (error: any) {
       sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
     }
   }
@@ -43,7 +42,7 @@ export class ScreenManagementController implements IScreenManagementController {
   async getScreensOfVendor(req: Request, res: Response): Promise<void> {
     try {
       const { page, limit, search, theaterId, sortBy, sortOrder } = req.query;
-      const vendorId = req.decoded?.userId; 
+      const vendorId = req.decoded?.userId;
 
       if (!vendorId) {
         throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
@@ -61,8 +60,7 @@ export class ScreenManagementController implements IScreenManagementController {
 
       const result = await this.fetchScreensOfVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
-    } catch (error:any) {
-      console.error("🚀 ~ ScreenManagementController ~ getScreensOfVendor ~ error:", error)
+    } catch (error: any) {
       sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, error.message);
     }
   }

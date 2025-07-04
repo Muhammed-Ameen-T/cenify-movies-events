@@ -7,7 +7,9 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FindSeatLayoutsByVendorUseCase implements IFindSeatLayoutsByVendorUseCase {
-  constructor(@inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository) {}
+  constructor(
+    @inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository,
+  ) {}
 
   async execute(params: {
     vendorId: string;
@@ -23,7 +25,7 @@ export class FindSeatLayoutsByVendorUseCase implements IFindSeatLayoutsByVendorU
     } catch (error) {
       throw new CustomError(
         ERROR_MESSAGES.GENERAL.FAILED_FETCHING_RECORDS,
-        HttpResCode.INTERNAL_SERVER_ERROR
+        HttpResCode.INTERNAL_SERVER_ERROR,
       );
     }
   }

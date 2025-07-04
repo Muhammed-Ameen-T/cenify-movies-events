@@ -8,7 +8,6 @@ import { generateOtp } from '../../../utils/helpers/otp.utils';
 import { sendOtp } from '../../../infrastructure/services/sendOtp.service';
 import { IUserRepository } from '../../../domain/interfaces/repositories/user.repository';
 
-
 @injectable()
 export class sendOtpVendorUseCase {
   constructor(

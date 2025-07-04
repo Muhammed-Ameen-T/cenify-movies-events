@@ -7,6 +7,7 @@ export const AUTH_MESSAGES = {
     INVALID_OTP: "Invalid OTP or login faile",
     PROFILE_UPDATE_FAILED: "Failed to update profile. Please try again.",
     FETCH_USER_FAILED: "Failed to fetch user data. Please try again.",
+    INVALID_OR_EXPIRED_REFRESH_TOKEN: "Invalid or expired refresh token"
 };
 
 export const ERROR_MESSAGES = {
@@ -27,4 +28,28 @@ export const ERROR_MESSAGES = {
     TIMEOUT_IMAGE_UPLOAD : "Image upload took too long. Please try again with a smaller image or check your internet connection.",
     CREATING_SCREEN_FAILED : "Failed to create screen",
     UPDATING_SCREEN_FAILED : "Failed to update screen",
+    TIME_CONFLICT: 'Selected time slot conflicts with an existing show.',
+    CREATING_SHOW_FAILED: "Failed to create show",
+    FETCH_USER_MOVIES_FAILED: "Failed to fetch user movies. Please try again.",
+    FETCH_MOVIE_PASS_FAILED: "Failed to fetch movie pass.",
+    CREATE_CHECKOUT_FAILED : "Create Checkout sesssion failed.",
+    FETCH_SHOW_DETAILS_FAILED: 'Failed to fetch show details',
+    FETCH_PAYMENT_OPTIONS_FAILED: 'Failed to load payment options',
+    CREATE_BOOKING_FAILED: 'Failed to create booking',
+    FETCH_BOOKING_FAILED: 'Failed to fetch booking details',
+    CANCEL_BOOKING_FAILED: 'Failed to cancel booking',
+    FETCH_DASHBOARD_FAILED: 'Failed to fetch dashboard data',
+    FAILED_CHANGING_PASSWORD: 'Failed to change password.',
+    FETCH_WALLET_TRANSACTIONS_FAILED: 'Failed to fetch wallet transactions',
+    FETCH_MOVIE_PASS_HISTORY_FAILED: 'Feth movie pass '
+};
+
+// src/constants/notification.messages.ts
+export const NOTIFICATION_MESSAGES = {
+  CREATE_GLOBAL_FAILED: 'Failed to create global notification',
+  CREATE_USER_FAILED: 'Failed to create user notification',
+  CREATE_VENDOR_FAILED: 'Failed to create vendor notification',
+  MARK_READ_FAILED: 'Failed to mark notification as read',
+  MARK_ALL_READ_FAILED: 'Failed to mark all notifications as read',
+  FETCH_NOTIFICATIONS_FAILED: 'Failed to fetch notifications',
 };

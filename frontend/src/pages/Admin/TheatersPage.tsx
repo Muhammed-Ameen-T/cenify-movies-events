@@ -1,19 +1,17 @@
+// src/components/Theaters.tsx
 import React, { useState, useEffect } from 'react';
 import { Filter, ChevronDown, RotateCcw, Search, Calendar, Star, MapPin, Tag } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Navbar from '../../components/Admin/Navbar';
-import Sidebar from '../../components/Admin/Sidebar';
 import TheaterCard from '../../components/Admin/TheaterCard';
 import TheaterModal from '../../components/Admin/TheaterModal';
-import {updateTheaterStatus } from '../../services/Vendor/theaterApi';
-import { fetchTheaters} from '../../services/Vendor/theaterApi';
+import { updateTheaterStatus } from '../../services/Vendor/theaterApi';
 import { Theater } from '../../types/theater';
+import { fetchAdminTheaters } from '../../services/Admin/theaterApi';
 
 const ITEMS_PER_PAGE = 6;
 
-// Filter Types
 type FilterOptions = {
   status: string[];
   features: string[];
@@ -50,7 +48,6 @@ const Theaters: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   
-  // States
   const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -58,7 +55,6 @@ const Theaters: React.FC = () => {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
   
-  // Filter states
   const [filters, setFilters] = useState<FilterOptions>({
     status: [],
     features: [],
@@ -68,73 +64,33 @@ const Theaters: React.FC = () => {
     search: '',
   });
 
-  // Status options for filtering
   const statusOptions = ['verified', 'pending', 'blocked', 'verifying', 'request'];
-  const featureOptions = ['Parking', 'Food', 'IMAX', '3D', 'Dolby Atmos', 'VIP'];
+  const featureOptions = ['Parking', 'Food Court', 'Mobile Ticket', 'Lounges', 'Free Cancellation'];
   
-  // Fetch theaters
-  const { data: allTheaters, isLoading, error } = useQuery({
-    queryKey: ['theaters'],
-    queryFn: fetchTheaters,
+  // Fetch theaters with filters and pagination
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['theaters', currentPage, filters],
+    queryFn: () =>
+      fetchAdminTheaters({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+        search: filters.search || undefined,
+        status: filters.status.length > 0 ? filters.status : undefined,
+        features: filters.features.length > 0 ? filters.features : undefined,
+        rating: filters.rating || undefined,
+        location: filters.location || undefined,
+        sortBy: filters.date ? 'createdAt' : undefined,
+        sortOrder: filters.date ? (filters.date === 'newest' ? 'desc' : 'asc') : undefined,
+      }),
   });
 
-  // Apply filters to theaters
-  const filteredTheaters = React.useMemo(() => {
-    if (!allTheaters) return [];
-    
-    return allTheaters.filter((theater) => {
-      // Filter by status
-      if (filters.status.length > 0 && !filters.status.includes(theater.status)) {
-        return false;
-      }
-      
-      // Filter by features
-      if (filters.features.length > 0) {
-        const hasFeature = filters.features.some(feature => 
-          theater.features.some(f => f.toLowerCase().includes(feature.toLowerCase()))
-        );
-        if (!hasFeature) return false;
-      }
-      
-      // Filter by rating
-      if (filters.rating !== null && theater.rating < filters.rating) {
-        return false;
-      }
-      
-      // Filter by location
-      if (filters.location && !theater.location.toLowerCase().includes(filters.location.toLowerCase())) {
-        return false;
-      }
-      
-      // Filter by search query (name or location)
-      if (filters.search && !theater.name.toLowerCase().includes(filters.search.toLowerCase()) && 
-          !theater.location.toLowerCase().includes(filters.search.toLowerCase())) {
-        return false;
-      }
-      
-      return true;
-    }).sort((a, b) => {
-      // Sort by date
-      if (filters.date === 'newest') {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      } else if (filters.date === 'oldest') {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      }
-      return 0;
-    });
-  }, [allTheaters, filters]);
+  const theaters = data?.theaters || [];
+  const totalCount = data?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
-  // Calculate pagination
-  const totalPages = Math.ceil((filteredTheaters?.length || 0) / ITEMS_PER_PAGE);
-  const paginatedTheaters = filteredTheaters.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  // Update URL with filters and pagination for state persistence
+  // Update URL with filters and pagination
   useEffect(() => {
     const queryParams = new URLSearchParams();
-    
     if (currentPage > 1) queryParams.set('page', currentPage.toString());
     if (filters.status.length > 0) queryParams.set('status', filters.status.join(','));
     if (filters.features.length > 0) queryParams.set('features', filters.features.join(','));
@@ -146,7 +102,7 @@ const Theaters: React.FC = () => {
     const queryString = queryParams.toString();
     navigate({
       pathname: location.pathname,
-      search: queryString ? `?${queryString}` : ''
+      search: queryString ? `?${queryString}` : '',
     }, { replace: true });
     
     // Count active filters
@@ -160,7 +116,7 @@ const Theaters: React.FC = () => {
     setActiveFilterCount(count);
   }, [filters, currentPage, location.pathname, navigate]);
   
-  // Load filters and pagination from URL on mount
+  // Load filters and pagination from URL
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const newFilters = { ...filters };
@@ -189,9 +145,8 @@ const Theaters: React.FC = () => {
     },
   });
 
-  // Theater action handlers
   const handleViewTheater = (id: string) => {
-    const theater = allTheaters?.find((t) => t.id === id);
+    const theater = theaters.find((t) => t.id === id);
     if (theater) {
       setSelectedTheater(theater);
       setIsModalOpen(true);
@@ -210,69 +165,54 @@ const Theaters: React.FC = () => {
     mutation.mutate({ id, status: 'verifying' });
   };
 
-  // Filter handlers
   const toggleStatusFilter = (status: string) => {
-    setFilters(prev => {
-      if (prev.status.includes(status)) {
-        return {
-          ...prev,
-          status: prev.status.filter(s => s !== status)
-        };
-      } else {
-        return {
-          ...prev,
-          status: [...prev.status, status]
-        };
-      }
-    });
-    setCurrentPage(1); // Reset to first page when filter changes
+    setFilters((prev) => ({
+      ...prev,
+      status: prev.status.includes(status)
+        ? prev.status.filter((s) => s !== status)
+        : [...prev.status, status],
+    }));
+    setCurrentPage(1);
   };
 
   const toggleFeatureFilter = (feature: string) => {
-    setFilters(prev => {
-      if (prev.features.includes(feature)) {
-        return {
-          ...prev,
-          features: prev.features.filter(f => f !== feature)
-        };
-      } else {
-        return {
-          ...prev,
-          features: [...prev.features, feature]
-        };
-      }
-    });
+    setFilters((prev) => ({
+      ...prev,
+      features: prev.features.includes(feature)
+        ? prev.features.filter((f) => f !== feature)
+        : [...prev.features, feature],
+    }));
     setCurrentPage(1);
   };
 
   const setRatingFilter = (rating: number | null) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      rating
+      rating,
     }));
     setCurrentPage(1);
   };
 
   const setDateFilter = (date: 'newest' | 'oldest' | null) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      date
+      date,
     }));
     setCurrentPage(1);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      search: e.target.value
+      search: e.target.value,
     }));
     setCurrentPage(1);
   };
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      location: e.target.value
+      location: e.target.value,
     }));
     setCurrentPage(1);
   };
@@ -290,16 +230,11 @@ const Theaters: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900">
-      <Sidebar activePage="theaters" />
-
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <Navbar />
-
-        <main className="flex-1 overflow-y-auto p-6">
+    <div className="flex bg-gray-900">
+      <div className="flex flex-col flex-1">
+        <main className="flex-1 p-6">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-white">Theater Management</h1>
-            
             <div className="relative">
               <div className="flex items-center bg-gray-800 rounded-full px-4 py-2">
                 <Search className="w-5 h-5 text-gray-400 mr-2" />
@@ -314,13 +249,13 @@ const Theaters: React.FC = () => {
             </div>
           </div>
 
-          {/* Filters Bar */}
           <div className="bg-gray-800 rounded-xl mb-8 shadow-lg">
             <div className="flex flex-wrap items-center p-2">
-              {/* Filter Button */}
-              <button 
-                onClick={() => setIsFilterDrawerOpen(!isFilterDrawerOpen)} 
-                className={`flex items-center p-3 rounded-lg mr-2 transition-all ${isFilterDrawerOpen ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}
+              <button
+                onClick={() => setIsFilterDrawerOpen(!isFilterDrawerOpen)}
+                className={`flex items-center p-3 rounded-lg mr-2 transition-all ${
+                  isFilterDrawerOpen ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                }`}
               >
                 <Filter className="w-5 h-5 mr-2" />
                 <span>Filters</span>
@@ -330,45 +265,57 @@ const Theaters: React.FC = () => {
                   </span>
                 )}
               </button>
-              
-              {/* Date Filter */}
+
               <div className="relative group mx-1">
-                <button className={`flex items-center p-3 rounded-lg transition-all ${filters.date ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>
+                <button
+                  className={`flex items-center p-3 rounded-lg transition-all ${
+                    filters.date ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
                   <Calendar className="w-5 h-5 mr-2" />
-                  <span>{filters.date ? (filters.date === 'newest' ? 'Newest First' : 'Oldest First') : 'Date'}</span>
+                  <span>
+                    {filters.date ? (filters.date === 'newest' ? 'Newest First' : 'Oldest First') : 'Date'}
+                  </span>
                   <ChevronDown className="w-4 h-4 ml-2" />
                 </button>
                 <div className="absolute left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                  <button 
+                  <button
                     onClick={() => setDateFilter('newest')}
-                    className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${filters.date === 'newest' ? 'text-orange-500' : 'text-gray-300'}`}
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${
+                      filters.date === 'newest' ? 'text-orange-500' : 'text-gray-300'
+                    }`}
                   >
                     Newest First
                   </button>
-                  <button 
+                  <button
                     onClick={() => setDateFilter('oldest')}
-                    className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${filters.date === 'oldest' ? 'text-orange-500' : 'text-gray-300'}`}
+                    className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${
+                      filters.date === 'oldest' ? 'text-orange-500' : 'text-gray-300'
+                    }`}
                   >
                     Oldest First
                   </button>
                 </div>
               </div>
-              
-              {/* Status Filter Dropdown */}
+
               <div className="relative group mx-1">
-                <button className={`flex items-center p-3 rounded-lg transition-all ${filters.status.length > 0 ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>
+                <button
+                  className={`flex items-center p-3 rounded-lg transition-all ${
+                    filters.status.length > 0 ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
                   <Tag className="w-5 h-5 mr-2" />
                   <span>Status {filters.status.length > 0 && `(${filters.status.length})`}</span>
                   <ChevronDown className="w-4 h-4 ml-2" />
                 </button>
                 <div className="absolute left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                  {statusOptions.map(status => (
-                    <label 
+                  {statusOptions.map((status) => (
+                    <label
                       key={status}
                       className="flex items-center px-4 py-2 hover:bg-gray-700 cursor-pointer"
                     >
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={filters.status.includes(status)}
                         onChange={() => toggleStatusFilter(status)}
                         className="mr-2 accent-orange-500"
@@ -380,30 +327,33 @@ const Theaters: React.FC = () => {
                   ))}
                 </div>
               </div>
-              
-              {/* Rating Filter */}
+
               <div className="relative group mx-1">
-                <button className={`flex items-center p-3 rounded-lg transition-all ${filters.rating ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}>
+                <button
+                  className={`flex items-center p-3 rounded-lg transition-all ${
+                    filters.rating ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
                   <Star className="w-5 h-5 mr-2" />
                   <span>Rating {filters.rating ? `(${filters.rating}+)` : ''}</span>
                   <ChevronDown className="w-4 h-4 ml-2" />
                 </button>
                 <div className="absolute left-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                  {[5, 4, 3, 2, 1].map(rating => (
-                    <button 
+                  {[5, 4, 3, 2, 1].map((rating) => (
+                    <button
                       key={rating}
                       onClick={() => setRatingFilter(filters.rating === rating ? null : rating)}
-                      className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${filters.rating === rating ? 'text-orange-500' : 'text-gray-300'}`}
+                      className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${
+                        filters.rating === rating ? 'text-orange-500' : 'text-gray-300'
+                      }`}
                     >
                       {Array(rating).fill('★').join('')}
-                      {Array(5-rating).fill('☆').join('')}
-                      {' '}{rating}+ Stars
+                      {Array(5 - rating).fill('☆').join('')} {rating}+ Stars
                     </button>
                   ))}
                 </div>
               </div>
-              
-              {/* Location Input */}
+
               <div className="relative mx-1 flex items-center p-2 rounded-lg text-gray-300 hover:bg-gray-700">
                 <MapPin className="w-5 h-5 mx-2 text-gray-400" />
                 <input
@@ -414,22 +364,22 @@ const Theaters: React.FC = () => {
                   onChange={handleLocationChange}
                 />
               </div>
-              
-              {/* Reset Filters */}
-              <button 
+
+              <button
                 onClick={resetFilters}
-                className={`flex items-center p-3 rounded-lg ml-auto ${activeFilterCount > 0 ? 'text-orange-500' : 'text-gray-500'}`}
+                className={`flex items-center p-3 rounded-lg ml-auto ${
+                  activeFilterCount > 0 ? 'text-orange-500' : 'text-gray-500'
+                }`}
                 disabled={activeFilterCount === 0}
               >
                 <RotateCcw className="w-5 h-5 mr-2" />
                 Reset Filters
               </button>
             </div>
-            
-            {/* Extended Filter Panel */}
+
             <AnimatePresence>
               {isFilterDrawerOpen && (
-                <motion.div 
+                <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
@@ -438,13 +388,13 @@ const Theaters: React.FC = () => {
                   <div className="p-4">
                     <h3 className="text-white font-medium mb-3">Features</h3>
                     <div className="flex flex-wrap gap-2">
-                      {featureOptions.map(feature => (
+                      {featureOptions.map((feature) => (
                         <button
                           key={feature}
                           onClick={() => toggleFeatureFilter(feature)}
                           className={`px-3 py-1 rounded-full text-sm ${
-                            filters.features.includes(feature) 
-                              ? 'bg-orange-600 text-white' 
+                            filters.features.includes(feature)
+                              ? 'bg-orange-600 text-white'
                               : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                           }`}
                         >
@@ -474,7 +424,7 @@ const Theaters: React.FC = () => {
             <div className="text-red-400 p-4 bg-red-900/20 rounded-lg">
               Error loading theaters: {(error as Error).message}
             </div>
-          ) : filteredTheaters.length === 0 ? (
+          ) : theaters.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 bg-gray-800 rounded-lg text-center">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -498,7 +448,7 @@ const Theaters: React.FC = () => {
             <>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
                 <AnimatePresence>
-                  {paginatedTheaters.map((theater) => (
+                  {theaters.map((theater) => (
                     <motion.div
                       key={theater.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -512,12 +462,12 @@ const Theaters: React.FC = () => {
                         location={theater.location}
                         features={theater.features}
                         rating={theater.rating}
-                        reviewCount={theater.reviewCount || 0}
-                        image={theater.images[0]}
+                        reviewCount={theater.ratingCount || 0}
+                        image={theater.images[1]}
                         status={theater.status}
                         onView={handleViewTheater}
                         onBlock={
-                          theater.status === 'verified' || theater.status === 'verifying' || theater.status ==='pending'
+                          theater.status === 'verified' || theater.status === 'verifying' || theater.status === 'pending'
                             ? handleBlockTheater
                             : undefined
                         }
@@ -535,32 +485,26 @@ const Theaters: React.FC = () => {
                   ))}
                 </AnimatePresence>
               </div>
-              
-              {/* Pagination */}
+
               {totalPages > 1 && (
                 <div className="flex justify-center items-center mt-6">
                   <div className="flex flex-wrap bg-gray-800 rounded-lg shadow-lg">
                     <button
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
                       className={`px-4 py-2 rounded-l-lg ${
-                        currentPage === 1 
-                          ? 'text-gray-500 cursor-not-allowed' 
-                          : 'text-gray-300 hover:bg-gray-700'
+                        currentPage === 1 ? 'text-gray-500 cursor-not-allowed' : 'text-gray-300 hover:bg-gray-700'
                       }`}
                     >
                       Previous
                     </button>
-                    
-                    {/* First Page */}
+
                     {currentPage > 3 && (
                       <>
                         <button
                           onClick={() => setCurrentPage(1)}
                           className={`px-4 py-2 ${
-                            currentPage === 1 
-                              ? 'bg-orange-600 text-white' 
-                              : 'text-gray-300 hover:bg-gray-700'
+                            currentPage === 1 ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                           }`}
                         >
                           1
@@ -570,29 +514,25 @@ const Theaters: React.FC = () => {
                         )}
                       </>
                     )}
-                    
-                    {/* Page Numbers */}
+
                     {Array.from({ length: totalPages })
                       .map((_, i) => i + 1)
-                      .filter(page => {
+                      .filter((page) => {
                         if (totalPages <= 7) return true;
                         return page >= currentPage - 1 && page <= currentPage + 1;
                       })
-                      .map(page => (
+                      .map((page) => (
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
                           className={`px-4 py-2 ${
-                            currentPage === page 
-                              ? 'bg-orange-600 text-white' 
-                              : 'text-gray-300 hover:bg-gray-700'
+                            currentPage === page ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                           }`}
                         >
                           {page}
                         </button>
                       ))}
-                    
-                    {/* Last Page */}
+
                     {currentPage < totalPages - 2 && (
                       <>
                         {currentPage < totalPages - 3 && (
@@ -601,23 +541,19 @@ const Theaters: React.FC = () => {
                         <button
                           onClick={() => setCurrentPage(totalPages)}
                           className={`px-4 py-2 ${
-                            currentPage === totalPages 
-                              ? 'bg-orange-600 text-white' 
-                              : 'text-gray-300 hover:bg-gray-700'
+                            currentPage === totalPages ? 'bg-orange-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                           }`}
                         >
                           {totalPages}
                         </button>
                       </>
                     )}
-                    
+
                     <button
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
                       className={`px-4 py-2 rounded-r-lg ${
-                        currentPage === totalPages 
-                          ? 'text-gray-500 cursor-not-allowed' 
-                          : 'text-gray-300 hover:bg-gray-700'
+                        currentPage === totalPages ? 'text-gray-500 cursor-not-allowed' : 'text-gray-300 hover:bg-gray-700'
                       }`}
                     >
                       Next
@@ -625,14 +561,14 @@ const Theaters: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {!isLoading && totalCount > 0 && (
+                <div className="mt-4 text-gray-400 text-sm text-center">
+                  Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{' '}
+                  {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of {totalCount} theaters
+                </div>
+              )}
             </>
-          )}
-          
-          {/* Results count info */}
-          {!isLoading && filteredTheaters.length > 0 && (
-            <div className="mt-4 text-gray-400 text-sm text-center">
-              Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredTheaters.length)} of {filteredTheaters.length} theaters
-            </div>
           )}
 
           <TheaterModal

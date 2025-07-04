@@ -1,6 +1,4 @@
 import { Router } from 'express';
-import 'reflect-metadata';
-import '../../infrastructure/container';
 import { container } from 'tsyringe';
 import { verifyAccessToken } from '../middleware/verifyToken.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
@@ -23,11 +21,12 @@ router.patch('/users/block/:id', verifyAccessToken, authorizeRoles(['admin']), (
   userMngController.updateUserBlockStatus(req, res),
 );
 
-
 // Movie Management Routes
-router.get('/fetch-movies', verifyAccessToken, authorizeRoles(['admin']), (req, res) =>
+router.get('/fetch-movies', verifyAccessToken, authorizeRoles(['admin', 'vendor']), (req, res) =>
   movieMngController.fetchMovies(req, res),
 );
+
+router.get('/fetch-movies-user', (req, res) => movieMngController.fetchMoviesUser(req, res));
 
 router.post('/create-movie', verifyAccessToken, authorizeRoles(['admin']), (req, res) =>
   movieMngController.createMovie(req, res),

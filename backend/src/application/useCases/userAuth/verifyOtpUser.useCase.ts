@@ -10,6 +10,8 @@ import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import { User } from '../../../domain/entities/user.entity';
 import { VerifyOtpDTO } from '../../../application/dtos/auth.dto';
 import bcrypt from 'bcrypt';
+import { IWalletRepository } from '../../../domain/interfaces/repositories/wallet.repository';
+import { Wallet } from '../../../domain/entities/wallet.entity';
 
 /**
  * Use case for verifying OTP during user registration.
@@ -27,6 +29,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
   constructor(
     @inject('IUserRepository') private authRepository: IUserRepository,
     @inject('JwtService') private jwtService: JwtService,
+    @inject('WalletRepository') private walletRepository: IWalletRepository,
     @inject('RedisService') private redisService: RedisService,
   ) {}
 
@@ -41,10 +44,10 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
   async execute(dto: VerifyOtpDTO): Promise<AuthResponseDTO> {
     console.log(dto);
     const storedOtp = await this.redisService.get(`otp:${dto.email}`);
-    storedOtp?.toString();
-    console.log('storedOtp:', storedOtp?.toString());
 
-    if (!storedOtp || storedOtp.toString() !== dto.otp) {
+    console.log('storedOtp:', storedOtp);
+
+    if (!storedOtp || storedOtp != dto.otp) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_OTP, HttpResCode.BAD_REQUEST);
     }
 
@@ -70,9 +73,10 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       new Date(),
     );
 
-    await this.authRepository.create(user);
-
-    const createdUser = await this.authRepository.findByEmail(user.email);
+    const savedUser = await this.authRepository.create(user);
+    console.log('🚀 ~ VerifyOtpUseCase ~ execute ~ savedUser:', savedUser);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const createdUser = await this.authRepository.findByEmail(user.email.toLocaleLowerCase());
     console.log('newcreatedUser:', createdUser);
     if (!createdUser) {
       throw new CustomError(
@@ -80,6 +84,15 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
         HttpResCode.INTERNAL_SERVER_ERROR,
       );
     }
+    const newWallet = new Wallet(
+      null as any,
+      createdUser._id?.toString(),
+      0,
+      [],
+      new Date(),
+      new Date(),
+    );
+    await this.walletRepository.createWallet(newWallet);
 
     const accessToken = this.jwtService.generateAccessToken(createdUser._id?.toString(), 'user');
     const refreshToken = this.jwtService.generateRefreshToken(createdUser._id?.toString(), 'user');

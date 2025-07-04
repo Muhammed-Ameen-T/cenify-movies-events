@@ -17,7 +17,7 @@ export class LoginVendorUseCase implements ILoginVendorUseCase {
 
   async execute(dto: LoginDTO): Promise<AuthResponseDTO> {
     const vendor = await this.userRepository.findByEmail(dto.email);
-    
+
     if (!vendor) {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.UNAUTHORIZED);
     }
@@ -27,7 +27,10 @@ export class LoginVendorUseCase implements ILoginVendorUseCase {
     }
 
     if (vendor.role !== 'vendor') {
-      throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.YOUR_NOT_VENDOR, HttpResCode.UNAUTHORIZED);
+      throw new CustomError(
+        ERROR_MESSAGES.AUTHENTICATION.YOUR_NOT_VENDOR,
+        HttpResCode.UNAUTHORIZED,
+      );
     }
 
     const isMatch = await bcrypt.compare(dto.password, vendor.password!);
@@ -36,7 +39,7 @@ export class LoginVendorUseCase implements ILoginVendorUseCase {
     }
 
     const accessToken = this.jwtService.generateAccessToken(vendor._id.toString(), vendor.role);
-    const refreshToken = this.jwtService.generateRefreshToken(vendor._id.toString(), vendor .role);
+    const refreshToken = this.jwtService.generateRefreshToken(vendor._id.toString(), vendor.role);
 
     return new AuthResponseDTO(accessToken, refreshToken, {
       id: vendor._id.toString(),

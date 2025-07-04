@@ -3,9 +3,10 @@ import { AUTH_MESSAGES } from "../../constants/auth.messages";
 import { ADMIN_ENDPOINTS } from "../../constants/apiEndPoint"
 import { handleAxiosError } from "../../utils/exios-error-handler";
 import { AuthResponse } from "../../store/types/auth.type";
+import axios from "axios";
 
 export const login = async (email: string,password: string): Promise<AuthResponse> => {
-  try {
+  try { 
     const response = await api.post(ADMIN_ENDPOINTS.login, { email,password });
     if (!response.data.success) {
       throw new Error(response.data.message || AUTH_MESSAGES.LOGIN_FAILED);

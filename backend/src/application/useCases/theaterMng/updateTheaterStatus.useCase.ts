@@ -2,15 +2,15 @@ import { ITheaterRepository } from '../../../domain/interfaces/repositories/thea
 import { TheaterResponseDTO } from '../../dtos/vendor.dto';
 import { sendResponse } from '../../../utils/response/sendResponse.utils';
 import { Response } from 'express';
-import { HttpResMsg,HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
+import { HttpResMsg, HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import { IUpdateTheaterStatusUseCase } from '../../../domain/interfaces/useCases/Vendor/updateTheaterStatus.interface';
 import { inject, injectable } from 'tsyringe';
 import { SuccessMsg } from '../../../utils/constants/commonSuccessMsg.constants';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
-export class UpdateTheaterStatusUseCase implements IUpdateTheaterStatusUseCase{
-    constructor(@inject('TheaterRepository') private vendorRepository: ITheaterRepository) {}
+export class UpdateTheaterStatusUseCase implements IUpdateTheaterStatusUseCase {
+  constructor(@inject('TheaterRepository') private vendorRepository: ITheaterRepository) {}
 
   async execute(id: string, status: string, res: Response): Promise<void> {
     const validStatuses = ['active', 'blocked', 'verified', 'verifying', 'pending', 'request'];
@@ -40,6 +40,7 @@ export class UpdateTheaterStatusUseCase implements IUpdateTheaterStatusUseCase{
       vendor.email,
       vendor.phone,
       vendor.rating,
+      vendor.ratingCount,
       vendor.description,
       null,
       vendor.createdAt,

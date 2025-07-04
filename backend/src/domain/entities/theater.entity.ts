@@ -1,4 +1,4 @@
-import mongoose,{ ObjectId } from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 
 export class Theater {
   constructor(
@@ -27,6 +27,7 @@ export class Theater {
     public description: string | null,
     public vendorId: mongoose.Types.ObjectId,
     public rating: number | null,
+    public ratingCount: number,
   ) {}
 
   isValidEmail(): boolean {

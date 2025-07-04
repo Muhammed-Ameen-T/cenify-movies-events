@@ -68,7 +68,7 @@ const Loader: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 bg-white/80 backdrop-blur-md flex flex-col items-center justify-center z-50"
+      className="fixed inset-0 bg-transparent backdrop-blur-md flex flex-col items-center justify-center z-50"
       aria-live="polite"
     >
       <div className="flex flex-col items-center gap-6">

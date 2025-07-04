@@ -39,6 +39,7 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
     email: string | null;
     phone: string | null;
     rating: number | null;
+    ratingCount: number | null;
     vendorId: {
       id: string;
       name: string;
@@ -49,7 +50,6 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
     updatedAt: string | null;
   }>;
   
-  console.log("🚀 ~ fetchTheaters ~ theaters:", theaters)
   // Map backend response to Theater type
   return theaters.map((theater) => ({
     id: theater.id,
@@ -78,8 +78,8 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
       : ['DOLBY ATMOS', '4K'], 
     description: theater.description, 
     images: theater.gallery?.length ? theater.gallery : ['/api/placeholder/600/400'],
-    rating: theater.rating || 4, 
-    reviewCount: 131, 
+    rating: theater.rating, 
+    ratingCount: theater.ratingCount, 
     vendorId: theater.vendorId ? {
       id: theater.vendorId.id,
       name: theater.vendorId.name,
@@ -87,8 +87,8 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
       phone: theater.vendorId.phone,
     } : undefined,
     screens: [
-      { name: 'Screen 1', capacity: 200, features: ['DOLBY ATMOS', '4K'] },
-      { name: 'Screen 2', capacity: 150, features: ['3D'] },
+      // { name: 'Screen 1', capacity: 200, features: ['DOLBY ATMOS', '4K'] },
+      // { name: 'Screen 2', capacity: 150, features: ['3D'] },
     ],
     coordinates: Array.isArray(theater.location?.coordinates) && theater.location.coordinates.length === 2
       ? (theater.location.coordinates as [number, number])
@@ -96,6 +96,95 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
     createdAt: theater.createdAt ? new Date(theater.createdAt) : new Date(),
     updatedAt: theater.updatedAt ? new Date(theater.updatedAt) : new Date()
   }));
+};
+
+
+interface FetchTheatersParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string[];
+  features?: string[];
+  rating?: number;
+  location?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+
+export const fetchTheatersOfAdmin = async (params: FetchTheatersParams = {}): Promise<{
+  theaters: Theater[];
+  totalCount: number;
+}> => {
+  try {
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.set('page', params.page.toString());
+    if (params.limit) queryParams.set('limit', params.limit.toString());
+    if (params.search) queryParams.set('search', params.search);
+    if (params.status && params.status.length > 0) queryParams.set('status', params.status.join(','));
+    if (params.features && params.features.length > 0) queryParams.set('features', params.features.join(','));
+    if (params.rating) queryParams.set('rating', params.rating.toString());
+    if (params.location) queryParams.set('location', params.location);
+    if (params.sortBy) queryParams.set('sortBy', params.sortBy);
+    if (params.sortOrder) queryParams.set('sortOrder', params.sortOrder);
+
+    const response = await api.get(`${VENDOR_ENDPOINTS.fetchTheaters}?${queryParams.toString()}`);
+    const { theaters, totalCount } = response.data.data;
+
+    // Map backend response to Theater type
+    return {
+      theaters: theaters.map((theater: any) => ({
+        id: theater.id,
+        name: theater.name,
+        status: theater.status,
+        location: theater.location?.city ? `${theater.location.city}` : 'Unknown Location',
+        address: 'Not provided', // Static fallback, adjust if backend provides address
+        phone: theater.phone || 'Not provided',
+        email: theater.email || 'Not provided',
+        website: 'www.example.com', // Static fallback
+        openingHours: '10:00 AM - 12:00 AM', // Static fallback
+        features: theater.facilities
+          ? Object.entries(theater.facilities)
+              .filter(([_, value]) => value)
+              .map(([key]) =>
+                key === 'foodCourt'
+                  ? 'Food Court'
+                  : key === 'lounges'
+                  ? 'Lounges'
+                  : key === 'mTicket'
+                  ? 'Mobile Ticket'
+                  : key === 'parking'
+                  ? 'Parking'
+                  : 'Free Cancellation'
+              )
+          : ['DOLBY ATMOS', '4K'], // Fallback features
+        description: theater.description || 'No description available',
+        images: theater.gallery?.length ? theater.gallery : ['/api/placeholder/600/400'],
+        rating: theater.rating ?? 0,
+        ratingCount: theater.ratingCount ?? 0,
+        vendorId: theater.vendorId
+          ? {
+              id: theater.vendorId.id,
+              name: theater.vendorId.name,
+              email: theater.vendorId.email,
+              phone: theater.vendorId.phone,
+            }
+          : undefined,
+        screens: [], // Adjust if backend provides screen data
+        coordinates: Array.isArray(theater.location?.coordinates) &&
+        theater.location.coordinates.length === 2
+          ? (theater.location.coordinates as [number, number])
+          : undefined,
+        createdAt: theater.createdAt ? new Date(theater.createdAt) : new Date(),
+        updatedAt: theater.updatedAt ? new Date(theater.updatedAt) : new Date(),
+      })),
+      totalCount,
+    };
+  } catch (error) {
+    console.error('Error fetching theaters:', error);
+    throw new Error('Failed to fetch theaters');
+  }
 };
 
 interface FetchTheatersResponse {
@@ -114,7 +203,6 @@ export const fetchTheatersByVendor = async (params: {
   sortOrder?: 'asc' | 'desc';
 }): Promise<FetchTheatersResponse> =>  {
   const response = await api.get(`${VENDOR_ENDPOINTS.fetchTheater}`, { params });
-  console.log("🚀 ~ response:", response)
   return response.data.data;
 };
 

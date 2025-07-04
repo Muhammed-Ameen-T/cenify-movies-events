@@ -44,22 +44,20 @@ export class LoginDTO {
   ) {}
 }
 
-
 export class ForgotPassSendOtpDTO {
   constructor(public email: string) {}
 }
 
-
-export class ForgotPassUpdateDTO{
+export class ForgotPassUpdateDTO {
   constructor(
-    public email:string,
-    public password:string,
-  ){}
+    public email: string,
+    public password: string,
+  ) {}
 }
 
-export class ForgotPassVerifyOtpDTO{
+export class ForgotPassVerifyOtpDTO {
   constructor(
-    public email:string,
-    public otp:string
-  ){}
+    public email: string,
+    public otp: string,
+  ) {}
 }

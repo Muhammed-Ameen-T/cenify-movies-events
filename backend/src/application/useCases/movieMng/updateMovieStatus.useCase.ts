@@ -14,20 +14,14 @@ export class UpdateMovieStatusUseCase implements IUpdateMovieStatusUseCase {
   async execute(dto: UpdateMovieStatusDTO): Promise<Movie> {
     const validStatuses = ['upcoming', 'released', 'archived'];
     if (!validStatuses.includes(dto.status)) {
-      throw new CustomError(
-        ERROR_MESSAGES.VALIDATION.INVALID_STATUS,
-        HttpResCode.BAD_REQUEST
-      );
+      throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_STATUS, HttpResCode.BAD_REQUEST);
     }
 
     try {
       const updatedMovie = await this.movieRepository.updateStatus(dto.id, dto.status);
       return updatedMovie;
     } catch (error) {
-      throw new CustomError(
-        ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND,
-        HttpResCode.NOT_FOUND
-      );
+      throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
   }
 }

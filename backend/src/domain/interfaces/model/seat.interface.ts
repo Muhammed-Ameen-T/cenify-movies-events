@@ -9,4 +9,6 @@ export interface ISeat extends Document {
   type: 'VIP' | 'Regular' | 'Premium' | 'Unavailable';
   price: number;
   position: { row: number; col: number };
+  createdAt?: Date;
+  updatedAt?: Date;
 }

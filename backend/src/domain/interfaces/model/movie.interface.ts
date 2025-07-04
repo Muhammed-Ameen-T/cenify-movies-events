@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import { ObjectId, Types } from 'mongoose';
 
 export interface IDuration {
   hours: number;
@@ -37,11 +37,11 @@ export interface IMovie extends Document {
   poster: string;
   duration: IDuration;
   description: string;
-  language: string; 
+  language: string;
   releaseDate: Date;
   status: string;
   likes?: number;
-  interests?: number;
+  likedBy?: Types.ObjectId[];
   is3D?: boolean;
   crew?: ICrew[];
   cast?: ICast[];

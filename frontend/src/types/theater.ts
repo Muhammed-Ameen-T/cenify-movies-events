@@ -53,7 +53,6 @@ export interface TheaterUpdatePayload {
 }
 
 // src/types/theater.ts
-// src/types/theater.ts
 export interface  Theater {
   id: string;
   name: string;

@@ -2,5 +2,5 @@ import { GoogleAuthRequestDTO, AuthResponseDTO } from '../../../../application/d
 
 export interface IGoogleAuthUseCase {
   execute(request: GoogleAuthRequestDTO): Promise<AuthResponseDTO>;
-  refreshToken(refreshToken: string): Promise<{ accessToken: string }>;
+  // refreshToken(refreshToken: string): Promise<{ accessToken: string }>;
 }

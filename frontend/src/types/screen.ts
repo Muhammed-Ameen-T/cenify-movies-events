@@ -21,6 +21,11 @@ export interface Screen {
   };
   createdAt: string;
   updatedAt: string;
+  filledTimes?: {
+    startTime: Date | null;
+    endTime: Date | null;
+    showId: string | null;
+  }[];
 }
 
 export const screenUpdateSchema = z.object({

@@ -1,16 +1,10 @@
 import mongoose from 'mongoose';
 import { Screen } from '../../domain/entities/screen.entity';
 import { IScreenRepository } from '../../domain/interfaces/repositories/screen.repository';
-import ScreenModel from '../database/screen.modal';
+import ScreenModel from '../database/screen.model';
 import { IScreen } from '../../domain/interfaces/model/screen.interface';
 import { TheaterModel } from '../database/theater.model';
 import SeatLayoutModel from '../database/seatLayout.model';
-
-try {
-  mongoose.model('Theaters');
-} catch (error) {
-  console.warn('Theaters model not registered yet. Ensure it is registered before using ScreenRepository.');
-}
 
 export class ScreenRepository implements IScreenRepository {
   async create(screen: Screen): Promise<Screen> {
@@ -19,19 +13,18 @@ export class ScreenRepository implements IScreenRepository {
         name: screen.name,
         theaterId: screen.theaterId,
         seatLayoutId: screen.seatLayoutId,
-        filledTimes: screen.filledTimes?.map((time) => ({
-          startTime: time.startTime,
-          endTime: time.endTime,
-          showId: time.showId,
-        })) || [],
+        filledTimes:
+          screen.filledTimes?.map((time) => ({
+            startTime: time.startTime,
+            endTime: time.endTime,
+            showId: time.showId,
+          })) || [],
         amenities: screen.amenities || {
           is3D: false,
           is4K: false,
           isDolby: false,
         },
       };
-
-      console.log('🚀 ~ ScreenRepository ~ create ~ screenData:', screenData);
 
       const newScreen = new ScreenModel(screenData);
       const savedScreen = await newScreen.save();
@@ -48,8 +41,8 @@ export class ScreenRepository implements IScreenRepository {
   async findById(id: string): Promise<Screen | null> {
     try {
       const screenDoc = await ScreenModel.findById(id)
-        .populate({path:'theaterId',model:'Theaters'}) // Populate all theater fields
-        .populate({path:'seatLayoutId',model:'SeatLayout'}) // Populate all seat layout fields
+        .populate({ path: 'theaterId', model: 'Theater' }) // Populate all theater fields
+        .populate({ path: 'seatLayoutId', model: 'SeatLayout' }) // Populate all seat layout fields
         .lean();
       if (!screenDoc) return null;
       return this.mapToEntity(screenDoc);
@@ -59,15 +52,19 @@ export class ScreenRepository implements IScreenRepository {
     }
   }
 
-  async findScreenByName(name: string, theaterId: string, screenId: string): Promise<Screen | null> {
+  async findScreenByName(
+    name: string,
+    theaterId: string,
+    screenId: string,
+  ): Promise<Screen | null> {
     try {
-      const screenDoc = await ScreenModel.findOne({ 
-        name, 
-        theaterId, 
-        _id: { $ne: screenId }
+      const screenDoc = await ScreenModel.findOne({
+        name,
+        theaterId,
+        _id: { $ne: screenId },
       })
-        .populate({ path: 'theaterId', model: 'Theaters' })
-        .populate({ path: 'seatLayoutId', model: 'SeatLayout' }) 
+        .populate({ path: 'theaterId', model: 'Theater' })
+        .populate({ path: 'seatLayoutId', model: 'SeatLayout' })
         .lean();
 
       if (!screenDoc) return null;
@@ -78,19 +75,20 @@ export class ScreenRepository implements IScreenRepository {
     }
   }
 
-
   async updateScreenDetails(screen: Screen): Promise<Screen> {
     try {
       const updatedScreen = await ScreenModel.findByIdAndUpdate(
         screen._id,
         {
           name: screen.name,
-          theaterId: typeof screen.theaterId === 'string'
-            ? screen.theaterId
-            : screen.theaterId?._id ?? null,
-          seatLayoutId: typeof screen.seatLayoutId === 'string'
-            ? screen.seatLayoutId
-            : screen.seatLayoutId?.['_id'] ?? null,
+          theaterId:
+            typeof screen.theaterId === 'string'
+              ? screen.theaterId
+              : (screen.theaterId?._id ?? null),
+          seatLayoutId:
+            typeof screen.seatLayoutId === 'string'
+              ? screen.seatLayoutId
+              : (screen.seatLayoutId?.['_id'] ?? null),
           filledTimes: screen.filledTimes?.map((time) => ({
             startTime: time.startTime,
             endTime: time.endTime,
@@ -98,9 +96,9 @@ export class ScreenRepository implements IScreenRepository {
           })),
           amenities: screen.amenities,
         },
-        { new: true }
+        { new: true },
       )
-        .populate({ path: 'theaterId', model: 'Theaters' })
+        .populate({ path: 'theaterId', model: 'Theater' })
         .populate({ path: 'seatLayoutId', model: 'SeatLayout' })
         .lean();
 
@@ -122,20 +120,12 @@ export class ScreenRepository implements IScreenRepository {
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ screens: Screen[]; totalCount: number }> {
     try {
-      const {
-        vendorId,
-        page = 1,
-        limit = 8,
-        search,
-        theaterId,
-        sortBy,
-        sortOrder,
-      } = params;
+      const { vendorId, page = 1, limit = 8, search, theaterId, sortBy, sortOrder } = params;
       const skip = (page - 1) * limit;
 
       let Theater;
       try {
-        Theater = mongoose.model('Theaters');
+        Theater = mongoose.model('Theater');
       } catch (error) {
         console.error('❌ Theaters model not registered:', error);
         throw new Error('Theaters model not registered. Please ensure it is initialized.');
@@ -173,7 +163,7 @@ export class ScreenRepository implements IScreenRepository {
         .limit(limit)
         .populate({
           path: 'theaterId',
-          model: 'Theaters', // Explicitly specify model name
+          model: 'Theater', // Explicitly specify model name
         })
         .populate({
           path: 'seatLayoutId',
@@ -192,13 +182,40 @@ export class ScreenRepository implements IScreenRepository {
     }
   }
 
+  async checkSlot(
+    screenId: string,
+    startTime: Date,
+    endTime: Date,
+    excludeShowId?: string,
+  ): Promise<boolean> {
+    try {
+      const query: any = {
+        _id: screenId,
+        filledTimes: {
+          $elemMatch: {
+            $or: [{ startTime: { $lt: endTime }, endTime: { $gt: startTime } }],
+          },
+        },
+      };
+
+      if (excludeShowId) {
+        query.filledTimes.$elemMatch.showId = { $ne: new mongoose.Types.ObjectId(excludeShowId) };
+      }
+
+      const existingShow = await ScreenModel.findOne(query).lean();
+      return !existingShow; // Returns true if slot is available, false if there's a conflict
+    } catch (error) {
+      console.error('❌ Error checking slot availability:', error);
+      throw new Error('Failed to check slot availability');
+    }
+  }
 
   private mapToEntity(doc: any): Screen {
     return new Screen(
       doc._id.toString(),
       doc.name,
-      doc.theaterId || doc.theaterId?._id?.toString(), 
-      doc.seatLayoutId || doc.seatLayoutId?._id?.toString(), 
+      doc.theaterId || doc.theaterId?._id?.toString(),
+      doc.seatLayoutId || doc.seatLayoutId?._id?.toString(),
       doc.filledTimes?.map((time: any) => ({
         startTime: time.startTime,
         endTime: time.endTime,
@@ -208,7 +225,29 @@ export class ScreenRepository implements IScreenRepository {
         is3D: false,
         is4K: false,
         isDolby: false,
-      }
+      },
     );
+  }
+
+  async findByIdSession(id: string, session?: mongoose.ClientSession): Promise<Screen | null> {
+    try {
+      const query = ScreenModel.findById(id)
+        .populate({ path: 'theaterId', model: 'Theater' })
+        .populate({ path: 'seatLayoutId', model: 'SeatLayout' })
+        .lean();
+
+      if (session) {
+        query.session(session);
+      }
+
+      const screenDoc = await query;
+
+      if (!screenDoc) return null;
+
+      return this.mapToEntity(screenDoc);
+    } catch (error) {
+      console.error('❌ Error finding screen by ID:', error);
+      throw new Error('Failed to find screen');
+    }
   }
 }

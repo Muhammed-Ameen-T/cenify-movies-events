@@ -33,7 +33,18 @@ const Avatar: React.FC<AvatarProps> = ({
   };
 
   return (
-    <div className={`relative rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-primary-400 to-primary-600 text-white font-medium ${sizeClasses[size]}`}>
+<div
+  className={`
+    relative 
+    rounded-full 
+    overflow-hidden 
+    flex items-center justify-center 
+    font-semibold text-white 
+    bg-gradient-to-br from-indigo-500 to-blue-600
+    ring-2 ring-white shadow-md
+    ${sizeClasses[size]}
+  `}
+>
       {src ? (
         <img
           src={src}
@@ -46,7 +57,7 @@ const Avatar: React.FC<AvatarProps> = ({
         />
       ) : null}
       <div 
-        className={`absolute inset-0 flex items-center justify-center ${src ? 'hidden' : 'flex'}`}
+        className={`absolute inset-0 flex items-center font-normal text-lg justify-center ${src ? 'hidden' : 'flex'}`}
       >
         {getInitials(name)}
       </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import Carousel from '../../components/User/Carousel';
+import Carousel from '../../components/User/HeroCarousel';
 import Footer from '../../components/User/Footer';
 import LoginModal from '../../components/User/LoginModal';
 import MovieSection from '../../components/User/MovieSection';
@@ -10,25 +10,8 @@ import SpecialOffersSection from '../../components/User/SpecialOffersSection';
 import MobileMenu from '../../components/User/MobileMenu';
 
 const HomePage: React.FC = () => {
-  // Mock user state - in a real app this would come from Redux
-  // const user = null;
-  
-  // const [showLoginModal, setShowLoginModal] = useState(false);
-  // const [showMenu, setShowMenu] = useState(false);
-
-  // const toggleLoginModal = () => setShowLoginModal(!showLoginModal);
-  // const toggleMenu = () => setShowMenu(!showMenu);
-
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* <Navbar 
-        onLoginClick={toggleLoginModal} 
-        onMenuToggle={toggleMenu} 
-        showMenu={showMenu} 
-        user={user}
-      /> */}
-      
-      
 
       <Carousel />
 
@@ -37,9 +20,9 @@ const HomePage: React.FC = () => {
         <EventsSection />
         <MoviePassSection />
         <SpecialOffersSection />
+        <Footer />
       </div>
 
-      <Footer />
     </div>
   );
 };

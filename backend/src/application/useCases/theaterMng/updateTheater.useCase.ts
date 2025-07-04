@@ -1,8 +1,8 @@
 // src/application/useCases/Vendor/updateTheater.useCase.ts
 import { inject, injectable } from 'tsyringe';
 import { Response } from 'express';
-import { ITheaterRepository } from '../../../domain/interfaces/repositories/theater.repository'
-import {IUpdateTheaterUseCase} from '../../../domain/interfaces/useCases/Vendor/updateTheater.interfase'
+import { ITheaterRepository } from '../../../domain/interfaces/repositories/theater.repository';
+import { IUpdateTheaterUseCase } from '../../../domain/interfaces/useCases/Vendor/updateTheater.interfase';
 import { TheaterResponseDTO } from '../../dtos/vendor.dto';
 import { sendResponse } from '../../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../../utils/constants/httpResponseCode.utils';
@@ -18,9 +18,9 @@ export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
   constructor(@inject('TheaterRepository') private theaterRepository: ITheaterRepository) {}
 
   async execute(id: string, data: Partial<Theater>, res: Response): Promise<void> {
-    console.log("🚀 ~ UpdateTheaterUseCase ~ execute ~ data:", data)
+    console.log('🚀 ~ UpdateTheaterUseCase ~ execute ~ data:', data);
     try {
-    //   const validatedData = theaterUpdateSchema.parse(data);
+      //   const validatedData = theaterUpdateSchema.parse(data);
 
       const theater = await this.theaterRepository.findById(id);
       if (!theater) {
@@ -37,14 +37,15 @@ export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
         theater.location,
         data.facilities || null,
         theater.createdAt,
-        new Date(), 
+        new Date(),
         data.intervalTime || theater.intervalTime,
         theater.gallery,
         data.email || theater.email,
         data.phone || theater.phone,
         data.description || theater.description,
         theater.vendorId,
-        theater.rating
+        theater.rating,
+        theater.ratingCount,
       );
 
       // Persist updates
@@ -62,21 +63,19 @@ export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
         savedTheater.email,
         savedTheater.phone,
         savedTheater.rating,
+        savedTheater.ratingCount,
         savedTheater.description,
         null,
         savedTheater.createdAt,
-        savedTheater.updatedAt
+        savedTheater.updatedAt,
       );
 
       sendResponse(res, HttpResCode.OK, SuccessMsg.THEATER_UPDATED, responseDTO);
     } catch (error) {
-    console.log("🚀 ~ UpdateTheaterUseCase ~ execute ~ error:", error)
-    //   if (error instanceof z.ZodError) {
-    //     sendResponse(res, HttpResCode.BAD_REQUEST, error.errors.map((e) => e.message).join(', '));
-    //     return;
-    //   }
       const errorMessage =
-        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.FAILED_UPDATING_THEATER;
+        error instanceof CustomError
+          ? error.message
+          : ERROR_MESSAGES.GENERAL.FAILED_UPDATING_THEATER;
       sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
     }
   }

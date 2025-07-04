@@ -39,7 +39,7 @@ export class LoginAdminUseCase implements ILoginUserUseCase {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.UNAUTHORIZED);
     }
 
-    if (admin.role!=='admin') {
+    if (admin.role !== 'admin') {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.YOUR_NOT_ADMIN, HttpResCode.FORBIDDEN);
     }
 

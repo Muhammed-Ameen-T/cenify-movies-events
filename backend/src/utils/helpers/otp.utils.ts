@@ -9,5 +9,5 @@ export function generateOtp(n: number): string {
   for (let i = 0; i < n; i++) {
     otp += Math.floor(Math.random() * 10);
   }
-  return otp;
+  return otp.toString();
 }

@@ -1,5 +1,6 @@
 // src/domain/entities/seatLayout.entity.ts
 import mongoose from 'mongoose';
+import { ISeat } from '../interfaces/model/seat.interface';
 
 export class Seat {
   constructor(
@@ -9,7 +10,7 @@ export class Seat {
     public number: string,
     public type: 'VIP' | 'Regular' | 'Premium' | 'Unavailable',
     public price: number,
-    public position: { row: number; col: number }
+    public position: { row: number; col: number },
   ) {}
 }
 
@@ -21,10 +22,10 @@ export class SeatLayout {
     public layoutName: string,
     public seatPrice: { regular: number; premium: number; vip: number },
     public capacity: number,
-    public seatIds: mongoose.Types.ObjectId[],
+    public seatIds: mongoose.Types.ObjectId[] | ISeat[],
     public rowCount: number,
     public columnCount: number,
     public createdAt: Date = new Date(),
-    public updatedAt: Date = new Date()
+    public updatedAt: Date = new Date(),
   ) {}
 }

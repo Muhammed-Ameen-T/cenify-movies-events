@@ -19,20 +19,29 @@ export class UpdateScreenUseCase implements IUpdateScreenUseCase {
   async execute(id: string, dto: UpdateScreenDTO): Promise<Screen> {
     try {
       const existingScreen = await this.screenRepository.findById(id);
-      console.log("🚀 ~ UpdateScreenUseCase ~ execute ~ existingScreen:", existingScreen)
       if (!existingScreen) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
       }
 
-      const existingScreenName = await this.screenRepository.findScreenByName(dto.name, dto.theaterId, id);
+      const existingScreenName = await this.screenRepository.findScreenByName(
+        dto.name,
+        dto.theaterId,
+        id,
+      );
       if (existingScreenName) {
-        throw new CustomError(ERROR_MESSAGES.VALIDATION.SCREEN_NAME_ALREADY_EXISTS, HttpResCode.BAD_REQUEST);
+        throw new CustomError(
+          ERROR_MESSAGES.VALIDATION.SCREEN_NAME_ALREADY_EXISTS,
+          HttpResCode.BAD_REQUEST,
+        );
       }
 
       let theaterId: Types.ObjectId | null = existingScreen.theaterId;
       if (dto.theaterId && dto.theaterId !== existingScreen.theaterId?.toString()) {
         if (!mongoose.Types.ObjectId.isValid(dto.theaterId)) {
-          throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_THEATER_ID, HttpResCode.BAD_REQUEST);
+          throw new CustomError(
+            ERROR_MESSAGES.VALIDATION.INVALID_THEATER_ID,
+            HttpResCode.BAD_REQUEST,
+          );
         }
         theaterId = new mongoose.Types.ObjectId(dto.theaterId);
       }
@@ -40,7 +49,10 @@ export class UpdateScreenUseCase implements IUpdateScreenUseCase {
       let seatLayoutId: Types.ObjectId | null = existingScreen.seatLayoutId;
       if (dto.seatLayoutId) {
         if (!mongoose.Types.ObjectId.isValid(dto.seatLayoutId)) {
-          throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_SEAT_LAYOUT_ID, HttpResCode.BAD_REQUEST);
+          throw new CustomError(
+            ERROR_MESSAGES.VALIDATION.INVALID_SEAT_LAYOUT_ID,
+            HttpResCode.BAD_REQUEST,
+          );
         }
         seatLayoutId = new mongoose.Types.ObjectId(dto.seatLayoutId);
       }
@@ -59,15 +71,27 @@ export class UpdateScreenUseCase implements IUpdateScreenUseCase {
           isDolby: dto.amenities.isDolby ?? existingScreen.amenities.isDolby,
         },
         existingScreen.createdAt,
-        new Date()
+        new Date(),
       );
 
       const savedScreen = await this.screenRepository.updateScreenDetails(updatedScreen);
-      console.log("🚀 ~ UpdateScreenUseCase ~ execute ~ savedScreen:", savedScreen)
-
+      if (!savedScreen) {
+        throw new CustomError(
+          ERROR_MESSAGES.DATABASE.RECORD_NOT_SAVED,
+          HttpResCode.INTERNAL_SERVER_ERROR,
+        );
+      }
       if (oldTheaterId !== savedScreen.theaterId?._id.toString()) {
-        await this.theaterRepository.updateScreens(oldTheaterId, savedScreen._id?.toString() || '', 'pull'); 
-        await this.theaterRepository.updateScreens(savedScreen.theaterId?._id.toString() || '', savedScreen._id?.toString() || '', 'push'); 
+        await this.theaterRepository.updateScreens(
+          oldTheaterId,
+          savedScreen._id?.toString() || '',
+          'pull',
+        );
+        await this.theaterRepository.updateScreens(
+          savedScreen.theaterId?._id.toString() || '',
+          savedScreen._id?.toString() || '',
+          'push',
+        );
       }
 
       return savedScreen;
@@ -75,7 +99,10 @@ export class UpdateScreenUseCase implements IUpdateScreenUseCase {
       if (error instanceof CustomError) {
         throw error;
       }
-      throw new CustomError(ERROR_MESSAGES.DATABASE.FAILED_UPDATING_RECORD, HttpResCode.INTERNAL_SERVER_ERROR);
+      throw new CustomError(
+        ERROR_MESSAGES.DATABASE.FAILED_UPDATING_RECORD,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

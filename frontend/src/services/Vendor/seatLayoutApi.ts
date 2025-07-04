@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 import { VENDOR_ENDPOINTS } from '../../constants/apiEndPoint';
 import api from '../../config/axios.config';
 import { CreateSeatLayoutRequest, SeatLayoutResponse, ApiResponse } from '../../types/seatLayout';
@@ -38,7 +38,25 @@ export const fetchSeatLayouts = async (params: {
 }): Promise<SeatLayoutResponse[]> => {
   try {
     const response = await api.get(VENDOR_ENDPOINTS.fetchSeatLayouts, { params });
-    console.log("🚀 ~ fetchSeatLayouts ~ response:", response.data.data);
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      const message = error.response.data?.message || ERROR_MESSAGES.FAILED_CREATE_LAYOUT;
+      throw new ApiError(message, error.response.status);
+    }
+    throw new ApiError(ERROR_MESSAGES.NETWORK_ERROR, 500);
+  }
+}
+
+export const fetchSeatLayoutsVendorCreateScreen = async (params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}): Promise<SeatLayoutResponse[]> => {
+  try {
+    const response = await api.get(VENDOR_ENDPOINTS.fetchSeatLayouts, { params });
     return response.data.data.seatLayouts;
   } catch (error) {
     if (error instanceof AxiosError && error.response) {
@@ -49,7 +67,7 @@ export const fetchSeatLayouts = async (params: {
   }
 };
 
-export const updateSeatLayout = async (id: string, data: CreateSeatLayoutRequest): Promise<unknown> => {
+export const updateSeatLayout = async (id: string, data: any): Promise<unknown> => {
   try {
     const response = await api.put(`${VENDOR_ENDPOINTS.updateLayout}/${id}`, data);
     return response.data;
@@ -60,4 +78,26 @@ export const updateSeatLayout = async (id: string, data: CreateSeatLayoutRequest
     }
     throw new ApiError(ERROR_MESSAGES.NETWORK_ERROR, 500);
   }
+};
+
+export const findSeatLayoutById = async (id: string): Promise<unknown> => {
+  try {
+    const response = await api.get(`${VENDOR_ENDPOINTS.findSeatLayouts}/${id}`);
+    return response.data.data;
+  } catch (error) {
+    if (error instanceof AxiosError && error.response) {
+      const message = error.response.data?.message || ERROR_MESSAGES.FAILED_CREATE_LAYOUT;
+      throw new ApiError(message, error.response.status);
+    }
+    throw new ApiError(ERROR_MESSAGES.NETWORK_ERROR, 500);
+  }
+};
+
+
+export const uploadToCloudinary = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "olx-clone1");
+  const response = await axios.post(VENDOR_ENDPOINTS.imageUpload,formData);
+  return response.data.secure_url;
 };

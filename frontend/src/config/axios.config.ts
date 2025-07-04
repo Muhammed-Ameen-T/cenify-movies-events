@@ -40,17 +40,17 @@ api.interceptors.request.use(
 
     console.log(SUCCESS_MESSAGES.INTERCEPTOR_REQUEST_SUCCESS);
 
-    let accessToken = store.getState().auth.accessToken;
+    const accessToken = store.getState().auth.accessToken;
 
     // If no access token, try to refresh
-    if (!accessToken) {
-      try {
-        accessToken = await refreshAccessToken();
-      } catch (error) {
-        store.dispatch(stopLoading());
-        return Promise.reject(error);
-      }
-    }
+    // if (!accessToken) {
+    //   try {
+    //     accessToken = await refreshAccessToken();
+    //   } catch (error) {
+    //     store.dispatch(stopLoading());
+    //     return Promise.reject(error);
+    //   }
+    // }
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;

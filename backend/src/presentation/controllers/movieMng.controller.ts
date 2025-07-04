@@ -11,6 +11,8 @@ import {
   UpdateMovieStatusDTO,
   UpdateMovieDTO,
   FetchMoviesDTO,
+  FetchMoviesUserDTO,
+  SubmitRatingDTO,
 } from '../../application/dtos/movie.dto';
 import { IMovieMngController } from './interface/movieMng.controller.interface';
 import { ICreateMovieUseCase } from '../../domain/interfaces/useCases/Admin/createMovie.interface';
@@ -20,6 +22,9 @@ import { IUpdateMovieUseCase } from '../../domain/interfaces/useCases/Admin/upda
 import { IFindMovieByIdUseCase } from '../../domain/interfaces/useCases/Admin/findMovieById.interface';
 import { SuccessMsg } from '../../utils/constants/commonSuccessMsg.constants';
 import mongoose from 'mongoose';
+import { IFetchMoviesUserUseCase } from '../../domain/interfaces/useCases/User/fetchMovieUser.interface';
+import { IRateMovieUseCase } from '../../domain/interfaces/useCases/User/rateMovie.interface';
+import { IMovieRepository } from '../../domain/interfaces/repositories/movie.repository';
 
 @injectable()
 export class MovieMngController implements IMovieMngController {
@@ -28,12 +33,15 @@ export class MovieMngController implements IMovieMngController {
     @inject('FetchMoviesUseCase') private fetchMoviesUseCase: IFetchMoviesUseCase,
     @inject('UpdateMovieStatusUseCase') private updateMovieStatusUseCase: IUpdateMovieStatusUseCase,
     @inject('UpdateMovieUseCase') private updateMovieUseCase: IUpdateMovieUseCase,
-    @inject('FindMovieByIdUseCase') private findMovieByIdUseCase: IFindMovieByIdUseCase
+    @inject('FindMovieByIdUseCase') private findMovieByIdUseCase: IFindMovieByIdUseCase,
+    @inject('FetchMoviesUserUseCase') private fetchMoviesUserUseCase: IFetchMoviesUserUseCase,
+    @inject('RateMovieUseCase') private rateMovieUseCase: IRateMovieUseCase,
+    @inject('MovieRepository') private movieRepository: IMovieRepository,
   ) {}
 
   async createMovie(req: Request, res: Response): Promise<void> {
     try {
-      console.log("🚀 ~ MovieMngController ~ createMovie ~ req.body:", req.body);
+      console.log('🚀 ~ MovieMngController ~ createMovie ~ req.body:', req.body);
       const {
         name,
         genre,
@@ -59,9 +67,9 @@ export class MovieMngController implements IMovieMngController {
         releaseDate,
         is3D,
         crew,
-        cast
+        cast,
       );
-      console.log("🚀 ~ MovieMngController ~ createMovie ~ dto:", dto);
+      console.log('🚀 ~ MovieMngController ~ createMovie ~ dto:', dto);
       const movie = await this.createMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_ADDED, movie);
     } catch (error) {
@@ -154,7 +162,7 @@ export class MovieMngController implements IMovieMngController {
         releaseDate,
         is3D,
         crew,
-        cast
+        cast,
       );
       const movie = await this.updateMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_UPDATED, movie);
@@ -181,6 +189,137 @@ export class MovieMngController implements IMovieMngController {
         error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND;
       const statusCode = error instanceof CustomError ? error.statusCode : HttpResCode.NOT_FOUND;
       sendResponse(res, statusCode, errorMessage);
+    }
+  }
+
+  async fetchMoviesUser(req: Request, res: Response): Promise<void> {
+    try {
+      const { page, limit, search, status, genre, sortBy, sortOrder } = req.query;
+      let { latitude, longitude, selectedLocation } = req.cookies;
+
+      if (!latitude || !longitude || !selectedLocation) {
+        selectedLocation = 'Calicut';
+        latitude = 11.5;
+        longitude = 76.0;
+      }
+
+      const params: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        status?: string[];
+        genre?: string[];
+        sortBy?: string;
+        sortOrder?: 'asc' | 'desc';
+        latitude: number;
+        longitude: number;
+        selectedLocation: string;
+      } = {
+        page: page ? parseInt(page as string) : undefined,
+        limit: limit ? parseInt(limit as string) : undefined,
+        search: search ? (search as string) : undefined,
+        status: status ? (status as string).split(',') : undefined,
+        genre: genre ? (genre as string).split(',') : undefined,
+        sortBy: sortBy ? (sortBy as string) : undefined,
+        sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+        selectedLocation: selectedLocation as string,
+      };
+
+      // Validate DTO
+      const dto = new FetchMoviesUserDTO();
+      Object.assign(dto, params);
+      const errors = await validate(dto);
+      if (errors.length > 0) {
+        throw new CustomError('Invalid query or location parameters', HttpResCode.BAD_REQUEST);
+      }
+
+      const result = await this.fetchMoviesUserUseCase.execute(params);
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
+    } catch (error) {
+      const errorMessage =
+        error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND;
+      const statusCode = error instanceof CustomError ? error.statusCode : HttpResCode.NOT_FOUND;
+      sendResponse(res, statusCode, errorMessage);
+    }
+  }
+
+  async submitRating(req: Request, res: Response): Promise<void> {
+    try {
+      const { movieId, theaterId, movieRating, theaterRating, review } = req.body;
+      console.log('🚀 ~ MovieMngController ~ submitRating ~ req.body:', req.body);
+
+      const userId = req.decoded?.userId;
+
+      if (!movieId || !theaterId || !userId) {
+        throw new CustomError('Missing required fields', HttpResCode.BAD_REQUEST);
+      }
+
+      const dto = new SubmitRatingDTO(
+        userId,
+        movieId,
+        theaterId,
+        theaterRating,
+        movieRating,
+        review,
+      );
+
+      const result = await this.rateMovieUseCase.execute(dto);
+      sendResponse(res, HttpResCode.OK, 'Rating submitted successfully', result);
+    } catch (error) {
+      const errorMessage =
+        error instanceof CustomError
+          ? error.message
+          : ERROR_MESSAGES.GENERAL.FAILED_UPDATING_RECORD;
+      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    }
+  }
+
+  async likeOrUnlikeMovie(req: Request, res: Response): Promise<void> {
+    try {
+      const { movieId, isLike } = req.body;
+      const userId = req.decoded?.userId;
+
+      if (!movieId || typeof isLike !== 'boolean' || !userId) {
+        throw new CustomError(
+          ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
+          HttpResCode.BAD_REQUEST,
+        );
+      }
+
+      const updatedMovie = await this.movieRepository.likeMovie(movieId, userId, isLike);
+
+      if (!updatedMovie) {
+        throw new CustomError(ERROR_MESSAGES.GENERAL.MOVIE_NOT_UPDATED, HttpResCode.NOT_FOUND);
+      }
+
+      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_UPDATED, updatedMovie);
+    } catch (error) {
+      const message =
+        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.MOVIE_NOT_UPDATED;
+      sendResponse(res, HttpResCode.BAD_REQUEST, message);
+    }
+  }
+
+  async isMovieLiked(req: Request, res: Response): Promise<void> {
+    try {
+      const { movieId } = req.params;
+      const userId = req.decoded?.userId;
+
+      if (!movieId || !userId) {
+        throw new CustomError(
+          ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
+          HttpResCode.BAD_REQUEST,
+        );
+      }
+
+      const isLiked = await this.movieRepository.hasUserLikedMovie(movieId, userId);
+      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_FETCHED, { isLiked });
+    } catch (error) {
+      const message =
+        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.FAILED_FETCH_LIKED;
+      sendResponse(res, HttpResCode.BAD_REQUEST, message);
     }
   }
 }

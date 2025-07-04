@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongoose';
+import { Min, IsEnum } from 'class-validator';
 
 export class CreateMovieDTO {
   constructor(
@@ -13,12 +14,15 @@ export class CreateMovieDTO {
     public releaseDate: string,
     public is3D: boolean,
     public crew: { id?: string; name: string; role: string; profileImage?: string }[],
-    public cast: { id?: string; name: string; as: string; profileImage?: string }[]
+    public cast: { id?: string; name: string; as: string; profileImage?: string }[],
   ) {}
 }
 
 export class UpdateMovieStatusDTO {
-  constructor(public id: string, public status: string) {}
+  constructor(
+    public id: string,
+    public status: string,
+  ) {}
 }
 
 export class UpdateMovieDTO {
@@ -35,11 +39,20 @@ export class UpdateMovieDTO {
     public releaseDate: string,
     public is3D: boolean,
     public crew: { id?: string; name: string; role: string; profileImage?: string }[],
-    public cast: { id?: string; name: string; as: string; profileImage?: string }[]
+    public cast: { id?: string; name: string; as: string; profileImage?: string }[],
   ) {}
 }
 
-
+export class SubmitRatingDTO {
+  constructor(
+    public userId: string,
+    public movieId: string,
+    public theaterId: string,
+    public theaterRating: number,
+    public movieRating: number,
+    public movieReview: string,
+  ) {}
+}
 
 import { IsOptional, IsString, IsNumber, IsIn, IsArray } from 'class-validator';
 
@@ -76,3 +89,45 @@ export class FetchMoviesDTO {
   sortOrder?: 'asc' | 'desc';
 }
 
+export class FetchMoviesUserDTO {
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  page?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  limit?: number;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  status?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  genre?: string[];
+
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
+
+  @IsOptional()
+  @IsEnum(['asc', 'desc'])
+  sortOrder?: 'asc' | 'desc';
+
+  @IsNumber()
+  latitude?: number;
+
+  @IsNumber()
+  longitude?: number;
+
+  @IsString()
+  selectedLocation?: string;
+}

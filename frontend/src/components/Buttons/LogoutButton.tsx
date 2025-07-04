@@ -4,6 +4,7 @@ import { clearAuth } from '../../store/slices/authSlice';
 import axios from 'axios';
 import { API_BASE_URL } from '../../constants/apiEndPoint';
 import { useNavigate } from 'react-router-dom';
+import api from '../../config/axios.config';
 
 const LogoutButton = () => {
   const navigate = useNavigate()
@@ -13,7 +14,7 @@ const LogoutButton = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/auth/logout`);
+      await api.post(`/auth/logout`);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
 

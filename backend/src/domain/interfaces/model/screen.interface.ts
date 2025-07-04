@@ -1,4 +1,4 @@
-import {Document, ObjectId, Types } from 'mongoose';
+import { Document, ObjectId, Types } from 'mongoose';
 
 export interface IScreen extends Document {
   _id: ObjectId;

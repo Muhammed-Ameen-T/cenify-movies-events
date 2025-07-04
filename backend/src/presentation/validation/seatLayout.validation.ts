@@ -21,26 +21,28 @@ export const createSeatLayoutSchema = z.object({
         row: z.number().int().min(0, 'Row must be non-negative'),
         column: z.number().int().min(0, 'Column must be non-negative'),
         number: z.string().min(1, 'Seat number is required'),
-      })
+      }),
     )
     .refine(
       (seats) => {
         const seatNumbers = seats.map((s) => s.number);
         return seatNumbers.length === new Set(seatNumbers).size;
       },
-      { message: 'Seat numbers must be unique' }
+      { message: 'Seat numbers must be unique' },
     )
     .refine(
       (seats) => {
         const seatUuids = seats.map((s) => s.uuid);
         return seatUuids.length === new Set(seatUuids).size;
       },
-      { message: 'Seat UUIDs must be unique' }
+      { message: 'Seat UUIDs must be unique' },
     )
     .refine(
       (seats) => {
-        return seats.every((seat) => seat.row < (this as any).rowCount && seat.column < (this as any).columnCount);
+        return seats.every(
+          (seat) => seat.row < (this as any).rowCount && seat.column < (this as any).columnCount,
+        );
       },
-      { message: 'Seat positions must be within rowCount and columnCount' }
+      { message: 'Seat positions must be within rowCount and columnCount' },
     ),
 });

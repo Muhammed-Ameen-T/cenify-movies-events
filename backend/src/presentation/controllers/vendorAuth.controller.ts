@@ -6,7 +6,7 @@ import { injectable, inject, container } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
-import { CustomError } from '../../utils/errors/custom.error';  
+import { CustomError } from '../../utils/errors/custom.error';
 
 import {
   SendOtpVendorDTO,
@@ -52,16 +52,17 @@ export class VendorAuthController implements IVendorAuthController {
 
   async verifyOtp(req: Request, res: Response): Promise<void> {
     try {
-      const { name, email, password,phone, accountType, otp } = req.body;
-      const dto = new VerifyOtpVendorDTO(name, email, password,phone, otp);
+      const { name, email, password, phone, accountType, otp } = req.body;
+      const dto = new VerifyOtpVendorDTO(name, email, password, phone, otp);
       const result = await this.verifyOtpUseCase.execute(dto);
-      
+
       sendResponse(res, HttpResCode.OK, SuccessMsg.USER_REGISTERED, {
         accessToken: result.accessToken,
         user: result.user,
       });
     } catch (error) {
-      const errorMessage = error instanceof CustomError ? error.message : ERROR_MESSAGES.VALIDATION.INVALID_OTP;
+      const errorMessage =
+        error instanceof CustomError ? error.message : ERROR_MESSAGES.VALIDATION.INVALID_OTP;
       sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
     }
   }
@@ -86,19 +87,31 @@ export class VendorAuthController implements IVendorAuthController {
         error instanceof CustomError
           ? error.message
           : ERROR_MESSAGES.AUTHENTICATION.PERMISSION_DENIED;
-      sendResponse(res, HttpResCode.UNAUTHORIZED, errorMessage);      
+      sendResponse(res, HttpResCode.UNAUTHORIZED, errorMessage);
     }
   }
 
   async createNewTheater(req: Request, res: Response): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
-      const {name,location,facilities,intervalTime,gallery,email,phone,description} = req.body;
-      const dto = new TheaterDetailsDTO(name,location,facilities,intervalTime,gallery,email,phone,description,vendorId);
+      const { name, location, facilities, intervalTime, gallery, email, phone, description } =
+        req.body;
+      const dto = new TheaterDetailsDTO(
+        name,
+        location,
+        facilities,
+        intervalTime,
+        gallery,
+        email,
+        phone,
+        description,
+        vendorId,
+      );
       const theater = await this.createTheaterUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, 'Theater details updated successfully.', theater);
     } catch (error) {
-      const errorMessage = error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_SAVED;
+      const errorMessage =
+        error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_SAVED;
       sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
     }
   }

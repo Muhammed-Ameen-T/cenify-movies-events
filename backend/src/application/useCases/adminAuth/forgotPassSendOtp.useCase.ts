@@ -15,7 +15,7 @@ import { generateOtp } from '../../../utils/helpers/otp.utils';
 export class ForgotPasswordSendOtpUseCase implements IForgotPasswordSendOtpUseCase {
   constructor(
     @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('RedisService') private redisService: RedisService
+    @inject('RedisService') private redisService: RedisService,
   ) {}
 
   async execute(email: string): Promise<void> {
@@ -32,7 +32,10 @@ export class ForgotPasswordSendOtpUseCase implements IForgotPasswordSendOtpUseCa
       console.log('RequestPasswordResetUseCase: Stored OTP in Redis:', { otpKey, otp });
     } catch (error) {
       console.error('RequestPasswordResetUseCase: Redis error:', error);
-      throw new CustomError(ERROR_MESSAGES.DATABASE.FAILED_STORING_OTP, HttpResCode.INTERNAL_SERVER_ERROR);
+      throw new CustomError(
+        ERROR_MESSAGES.DATABASE.FAILED_STORING_OTP,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
     }
 
     try {
@@ -40,7 +43,10 @@ export class ForgotPasswordSendOtpUseCase implements IForgotPasswordSendOtpUseCa
       console.log('RequestPasswordResetUseCase: OTP email sent to:', email);
     } catch (error) {
       console.error('RequestPasswordResetUseCase: Email service error:', error);
-      throw new CustomError(ERROR_MESSAGES.GENERAL.FAILED_SENDING_OTP, HttpResCode.INTERNAL_SERVER_ERROR);
+      throw new CustomError(
+        ERROR_MESSAGES.GENERAL.FAILED_SENDING_OTP,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

@@ -107,12 +107,28 @@
     };
   }
 
+export interface Transaction {
+  id: string;
+  amount: number;
+  remark?: string;
+  type: 'credit' | 'debit';
+  source: 'loyality' | 'refund' | 'topup' | 'booking';
+  createdAt: string;
+  status: 'completed' | 'pending' | 'failed';
+}
 
+
+export interface WalletTransactionsResponse {
+  transactions: Transaction[];
+  total: number;
+  creditCount: number;
+  debitCount: number;
+}
 
 
 
   // User profile types
-export type TabType = "account" | "bookings" | "notifications" | "rewards" | "loyalty" | "moviepass";
+export type TabType = "account" | "bookings" | "notifications" | "rewards" | "wallet" | "moviepass";
 
 export interface UserProfile {
   name: string;
@@ -120,8 +136,20 @@ export interface UserProfile {
   phone: string;
   dateOfBirth: string;
   joinedDate: string;
-  loyaltyPoints: number;
+  loyalityPoints: number;
   profileImage: string;
+}
+
+export interface UserResponseDTO {
+  id: string;
+  name: string;
+  email: string;
+  phone: number | null;
+  role: string;
+  isBlocked: boolean;
+  createdAt: string;
+  updatedAt: string;
+  profileImage?: string;
 }
 
 export interface Booking {
@@ -135,15 +163,51 @@ export interface Booking {
   upcoming: boolean;
 }
 
+// src/types/notification.types.ts
+
 export interface Notification {
-  id: string;
+  _id: string;
+  userId?: string; 
   title: string;
-  message: string;
-  date: string;
-  read: boolean;
+  type: string; 
+  description: string; 
+  bookingId?: string; 
+  createdAt: Date;
+  updatedAt: Date;
+  isRead: boolean; 
+  isGlobal?: boolean;
+  readedUsers?: string[]; 
+}
+export interface NotificationDocument {
+  _id: string;
+  userId?: string; 
+  title: string;
+  type: string; 
+  description: string; 
+  bookingId?: string; 
+  createdAt: Date;
+  updatedAt: Date;
+  isRead: boolean; 
+  isGlobal?: boolean;
+  readedUsers?: string[]; 
 }
 
 export interface PasswordChange {
   oldPassword: string;
   newPassword: string;
+}
+
+export interface WalletData {
+  balance: number;
+  createdAt: Date;
+  transactions: {
+    amount: number;
+    remark: string;
+    type: 'debit' | 'credit';
+    source: 'loyality' | 'refund' | 'topup' | 'booking';
+    createdAt: string;
+  }[];
+  updatedAt: Date;
+  userId: string;
+  _id: string;
 }

@@ -13,7 +13,7 @@ import { ITheaterRepository } from '../../../domain/interfaces/repositories/thea
 export class CreateScreenUseCase implements ICreateScreenUseCase {
   constructor(
     @inject('ScreenRepository') private screenRepository: IScreenRepository,
-    @inject('TheaterRepository') private theaterRepository: ITheaterRepository
+    @inject('TheaterRepository') private theaterRepository: ITheaterRepository,
   ) {}
 
   async execute(dto: CreateScreenDTO): Promise<Screen> {
@@ -23,32 +23,34 @@ export class CreateScreenUseCase implements ICreateScreenUseCase {
       new mongoose.Types.ObjectId(dto.theaterId),
       new mongoose.Types.ObjectId(dto.seatLayoutId),
       [],
-      dto.amenities
+      dto.amenities,
     );
 
-    const existingScreenName = await this.screenRepository.findScreenByName(dto.name,dto.theaterId);
-    if(existingScreenName){
+    const existingScreenName = await this.screenRepository.findScreenByName(
+      dto.name,
+      dto.theaterId,
+    );
+    if (existingScreenName) {
       throw new CustomError(
         ERROR_MESSAGES.VALIDATION.SCREEN_NAME_ALREADY_EXISTS,
-        HttpResCode.BAD_REQUEST
+        HttpResCode.BAD_REQUEST,
       );
     }
 
-    
-    console.log("🚀 ~ CreateScreenUseCase ~ execute ~ newScreen:", newScreen);
-    
+    console.log('🚀 ~ CreateScreenUseCase ~ execute ~ newScreen:', newScreen);
+
     try {
       const savedScreen = await this.screenRepository.create(newScreen);
       await this.theaterRepository.updateScreens(
         savedScreen.theaterId?.toString() || '',
         savedScreen._id?.toString() || '',
-        'push'
+        'push',
       );
       return savedScreen;
     } catch (error) {
       throw new CustomError(
         ERROR_MESSAGES.DATABASE.RECORD_NOT_SAVED,
-        HttpResCode.INTERNAL_SERVER_ERROR
+        HttpResCode.INTERNAL_SERVER_ERROR,
       );
     }
   }

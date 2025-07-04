@@ -1,8 +1,8 @@
-import { SeatLayout, Seat } from '../../entities/seatLayout.entity';
+// src/domain/interfaces/repositories/seatLayout.repository.ts
+import mongoose from 'mongoose';
+import { SeatLayout, Seat } from '../../../domain/entities/seatLayout.entity';
 
 export interface ISeatLayoutRepository {
-  create(seatLayout: SeatLayout): Promise<SeatLayout>;
-  createSeats(seats: Seat[]): Promise<Seat[]>;
   findByVendor(params: {
     vendorId: string;
     page?: number;
@@ -11,4 +11,10 @@ export interface ISeatLayoutRepository {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ seatLayouts: any[]; totalCount: number }>;
+  create(seatLayout: SeatLayout): Promise<SeatLayout>;
+  createSeats(seats: Seat[]): Promise<Seat[]>;
+  // New methods
+  update(seatLayout: SeatLayout): Promise<SeatLayout>;
+  replaceSeats(seatLayoutId: mongoose.Types.ObjectId, seats: Seat[]): Promise<Seat[]>;
+  findById(id: string): Promise<SeatLayout | null>;
 }

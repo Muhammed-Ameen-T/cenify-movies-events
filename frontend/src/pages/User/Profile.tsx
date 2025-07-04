@@ -1,7 +1,6 @@
-// src/pages/TheaterProfilePage.tsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Bell, Ticket, Gift, Star, Film, LogOut, X, Menu } from 'lucide-react';
+import { User, Bell, Ticket, Gift, Star, Film, LogOut, X, Menu, Wallet } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { TabType, UserProfile, PasswordChange } from '../../types/index';
 import { mockUser, mockBookings, mockNotifications } from '../../Data/MockData';
@@ -12,23 +11,27 @@ import { toast } from 'react-hot-toast';
 // Components
 import BookingsTab from '../../components/UserProfile/BookingTab';
 import NotificationsTab from '../../components/UserProfile/NotificationTab';
-import RewardsTab from '../../components/UserProfile/RewardTab';
-import LoyaltyTab from '../../components/UserProfile/LoyalityTab';
+import WalletTab from '../../components/UserProfile/WalletTab';
 import MoviePassTab from '../../components/UserProfile/MoviePassTab';
-import ProfileModal from '../../components/UserProfile/ProfileModal';
-import PasswordModal from '../../components/UserProfile/PasswordModal';
-import ImageCropperModal from '../../components/UserProfile/ImageCroppperModal'; // Fixed typo
+import ProfileModal from '../../components/UserProfile/ProfileUpdateModal';
+import PasswordModal from '../../components/UserProfile/ChangePasswordModal';
+import ImageCropperModal from '../../components/UserProfile/ImageCroppperModal';
 import AccountTab from '../../components/UserProfile/AccountTab';
+import api from '../../config/axios.config';
+import { useDispatch } from 'react-redux';
+import { clearAuth } from '../../store/slices/authSlice';
+import { showSuccessToast } from '../../utils/toast';
 
 export default function TheaterProfilePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['currentUser'],
     queryFn: async () => {
-      console.log('🚀 ~ useQuery ~ Calling getCurrentUser');
       return getCurrentUser();
     },
     staleTime: 5 * 60 * 1000,
@@ -36,16 +39,13 @@ export default function TheaterProfilePage() {
     retry: 2,
   });
 
-  // Get tab from query parameter
-  const queryParams = new URLSearchParams(location.search);
-  const initialTab = queryParams.get('tab') || 'account';
+  // Extract tab from route path
+  const pathSegments = location.pathname.split('/');
+  const tabFromPath = pathSegments[pathSegments.length - 1].replace('-tab', '') as TabType;
+  const validTabs: TabType[] = ['account', 'bookings', 'notifications', 'wallet', 'moviepass'];
+  const initialTab = validTabs.includes(tabFromPath) ? tabFromPath : 'account';
 
-  // Validate initial tab
-  const validTabs: TabType[] = ['account', 'bookings', 'notifications', 'rewards', 'loyalty', 'moviepass'];
-  const [activeTab, setActiveTab] = useState<TabType>(
-    validTabs.includes(initialTab as TabType) ? (initialTab as TabType) : 'account'
-  );
-
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [editedProfile, setEditedProfile] = useState<UserProfile | null>(null);
@@ -69,20 +69,19 @@ export default function TheaterProfilePage() {
     }
   }, [data]);
 
-  // Update URL when activeTab changes
+  // Update activeTab when route changes
   useEffect(() => {
-    if (activeTab !== queryParams.get('tab')) {
-      navigate(`/account?tab=${activeTab}`, { replace: true });
+    const currentTab = pathSegments[pathSegments.length - 1].replace('-tab', '') as TabType;
+    if (validTabs.includes(currentTab) && currentTab !== activeTab) {
+      setActiveTab(currentTab);
     }
-  }, [activeTab, navigate, queryParams]);
+  }, [location.pathname]);
 
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: updateProfile,
     onSuccess: async (updatedUser) => {
-      // Update cache immediately for optimistic update
       queryClient.setQueryData(['currentUser'], updatedUser);
-      // Refetch to ensure we have the full, latest user data from the backend
       await refetch();
       setEditedProfile(updatedUser);
       setIsModalOpen(false);
@@ -159,13 +158,23 @@ export default function TheaterProfilePage() {
   // Form validation
   const validateForm = (currentProfile: UserProfile, originalProfile: UserProfile | null): boolean => {
     const newErrors: Partial<Record<keyof UserProfile, string>> = {};
-    // Only validate if the field is being submitted
-    if (currentProfile.name !== originalProfile?.name && !currentProfile.name?.trim()) {
-      newErrors.name = 'Name is required';
+
+    if (currentProfile.name !== originalProfile?.name) {
+      if (!currentProfile.name?.trim()) {
+        newErrors.name = 'Name is required';
+      } else if (currentProfile.name.trim().length < 2) {
+        newErrors.name = 'Name must be at least 2 characters';
+      }
     }
-    if (currentProfile.phone !== originalProfile?.phone && !currentProfile.phone?.trim()) {
-      newErrors.phone = 'Phone number is required';
+
+    if (currentProfile.phone !== originalProfile?.phone) {
+      if (!currentProfile.phone?.trim()) {
+        newErrors.phone = 'Phone number is required';
+      } else if (!/^\d{10}$/.test(currentProfile.phone.trim())) {
+        newErrors.phone = 'Phone number must be exactly 10 digits';
+      }
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -204,14 +213,22 @@ export default function TheaterProfilePage() {
     );
   };
 
+   const handleLogout = () => {
+      api.post(`/auth/logout`);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      dispatch(clearAuth());
+      navigate('/');
+      showSuccessToast('User Logout successfully!');
+  };
+
   // Tabs configuration
   const tabs = [
-    { id: 'account', label: 'Account', icon: <User className="w-5 h-5" /> },
-    { id: 'bookings', label: 'Bookings', icon: <Ticket className="w-5 h-5" /> },
-    { id: 'notifications', label: 'Notifications', icon: <Bell className="w-5 h-5" /> },
-    { id: 'rewards', label: 'Rewards', icon: <Gift className="w-5 h-5" /> },
-    { id: 'loyalty', label: 'Loyalty Points', icon: <Star className="w-5 h-5" /> },
-    { id: 'moviepass', label: 'Movie Pass', icon: <Film className="w-5 h-5" /> },
+    { id: 'account', label: 'Account', icon: <User className="w-5 h-5" />, route: 'account-tab' },
+    { id: 'bookings', label: 'Bookings', icon: <Ticket className="w-5 h-5" />, route: 'bookings-tab' },
+    { id: 'notifications', label: 'Notifications', icon: <Bell className="w-5 h-5" />, route: 'notifications-tab' },
+    { id: 'wallet', label: 'Wallet', icon: <Wallet className="w-5 h-5" />, route: 'wallet-tab' },
+    { id: 'moviepass', label: 'Movie Pass', icon: <Film className="w-5 h-5" />, route: 'moviepass-tab' },
   ];
 
   // Animation variants
@@ -220,10 +237,28 @@ export default function TheaterProfilePage() {
     visible: { opacity: 1, transition: { duration: 0.5 } },
   };
 
+  const slideIn = {
+    hidden: { x: -300, opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        damping: 25,
+        stiffness: 120,
+        duration: 0.6,
+      },
+    },
+  };
+
   // Handle tab change
   const handleTabChange = (tabId: TabType) => {
-    setActiveTab(tabId);
-    setIsMobileMenuOpen(false);
+    const tab = tabs.find((t) => t.id === tabId);
+    if (tab) {  
+      setActiveTab(tabId);
+      navigate(`/account/${tab.route}`);
+      setIsMobileMenuOpen(false);
+    }
   };
 
   // Handle authentication error
@@ -235,14 +270,26 @@ export default function TheaterProfilePage() {
   // Handle general error state
   if (isError) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-red-600">Error loading user data: {error?.message || 'Unknown error'}</div>
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 flex justify-center items-center">
+        <div className="text-center p-8 bg-white rounded-3xl shadow-2xl">
+          <div className="text-red-600 text-lg font-semibold">Error loading user data</div>
+          <div className="text-gray-600 mt-2">{error?.message || 'Unknown error'}</div>
+        </div>
       </div>
     );
   }
 
   // Fallback to mockUser if data is undefined
-  const userData = data || mockUser;
+  const userData = data || mockUser
+
+  // Dummy callback functions
+  const handlePurchasePass = () => {
+    console.log('Movie Pass purchased!');
+  };
+
+  const handleViewHistory = () => {
+    console.log('Viewing pass history...');
+  };
 
   // Tab content components
   const renderTabContent = () => {
@@ -258,112 +305,196 @@ export default function TheaterProfilePage() {
           />
         );
       case 'bookings':
-        return <BookingsTab bookings={mockBookings} />;
+        return <BookingsTab />;
       case 'notifications':
-        return <NotificationsTab notifications={mockNotifications} />;
-      case 'rewards':
-        return <RewardsTab />;
-      case 'loyalty':
-        return <LoyaltyTab user={userData} />;
+        return <NotificationsTab  />;
+      case 'wallet':
+        return <WalletTab user={userData} />;
       case 'moviepass':
-        return <MoviePassTab />;
+        return (
+          <MoviePassTab
+            isLoading={false}
+            onViewHistory={handleViewHistory}
+          />
+        );
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Mobile Header */}
-      <div className="bg-white shadow-md p-4 md:hidden flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800">My Profile</h1>
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 rounded-lg hover:bg-gray-100"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2 opacity-30"></div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Mobile Sidebar (Slide-in menu) */}
-          <AnimatePresence>
-            {isMobileMenuOpen && (
-              <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="fixed inset-0 z-50 bg-white md:hidden"
-              >
-                <div className="p-4 flex flex-col h-full">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-gray-800">Menu</h2>
-                    <button
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="p-2 rounded-lg hover:bg-gray-100"
-                    >
-                      <X className="w-6 h-6" />
-                    </button>
+      {/* Mobile Header */}
+      <motion.div
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="bg-white/95 backdrop-blur-sm shadow-xl p-4 md:hidden flex items-center justify-between relative z-10 border-b border-gray-100 fixed top-0 left-0 right-0"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-8 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full"></div>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">My Profile</h1>
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-3 rounded-xl hover:bg-gray-100 transition-all duration-300 bg-white shadow-lg border border-gray-200"
+        >
+          <Menu className="w-6 h-6 text-gray-700" />
+        </motion.button>
+      </motion.div>
+
+      {/* Main Container with proper padding for mobile header */}
+      <div className="pt-0 md:pt-1">
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Mobile Sidebar (Slide-in menu) */}
+            <AnimatePresence>
+              {isMobileMenuOpen && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  <motion.div
+                    initial={{ x: '-100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '-100%' }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    className="fixed left-0 top-0 bottom-0 z-50 bg-white/95 backdrop-blur-xl md:hidden w-80 shadow-2xl"
+                  >
+                    <div className="p-6 flex flex-col h-full">
+                      <div className="flex justify-between items-center mb-8">
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-8 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full"></div>
+                          <h2 className="text-2xl font-black text-gray-900 tracking-tight">Menu</h2>
+                        </div>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="p-2 rounded-xl hover:bg-gray-100 transition-all duration-300"
+                        >
+                          <X className="w-6 h-6 text-gray-700" />
+                        </motion.button>
+                      </div>
+                      <div className="space-y-3 flex-1 overflow-y-auto px-2">
+                        {tabs.map((tab, index) => (
+                          <motion.button
+                            key={tab.id}
+                            initial={{ x: -50, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: index * 0.1 }}
+                            onClick={() => handleTabChange(tab.id as TabType)}
+                            className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+                              activeTab === tab.id
+                                ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black shadow-lg shadow-yellow-400/25'
+                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
+                            }`}
+                          >
+                            <div className={`p-2 rounded-xl ${activeTab === tab.id ? 'bg-white/20' : 'bg-gray-100'}`}>
+                              {tab.icon}
+                            </div>
+                            <span className="font-semibold">{tab.label}</span>
+                          </motion.button>
+                        ))}
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex items-center space-x-4 px-6 py-4 text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-300 mt-4 border border-red-200"
+                      >
+                        <div className="p-2 rounded-xl bg-red-100">
+                          <LogOut className="w-5 h-5" />
+                        </div>
+                        <span className="font-semibold">Sign Out</span>
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+
+            {/* Desktop Fixed Sidebar */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={slideIn}
+              className="hidden lg:block w-80 fixed left-4 top-25 bottom-8 z-50"
+            >
+              <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-6 h-full border border-gray-200 flex flex-col overflow-hidden">
+                <div className="mb-8 flex-shrink-0">
+                  <div className="flex items-center gap-3 mb-0">
+                    <div className="w-1 h-8 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full"></div>
+                    <span className="text-yellow-600 font-bold text-sm uppercase tracking-wider">
+                      Profile Menu
+                    </span>
                   </div>
-                  <div className="space-y-2 flex-1 overflow-y-auto">
-                    {tabs.map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => handleTabChange(tab.id as TabType)}
-                        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                          activeTab === tab.id
-                            ? 'bg-[#FFCC00] text-gray-900'
-                            : 'text-gray-600 hover:bg-gray-100'
+                </div>
+                <div className="space-y-3 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 px-2">
+                  {tabs.map((tab, index) => (
+                    <motion.button
+                      key={tab.id}
+                      initial={{ x: -30, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ scale: 1.02, x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleTabChange(tab.id as TabType)}
+                      className={`w-full flex items-center space-x-4 px-6 py-4 rounded-2xl transition-all duration-300 group ${
+                        activeTab === tab.id
+                          ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black shadow-xl shadow-yellow-400/25'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 hover:shadow-lg'
+                      }`}
+                    >
+                      <div
+                        className={`p-2 rounded-xl transition-all duration-300 ${
+                          activeTab === tab.id ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-gray-200'
                         }`}
                       >
                         {tab.icon}
-                        <span>{tab.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <button className="flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <LogOut className="w-5 h-5" />
-                    <span>Sign Out</span>
-                  </button>
+                      </div>
+                      <span className="font-semibold">{tab.label}</span>
+                    </motion.button>
+                  ))}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <div className="flex-shrink-0 pt-6">
+                  <hr className="mb-6 border-gray-200" />
+                  <motion.button
+                    onClick={handleLogout}
+                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full flex items-center space-x-4 px-6 py-4 text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-300 border border-red-200 hover:border-red-300 hover:shadow-lg group"
+                  >
+                    <div className="p-2 rounded-xl bg-red-100 group-hover:bg-red-200 transition-all duration-300">
+                      <LogOut className="w-5 h-5" />
+                    </div>
+                    <span className="font-semibold">Sign Out</span>
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
 
-          {/* Desktop Sidebar */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeIn}
-            className="hidden md:block w-64 bg-white rounded-xl shadow-lg p-4 h-fit"
-          >
-            <div className="space-y-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabChange(tab.id as TabType)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-[#FFCC00] text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  {tab.icon}
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-              <hr className="my-4" />
-              <button className="w-full flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                <LogOut className="w-5 h-5" />
-                <span>Sign Out</span>
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Main Content */}
-          <div className="flex-1">{renderTabContent()}</div>
+            {/* Main Content with proper margin for fixed sidebar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex-1 lg:ml-80 lg:pl-8"
+            >
+              {renderTabContent()}
+            </motion.div>
+          </div>
         </div>
       </div>
 

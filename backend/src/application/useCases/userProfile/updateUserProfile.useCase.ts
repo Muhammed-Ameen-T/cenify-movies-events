@@ -16,10 +16,7 @@ export class updateUserProfileUseCase implements IupdateUserProfileUseCase {
     // Fetch existing user
     const existingUser = await this.userRepository.findById(id);
     if (!existingUser) {
-      throw new CustomError(
-        ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND,
-        HttpResCode.NOT_FOUND
-      );
+      throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
 
     // Create updated user object
@@ -37,7 +34,7 @@ export class updateUserProfileUseCase implements IupdateUserProfileUseCase {
       existingUser.isBlocked,
       existingUser.role,
       existingUser.createdAt,
-      new Date()
+      new Date(),
     );
 
     // Update user in repository

@@ -26,10 +26,7 @@ export class UpdateUserBlockStatusUseCase implements IUpdateUserBlockStatusUseCa
       // Check if user exists
       const user = await this.userRepository.findById(id);
       if (!user) {
-        throw new CustomError(
-          ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND,
-          HttpResCode.NOT_FOUND,
-        );
+        throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.NOT_FOUND);
       }
 
       // Update block status
