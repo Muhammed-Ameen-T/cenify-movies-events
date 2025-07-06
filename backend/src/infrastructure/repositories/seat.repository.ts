@@ -46,7 +46,11 @@ export class SeatRepository implements ISeatRepository {
     }
   }
 
-  async findSeatsByIdsSession(layoutId: string, seatIds: string[], session?: mongoose.ClientSession): Promise<Seat[]> {
+  async findSeatsByIdsSession(
+    layoutId: string,
+    seatIds: string[],
+    session?: mongoose.ClientSession,
+  ): Promise<Seat[]> {
     try {
       const query = SeatModel.find({
         seatLayoutId: layoutId,

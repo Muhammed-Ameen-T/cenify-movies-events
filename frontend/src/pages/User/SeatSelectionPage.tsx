@@ -1,16 +1,15 @@
-// src/pages/User/TheaterSeatSelection.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Users, 
-  Edit3, 
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  Edit3,
   Crown,
-  X
+  X,
 } from 'lucide-react';
 import screenDummy from '../../assets/screen.png';
 import { fetchSeatSelection, selectSeats } from '../../services/User/seatSelectionApi';
@@ -60,10 +59,10 @@ const TheaterSeatSelection: React.FC = () => {
 
   // Seat selection mutation
   const selectSeatsMutation = useMutation({
-    mutationFn: ({ showId, seatIds }: { showId: string; seatIds: string[] }) => selectSeats(showId, seatIds),
+    mutationFn: ({ showId, seatIds }: { showId: string; seatIds: string[] }) =>
+      selectSeats(showId, seatIds),
     onSuccess: (response) => {
       localStorage.setItem('selectedSeats', JSON.stringify(response.selectedSeats));
-      // Set timer start time before navigation
       localStorage.setItem(`timerStart_${showId}`, Date.now().toString());
       console.log(`Set timerStart_${showId} for navigation to checkout`);
       navigate(`/checkout/${showId}`);
@@ -73,8 +72,7 @@ const TheaterSeatSelection: React.FC = () => {
     },
   });
 
-  // ... (rest of the Socket.IO setup, seat selection logic, and JSX remains unchanged)
-  // Socket.IO setup
+  // Socket.IO setup (unchanged)
   useEffect(() => {
     if (!showId) return;
 
@@ -146,7 +144,7 @@ const TheaterSeatSelection: React.FC = () => {
     };
   }, [showId, queryClient]);
 
-  // Scroll effect
+  // Scroll effect (unchanged)
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 80);
@@ -155,79 +153,79 @@ const TheaterSeatSelection: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Convert seats to row-based structure
+  // Convert seats to row-based structure, sorted A-Z
   const seatsByRow = data?.seats.reduce((acc, seat) => {
-    const row = String.fromCharCode(65 + seat.position.row);
-    acc[row] = acc[row] || [];
-    acc[row][seat.position.col] = seat;
+    const row = String.fromCharCode(65 + seat.position.row); // A, B, C, ...
+    acc[row] = acc[row] || { Regular: [], Premium: [], VIP: [] };
+    acc[row][seat.type].push(seat);
     return acc;
-  }, {} as Record<string, SeatDTO[]>) || {};
+  }, {} as Record<string, { Regular: SeatDTO[]; Premium: SeatDTO[]; VIP: SeatDTO[] }>) || {};
+
+  // Sort seats within each type by column
+  Object.values(seatsByRow).forEach((row) => {
+    row.Regular.sort((a, b) => a.position.col - b.position.col);
+    row.Premium.sort((a, b) => a.position.col - b.position.col);
+    row.VIP.sort((a, b) => a.position.col - b.position.col);
+  });
 
   // Determine dominant seat type per row
-  const getDominantSeatType = (row: SeatDTO[]): string => {
-    if (!row.length) return 'Regular';
-    const typeCounts = row.reduce((acc, seat) => {
-      if (seat) { // Check if seat exists (not undefined)
-        acc[seat.type] = (acc[seat.type] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+  const getDominantSeatType = (row: { Regular: SeatDTO[]; Premium: SeatDTO[]; VIP: SeatDTO[] }): string => {
+    const typeCounts = {
+      Regular: row.Regular.length,
+      Premium: row.Premium.length,
+      VIP: row.VIP.length,
+    };
     return Object.keys(typeCounts).reduce((a, b) => (typeCounts[a] >= typeCounts[b] ? a : b), 'Regular');
   };
 
-  // Get section info based on dominant type
-  const getSectionInfo = (dominantType: string): { name: string; price: number; color: string } => {
+  // Get section info based on seat type
+  const getSectionInfo = (seatType: string): { name: string; price: number; color: string } => {
     if (!data?.seatLayout.seatPrices) return { name: 'Regular', price: 0, color: 'text-gray-700' };
-    
-    switch (dominantType) {
+
+    switch (seatType) {
       case 'Premium':
-        return { 
-          name: 'Premium', 
+        return {
+          name: 'Premium',
           price: data.seatLayout.seatPrices.premium,
-          color: 'text-blue-600'
+          color: 'text-blue-600',
         };
       case 'VIP':
-        return { 
-          name: 'VIP', 
+        return {
+          name: 'VIP',
           price: data.seatLayout.seatPrices.vip,
-          color: 'text-purple-600'
+          color: 'text-purple-600',
         };
       default:
-        return { 
-          name: 'Regular', 
+        return {
+          name: 'Regular',
           price: data.seatLayout.seatPrices.regular,
-          color: 'text-gray-700'
+          color: 'text-gray-700',
         };
     }
   };
 
-  // Create row information with dominant types
-  const getRowsWithDominantTypes = () => {
-    const rows = Object.keys(seatsByRow).map((rowKey) => {
-      const rowSeats = seatsByRow[rowKey].filter((seat) => seat); // Filter out undefined seats
-      const dominantType = getDominantSeatType(rowSeats);
-      return {
+  // Get rows with dominant types and seat groups
+  const getRowsWithSeatTypes = () => {
+    const rows = Object.keys(seatsByRow)
+      .sort() // Sort rows A-Z
+      .map((rowKey) => ({
         key: rowKey,
-        seats: rowSeats,
-        dominantType: dominantType
-      };
-    });
-    
-    return rows;
+        dominantType: getDominantSeatType(seatsByRow[rowKey]),
+        seatGroups: [
+          { type: 'Regular', seats: seatsByRow[rowKey].Regular },
+          { type: 'Premium', seats: seatsByRow[rowKey].Premium },
+          { type: 'VIP', seats: seatsByRow[rowKey].VIP },
+        ].filter((group) => group.seats.length > 0), // Only include non-empty groups
+      }));
+
+    // Determine when to show section info (only for the first row of a group with the same dominant type)
+    return rows.map((row, index) => ({
+      ...row,
+      showSectionInfo: index === 0 || row.dominantType !== rows[index - 1].dominantType,
+    }));
   };
 
-  // Determine if section info should be shown for a row
-  const shouldShowSectionInfo = (currentRowIndex: number, rows: ReturnType<typeof getRowsWithDominantTypes>) => {
-    if (currentRowIndex === 0) return true; // Always show for first row
-    
-    const currentRow = rows[currentRowIndex];
-    const previousRow = rows[currentRowIndex - 1];
-    
-    // Show section info if dominant type changes from previous row
-    return currentRow.dominantType !== previousRow.dominantType;
-  };
-
-  // Seat selection logic
+  // Seat selection logic (unchanged)
   const findOptimalSeats = (clickedSeatId: string, neededCount: number): string[] => {
     if (neededCount <= 1) return [];
     const allSeats = data?.seats || [];
@@ -293,7 +291,14 @@ const TheaterSeatSelection: React.FC = () => {
   };
 
   const getSeatTypeColor = (seat: SeatDTO): string => {
-    return 'border-gray-300 text-gray-600';
+    switch (seat.type) {
+      case 'Premium':
+        return 'border-blue-300 text-blue-600';
+      case 'VIP':
+        return 'border-purple-300 text-purple-600';
+      default:
+        return 'border-gray-300 text-gray-600';
+    }
   };
 
   const handleSeatClick = (seat: SeatDTO) => {
@@ -422,12 +427,11 @@ const TheaterSeatSelection: React.FC = () => {
     </div>
   );
 
-  if (isLoading) return <div className="text-center py-10"><Loader/></div>;
+  if (isLoading) return <div className="text-center py-10"><Loader /></div>;
   if (error) return <div className="text-center py-10 text-red-500">Error: {error.message}</div>;
   if (!data) return <div className="text-center py-10">No data available</div>;
 
-  const rowsWithDominantTypes = getRowsWithDominantTypes();
-  
+  const rowsWithSeatTypes = getRowsWithSeatTypes();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
@@ -453,7 +457,7 @@ const TheaterSeatSelection: React.FC = () => {
                 <div className="flex items-center gap-3 text-xs text-gray-600">
                   <div className="flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
-                    <span>{data.showDetails.theaterName} ,{data.showDetails.theaterCity}</span>
+                    <span>{data.showDetails.theaterName}, {data.showDetails.theaterCity}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
@@ -485,76 +489,73 @@ const TheaterSeatSelection: React.FC = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-3">
-        {/* Other Shows 
-        <div className="mb-0">
-          <h3 className="text-base font-bold text-gray-900 mb-2">Other Shows Today</h3>
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <div className="text-sm text-gray-500">Coming soon...</div>
-          </div>
-        </div>*/}
-
         {/* Seat Selection */}
         <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 py-1 px-6 mb-24">
-          {/* Screen */}
-          
+          <div className="text-center ml-10 mt-5">
+            <div className="relative mx-auto w-full max-w-[190px]">
+              <img src={screenDummy} alt="Screen preview" className="w-full h-auto object-contain" />
+            </div>
+            <p className="text-xs mb-0">All eyes on this way please!</p>
+          </div>
 
           {/* Seat Layout */}
-          <div className="space-y-1 mb-5 mt-3">
-            {rowsWithDominantTypes.map((rowData, rowIndex) => {
-              const { key: row, seats: rowSeats, dominantType } = rowData;
-              const sectionInfo = getSectionInfo(dominantType);
-              const showSectionInfo = shouldShowSectionInfo(rowIndex, rowsWithDominantTypes);
-
-              return (
-                <div key={row}>
-                  {showSectionInfo && (
-                    <div className="flex items-center w-full mb-0">
-                      <span
-                        className={`w-[129px] text-xs font-semibold  bg-gray-100 px-3 py-1 rounded-full inline-block text-center truncate`}
-                      >
-                        Rs. {sectionInfo.price} • {sectionInfo.name}
-                      </span>
-                      <div className="flex-grow flex justify-center ml-3">
-                        <div className="w-2/3 h-px bg-gray-200" />
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-4">
-                    <div className="w-6 text-center font-medium text-gray-700 text-sm">{row}</div>
-                    <div className="flex-1 flex justify-center">
-                      <div className="flex flex-wrap gap-1 justify-center">
-                        {rowSeats.map((seat) => (
-                          <button
-                            key={seat.id}
-                            onClick={() => handleSeatClick(seat)}
-                            disabled={seat.status === 'booked' || seat.status === 'unavailable' || seat.status === 'pending'}
-                            className={`relative w-6 h-6 rounded-sm border-2 text-xs font-semibold transition-all duration-200 hover:scale-105 ${getSeatStatusColor(seat)} ${
-                              seat.status !== 'booked' &&
-                              seat.status !== 'unavailable' &&
-                              seat.status !== 'pending' &&
-                              !selectedSeats.includes(seat.id)
-                                ? getSeatTypeColor(seat)
-                                : ''
-                            }`}
-                          >
-                            {needsCrown(seat, dominantType) && (
-                              <Crown className={`absolute -top-1 -right-1 w-2 h-2 ${getCrownColor(seat)}`} />
-                            )}
-                            {seat.number.replace(/^\D+/, '')}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+          <div className="space-y-0 mb-5 mt-3">
+            {rowsWithSeatTypes.map((rowData) => (
+              <div key={rowData.key} className="space-y-2">
+                <div className="flex items-center gap-0">
+                  <div className="w-10 text-center font-medium text-gray-700 text-sm">{rowData.key}</div>
+                  <div className="flex-1">
+                    {rowData.seatGroups.map((group) => {
+                      const sectionInfo = getSectionInfo(rowData.dominantType);
+                      return (
+                        <div key={`${rowData.key}-${group.type}`} className="mb-1">
+                          {rowData.showSectionInfo && group.type === rowData.dominantType && (
+                            <div className="flex items-center w-full mb-0">
+                              <span
+                                className={`w-[129px] text-xs font-semibold  bg-gray-100 px-3 py-1 rounded-full inline-block text-center truncate`}
+                              >
+                                Rs. {sectionInfo.price} • {sectionInfo.name}
+                              </span>
+                              <div className="flex-grow flex  me-10">
+                                <div className="w-3/3 h-px bg-gray-200" />
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex flex-wrap gap-1 justify-center">
+                            {group.seats.map((seat) => (
+                              <button
+                                key={seat.id}
+                                onClick={() => handleSeatClick(seat)}
+                                disabled={
+                                  seat.status === 'booked' ||
+                                  seat.status === 'unavailable' ||
+                                  seat.status === 'pending'
+                                }
+                                className={`relative w-6 h-6 rounded-sm border-2 text-xs font-semibold transition-all duration-200 hover:scale-105 ${getSeatStatusColor(
+                                  seat
+                                )} ${
+                                  seat.status !== 'booked' &&
+                                  seat.status !== 'unavailable' &&
+                                  seat.status !== 'pending' &&
+                                  !selectedSeats.includes(seat.id)
+                                    ? ''
+                                    : ''
+                                }`}
+                              >
+                                {needsCrown(seat, rowData.dominantType) && (
+                                  <Crown className={`absolute -top-1 -right-1 w-2 h-2 ${getCrownColor(seat)}`} />
+                                )}
+                                {seat.number.replace(/^\D+/, '')}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-              );
-            })}
-            <div className="text-center ml-10 mt-5">
-              <div className="relative mx-auto w-full max-w-[190px]">
-                <img src={screenDummy} alt="Screen preview" className="w-full h-auto object-contain" />
               </div>
-              <p className="text-xs mb-0">All eyes on this way please!</p>
-            </div>
+            ))}
           </div>
 
           {/* Seat Info Legend */}
@@ -576,13 +577,13 @@ const TheaterSeatSelection: React.FC = () => {
               <span className="text-xs text-gray-700">Pending</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="relative w-5 h-5 bg-white border-2 border-gray-300 rounded">
+              <div className="relative w-5 h-5 bg-white border-2 border-blue-300 rounded">
                 <Crown className="absolute -top-1 -right-1 w-2 h-2 text-[#3B82F6]" />
               </div>
               <span className="text-xs text-gray-700">Premium</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="relative w-5 h-5 bg-white border-2 border-gray-300 rounded">
+              <div className="relative w-5 h-5 bg-white border-2 border-purple-300 rounded">
                 <Crown className="absolute -top-1 -right-1 w-2 h-2 text-[#7C3AED]" />
               </div>
               <span className="text-xs text-gray-700">VIP</span>
@@ -646,7 +647,6 @@ const TheaterSeatSelection: React.FC = () => {
               `Select ${selectedSeatCount} Seats to Continue`
             )}
           </button>
-
         </div>
       </div>
 

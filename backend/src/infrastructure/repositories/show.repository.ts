@@ -262,10 +262,10 @@ export class ShowRepository implements IShowRepository {
       const sort: any = {};
       if (sortBy && sortOrder) {
         sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
-      }else {
-        sort.createdAt = -1; 
+      } else {
+        sort.createdAt = -1;
       }
-      
+
       if (Object.keys(sort).length > 0) {
         pipeline.push({ $sort: sort });
       }
@@ -850,19 +850,23 @@ export class ShowRepository implements IShowRepository {
       const showDoc = await query.lean();
       if (!showDoc) return null;
       // Map to Show entity
-      return this.mapToEntity(showDoc)
+      return this.mapToEntity(showDoc);
     } catch (error) {
       console.error('❌ Error finding show:', error);
       throw new Error('Failed to find show');
     }
   }
 
-  async updateBookedSeatsSession(showId: string, bookedSeats: any[], session?: mongoose.ClientSession): Promise<void> {
+  async updateBookedSeatsSession(
+    showId: string,
+    bookedSeats: any[],
+    session?: mongoose.ClientSession,
+  ): Promise<void> {
     try {
       const updateQuery = ShowModel.findByIdAndUpdate(
         showId,
         { $push: { bookedSeats: { $each: bookedSeats } } },
-        { new: true }
+        { new: true },
       );
       if (session) {
         updateQuery.session(session);

@@ -410,7 +410,6 @@ container.register<IFindUserWalletTransactionsUseCase>('WalletTransactionUseCase
   useClass: FindUserWalletTransactionsUseCase,
 });
 
-
 // Booking Repository,Controller,UseCase Registration
 container.register<IBookingRepository>('BookingRepository', { useClass: BookingRepository });
 container.register<ICreateBookingUseCase>('CreateBookingUseCase', {

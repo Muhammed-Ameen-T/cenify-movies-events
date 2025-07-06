@@ -9,7 +9,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import { User } from '../../../domain/entities/user.entity';
 import { VerifyOtpDTO } from '../../../application/dtos/auth.dto';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { IWalletRepository } from '../../../domain/interfaces/repositories/wallet.repository';
 import { Wallet } from '../../../domain/entities/wallet.entity';
 

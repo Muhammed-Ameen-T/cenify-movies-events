@@ -252,11 +252,7 @@ export class MovieRepository implements IMovieRepository {
 
       movieQuery._id = { $in: movieIds };
 
-      const movieDocs = await MovieModel.find(movieQuery)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit)
-        .lean();
+      const movieDocs = await MovieModel.find(movieQuery).sort(sort).skip(skip).limit(limit).lean();
 
       const totalCount = await MovieModel.countDocuments(movieQuery);
 

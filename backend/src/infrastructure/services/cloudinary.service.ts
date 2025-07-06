@@ -28,20 +28,20 @@ export class CloudinaryService {
             return reject(
               new CustomError(
                 error.message || 'Failed to upload image to Cloudinary',
-                HttpResCode.INTERNAL_SERVER_ERROR
-              )
+                HttpResCode.INTERNAL_SERVER_ERROR,
+              ),
             );
           }
           if (!result || !result.secure_url) {
             return reject(
               new CustomError(
                 'Cloudinary upload did not return a valid result',
-                HttpResCode.INTERNAL_SERVER_ERROR
-              )
+                HttpResCode.INTERNAL_SERVER_ERROR,
+              ),
             );
           }
           resolve(result.secure_url);
-        }
+        },
       );
 
       stream.end(fileBuffer);

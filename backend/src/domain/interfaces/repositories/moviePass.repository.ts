@@ -9,7 +9,7 @@ export interface IMoviePassRepository {
   findHistoryByUserId(
     userId: string,
     page: number,
-    limit: number
+    limit: number,
   ): Promise<{
     history: MoviePassHistory[];
     total: number;

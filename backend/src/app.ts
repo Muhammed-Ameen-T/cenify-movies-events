@@ -5,9 +5,10 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { requestLogger } from './presentation/middleware/logger.middleware';
+import errorHandler from './presentation/middleware/errorHandler.middleware';
 import './infrastructure/container';
 import 'tsconfig-paths/register';
-import { container } from './infrastructure/container';   
+import { container } from './infrastructure/container';
 
 // 🔹 Load environment variables
 dotenv.config();
@@ -35,13 +36,13 @@ app.use(cookieParser());
 app.use(express.json());
 
 
-app.use(
-  helmet({
-    crossOriginOpenerPolicy: { policy: "unsafe-none" },
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginEmbedderPolicy: { policy: "require-corp" },
-  })
-);
+// app.use(
+//   helmet({
+//     crossOriginOpenerPolicy: { policy: "unsafe-none" },
+//     crossOriginResourcePolicy: { policy: "cross-origin" },
+//     crossOriginEmbedderPolicy: { policy: "require-corp" },
+//   })
+// );
 
 // 🔹 Routes
 import vendorRoutes from './presentation/routes/vendorAuth.routes';
@@ -77,6 +78,7 @@ app.use('/api/seat-selection', seatSelectionRoutes);
 app.use('/api/booking', bookingRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use(errorHandler);
 app.use(requestLogger);
 
 export default app;

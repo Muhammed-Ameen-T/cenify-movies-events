@@ -41,4 +41,5 @@ export const SuccessMsg = {
   MOVIE_RATED: 'Movie rated successfully',
   LIKE_UPDATED: 'Like status updated successfully',
   LIKE_FETCHED: 'Like Fetched Successfully.',
+  WEBHOOK_RECIEVED: 'Webhook received',
 };

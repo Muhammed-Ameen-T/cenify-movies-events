@@ -92,7 +92,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
 
     await this.bookingRepository.create(newBooking);
     const savedBooking = await this.bookingRepository.findByBookingId(bookingId);
-    console.log("🚀 ~ CreateBookingUseCase ~ execute ~ savedBooking:", savedBooking)
+    console.log('🚀 ~ CreateBookingUseCase ~ execute ~ savedBooking:', savedBooking);
     if (!savedBooking) {
       throw new CustomError(
         ERROR_MESSAGES.GENERAL.FAILED_CREATING_BOOKING,
@@ -116,7 +116,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         `WALLET-${bookingId}`,
       );
 
-      // Send 
+      // Send
       const now = new Date();
 
       // Send to user
@@ -131,7 +131,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         now,
         false,
         false,
-        []
+        [],
       );
 
       // Send to vendor
@@ -153,12 +153,12 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         now,
         false,
         false,
-        []
+        [],
       );
 
       const adminNotification = new Notification(
         null as any,
-        null, 
+        null,
         'New Booking Received',
         'Booking',
         `Booking ${bookingId} has been confirmed and sent to vendor.`,
@@ -166,8 +166,8 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         now,
         now,
         false,
-        true, 
-        []
+        true,
+        [],
       );
 
       await this.notificationRepository.createNotification(userNotification);
@@ -181,10 +181,14 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       const seatNumbers: string[] = await this.seatRepository.findSeatNumbersByIds(
         savedBooking.bookedSeatsId.map((seat) => seat._id),
       );
-      
-      await this.showRepository.confirmBookedSeats(savedBooking.showId._id.toString(), seatNumbers);  
-      
-      socketService.emitSeatUpdate(show._id, savedBooking.bookedSeatsId.map(seat=>seat.toString()), 'booked');
+
+      await this.showRepository.confirmBookedSeats(savedBooking.showId._id.toString(), seatNumbers);
+
+      socketService.emitSeatUpdate(
+        show._id,
+        savedBooking.bookedSeatsId.map((seat) => seat.toString()),
+        'booked',
+      );
 
       return { booking: savedBooking };
     } else if (dto.payment.method === 'stripe') {
@@ -195,7 +199,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         dto.showId,
         dto.bookedSeatsId,
       );
-      await this.showJobService.scheduleBookingAutoCancel(bookingId)
+      await this.showJobService.scheduleBookingAutoCancel(bookingId);
 
       return { booking: savedBooking, stripeSessionUrl };
     }

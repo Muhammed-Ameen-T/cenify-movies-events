@@ -68,7 +68,7 @@ export class MoviePassRepository implements IMoviePassRepository {
   async findHistoryByUserId(
     userId: string,
     page: number,
-    limit: number
+    limit: number,
   ): Promise<{
     history: MoviePassHistory[];
     total: number;
@@ -102,45 +102,53 @@ export class MoviePassRepository implements IMoviePassRepository {
       }
 
       // Aggregation pipeline for paginated history
-      const result = await this.model.aggregate([
-        { $match: { userId: objectId } },
-        { $unwind: '$history' },
-        { $sort: { 'history.date': -1 } },
-        { $skip: (page - 1) * limit },
-        { $limit: limit },
-        {
-          $group: {
-            _id: '$_id',
-            history: { $push: '$history' },
-            total: { $sum: 1 },
+      const result = await this.model
+        .aggregate([
+          { $match: { userId: objectId } },
+          { $unwind: '$history' },
+          { $sort: { 'history.date': -1 } },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          {
+            $group: {
+              _id: '$_id',
+              history: { $push: '$history' },
+              total: { $sum: 1 },
+            },
           },
-        },
-        {
-          $project: {
-            history: 1,
-            total: { $size: '$history' },
+          {
+            $project: {
+              history: 1,
+              total: { $size: '$history' },
+            },
           },
-        },
-      ]).exec();
+        ])
+        .exec();
 
-      const history = result[0]?.history?.map((h: any) => ({
-        title: h.title,
-        date: h.date,
-        saved: h.saved,
-      })) || [];
+      const history =
+        result[0]?.history?.map((h: any) => ({
+          title: h.title,
+          date: h.date,
+          saved: h.saved,
+        })) || [];
 
       // Get total history count
-      const totalCountResult = await this.model.aggregate([
-        { $match: { userId: objectId } },
-        { $project: { total: { $size: '$history' } } },
-      ]).exec();
+      const totalCountResult = await this.model
+        .aggregate([
+          { $match: { userId: objectId } },
+          { $project: { total: { $size: '$history' } } },
+        ])
+        .exec();
 
       const total = totalCountResult[0]?.total || 0;
 
       return { history, total };
     } catch (error) {
       console.error('❌ Error finding movie pass history by user ID:', error);
-      throw new CustomError(ERROR_MESSAGES.GENERAL.FAILED_FINDING_MOVIE_PASS, HttpResCode.INTERNAL_SERVER_ERROR);
+      throw new CustomError(
+        ERROR_MESSAGES.GENERAL.FAILED_FINDING_MOVIE_PASS,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

@@ -18,7 +18,7 @@ router.post('/rate', verifyAccessToken, (req, res) => movieMngController.submitR
 
 router.post('/like', verifyAccessToken, (req, res) => movieMngController.submitRating(req, res));
 
-router.patch('/like', verifyAccessToken,authorizeRoles(['user']), (req, res) =>
+router.patch('/like', verifyAccessToken, authorizeRoles(['user']), (req, res) =>
   movieMngController.likeOrUnlikeMovie(req, res),
 );
 

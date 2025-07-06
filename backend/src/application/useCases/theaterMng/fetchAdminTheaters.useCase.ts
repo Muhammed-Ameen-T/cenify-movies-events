@@ -4,9 +4,9 @@ import { ITheaterRepository } from '../../../domain/interfaces/repositories/thea
 import { IFetchAdminTheatersUseCase } from '../../../domain/interfaces/useCases/Admin/fetchAdminTheaters.interface';
 import { TheaterResponseDTO } from '../../dtos/vendor.dto';
 import { Theater } from '../../../domain/entities/theater.entity';
-import {FetchTheatersParams} from '../../../domain/types/theater'
+import { FetchTheatersParams } from '../../../domain/types/theater';
 
-@injectable() 
+@injectable()
 export class FetchAdminTheatersUseCase implements IFetchAdminTheatersUseCase {
   constructor(@inject('TheaterRepository') private theaterRepository: ITheaterRepository) {}
 
@@ -51,7 +51,7 @@ export class FetchAdminTheatersUseCase implements IFetchAdminTheatersUseCase {
           }
         : null,
       theater.createdAt,
-      theater.updatedAt
+      theater.updatedAt,
     );
   }
 }

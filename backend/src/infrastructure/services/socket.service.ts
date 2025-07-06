@@ -38,7 +38,9 @@ class SocketService {
 
     this.isInitialized = true;
     this.setupSocketEvents();
-    console.log(`Socket.IO server initialized with path: /socket.io, instance ID: ${this.instanceId}`);
+    console.log(
+      `Socket.IO server initialized with path: /socket.io, instance ID: ${this.instanceId}`,
+    );
   }
 
   private setupSocketEvents() {
@@ -48,7 +50,6 @@ class SocketService {
     }
 
     this.io.on('connection', (socket: Socket) => {
-
       socket.on('joinShowRoom', (showId: string) => {
         if (!showId) {
           socket.emit('error', { message: 'Invalid showId' });
@@ -62,8 +63,7 @@ class SocketService {
         );
         socket.emit('joinedShowRoom', { showId, socketId: socket.id });
 
-        this.io!
-          .in(showId)
+        this.io!.in(showId)
           .allSockets()
           .then((sockets) => {
             console.log(`Clients in room ${showId} after join:`, Array.from(sockets));
@@ -83,7 +83,9 @@ class SocketService {
       });
 
       socket.on('disconnect', (reason) => {
-        console.log(`Socket disconnected: ${socket.id}, reason: ${reason}, instance ID: ${this.instanceId}`);
+        console.log(
+          `Socket disconnected: ${socket.id}, reason: ${reason}, instance ID: ${this.instanceId}`,
+        );
       });
 
       socket.on('error', (error) => {
@@ -93,33 +95,57 @@ class SocketService {
   }
 
   emitSeatUpdate(showId: string, seatIds: string[], status: 'pending' | 'booked' | 'available') {
-    console.log(`emitSeatUpdate called with showId: ${showId}, seatIds:`, seatIds, `status: ${status}, instance ID: ${this.instanceId}`);
+    console.log(
+      `emitSeatUpdate called with showId: ${showId}, seatIds:`,
+      seatIds,
+      `status: ${status}, instance ID: ${this.instanceId}`,
+    );
     if (!this.isInitialized || !this.io) {
-      console.log(`🚀 ~ SocketService ~ emitSeatUpdate ~ this.isInitialized: ${this.isInitialized}`);
+      console.log(
+        `🚀 ~ SocketService ~ emitSeatUpdate ~ this.isInitialized: ${this.isInitialized}`,
+      );
       console.log(`🚀 ~ SocketService ~ emitSeatUpdate ~ this.io: ${this.io}`);
-      console.error(`Socket.IO server not initialized, cannot emit seatUpdate, instance ID: ${this.instanceId}`);
+      console.error(
+        `Socket.IO server not initialized, cannot emit seatUpdate, instance ID: ${this.instanceId}`,
+      );
       return;
     }
     if (!showId || !seatIds.length) {
-      console.warn(`Cannot emit seatUpdate: invalid showId (${showId}) or empty seatIds, instance ID: ${this.instanceId}`);
+      console.warn(
+        `Cannot emit seatUpdate: invalid showId (${showId}) or empty seatIds, instance ID: ${this.instanceId}`,
+      );
       return;
     }
-    console.log(`Emitting seatUpdate to room ${showId}:`, { seatIds, status, instanceId: this.instanceId });
+    console.log(`Emitting seatUpdate to room ${showId}:`, {
+      seatIds,
+      status,
+      instanceId: this.instanceId,
+    });
     this.io.to(showId).emit('seatUpdate', { seatIds, status });
     this.io
       .in(showId)
       .allSockets()
       .then((sockets) => {
-        console.log(`Clients in room ${showId} received seatUpdate:`, Array.from(sockets), `instance ID: ${this.instanceId}`);
+        console.log(
+          `Clients in room ${showId} received seatUpdate:`,
+          Array.from(sockets),
+          `instance ID: ${this.instanceId}`,
+        );
       })
       .catch((err) => {
-        console.error(`Error fetching clients in room ${showId}:`, err, `instance ID: ${this.instanceId}`);
+        console.error(
+          `Error fetching clients in room ${showId}:`,
+          err,
+          `instance ID: ${this.instanceId}`,
+        );
       });
   }
 
   emitError(socketId: string, error: string) {
     if (!this.isInitialized || !this.io) {
-      console.error(`Socket.IO server not initialized, cannot emit error, instance ID: ${this.instanceId}`);
+      console.error(
+        `Socket.IO server not initialized, cannot emit error, instance ID: ${this.instanceId}`,
+      );
       return;
     }
     console.log(`Emitting error to socket ${socketId}:`, { error, instanceId: this.instanceId });

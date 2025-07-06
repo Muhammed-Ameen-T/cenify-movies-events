@@ -5,7 +5,7 @@ import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { IUserRepository } from '../../../domain/interfaces/repositories/user.repository';
 import { ChangePasswordRequestDTO, UserResponseDTO } from '../../dtos/user.dto';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { hashPassword } from '../../../utils/helpers/hash.utils';
 
 @injectable()

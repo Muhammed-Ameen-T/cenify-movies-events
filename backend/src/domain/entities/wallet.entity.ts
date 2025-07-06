@@ -12,7 +12,7 @@ export class Wallet {
     }[],
     public createdAt?: Date,
     public updatedAt?: Date,
-  ) {}  
+  ) {}
 }
 
 export interface Transaction {
@@ -25,7 +25,7 @@ export interface Transaction {
   status: 'completed' | 'pending' | 'failed';
 }
 export class Transaction {
-  constructor(    
+  constructor(
     public id: string,
     public amount: number,
     public type: 'credit' | 'debit',
@@ -33,5 +33,5 @@ export class Transaction {
     public createdAt: string,
     public status: 'completed' | 'pending' | 'failed',
     public remark?: string,
-  ){}
+  ) {}
 }

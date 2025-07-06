@@ -262,18 +262,18 @@ export class TheaterRepository implements ITheaterRepository {
       }
 
       if (features && features.length > 0) {
-        const facilityKeys = features.map((feature:any) =>
+        const facilityKeys = features.map((feature: any) =>
           feature === 'Food Court'
             ? 'foodCourt'
             : feature === 'Lounges'
-            ? 'lounges'
-            : feature === 'Mobile Ticket'
-            ? 'mTicket'
-            : feature === 'Parking'
-            ? 'parking'
-            : 'freeCancellation'
+              ? 'lounges'
+              : feature === 'Mobile Ticket'
+                ? 'mTicket'
+                : feature === 'Parking'
+                  ? 'parking'
+                  : 'freeCancellation',
         );
-        query.$or = facilityKeys.map((key:any) => ({ [`facilities.${key}`]: true }));
+        query.$or = facilityKeys.map((key: any) => ({ [`facilities.${key}`]: true }));
       }
 
       if (rating) {
@@ -316,7 +316,6 @@ export class TheaterRepository implements ITheaterRepository {
       throw new Error('Failed to retrieve theaters');
     }
   }
-
 
   private mapToEntity(doc: ITheater): Theater {
     return new Theater(

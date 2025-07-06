@@ -7,14 +7,14 @@ import { container } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
-import { CustomError } from '../../utils/errors/custom.error';  
+import { CustomError } from '../../utils/errors/custom.error';
 
 import {
   VerifyOtpDTO,
   LoginDTO,
   ForgotPassVerifyOtpDTO,
   ForgotPassSendOtpDTO,
-  ForgotPassUpdateDTO,        
+  ForgotPassUpdateDTO,
 } from '../../application/dtos/auth.dto';
 
 import { IUserAuthController } from './interface/userAuth.controller.interface';

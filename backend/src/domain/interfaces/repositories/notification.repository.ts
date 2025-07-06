@@ -8,7 +8,7 @@ export interface INotificationRepository {
     userId: string,
     page: number,
     limit: number,
-    filter: string
+    filter: string,
   ): Promise<{
     notifications: Notification[];
     total: number;
@@ -18,7 +18,7 @@ export interface INotificationRepository {
   fetchAdminNotifications(
     page: number,
     limit: number,
-    filter: string
+    filter: string,
   ): Promise<{
     notifications: Notification[];
     total: number;

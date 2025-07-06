@@ -51,7 +51,7 @@ export class NotificationRepository implements INotificationRepository {
     userId: string,
     page: number,
     limit: number,
-    filter: string
+    filter: string,
   ): Promise<{
     notifications: Notification[];
     total: number;
@@ -61,7 +61,7 @@ export class NotificationRepository implements INotificationRepository {
     try {
       // Base query for notifications
       const baseQuery: Record<string, any> = {
-        userId 
+        userId,
       };
 
       // Apply filter
@@ -99,7 +99,7 @@ export class NotificationRepository implements INotificationRepository {
   async fetchAdminNotifications(
     page: number,
     limit: number,
-    filter: string
+    filter: string,
   ): Promise<{
     notifications: Notification[];
     total: number;
@@ -109,7 +109,7 @@ export class NotificationRepository implements INotificationRepository {
     try {
       // Base query for global notifications
       const baseQuery: Record<string, any> = {
-        isGlobal: true
+        isGlobal: true,
       };
 
       // Apply read/unread filter
@@ -136,14 +136,13 @@ export class NotificationRepository implements INotificationRepository {
         notifications: notifications.map(this.mapToEntity),
         total,
         unreadCount,
-        readCount
+        readCount,
       };
     } catch (error) {
       console.error('❌ Error fetching admin notifications:', error);
       throw new Error('Failed to fetch admin notifications');
     }
   }
-
 
   async fetchVendorNotifications(vendorId: string): Promise<Notification[]> {
     try {
@@ -177,10 +176,7 @@ export class NotificationRepository implements INotificationRepository {
 
   async markAllAdminNotificationsRead(): Promise<boolean> {
     try {
-      await NotificationModel.updateMany(
-        { isGlobal: true, isRead: false },
-        { isRead: true }
-      );
+      await NotificationModel.updateMany({ isGlobal: true, isRead: false }, { isRead: true });
       return true;
     } catch (error) {
       console.error('❌ Error marking admin notifications as read:', error);

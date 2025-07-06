@@ -108,12 +108,11 @@ export class WalletRepository implements IWalletRepository {
     return wallet?.balance;
   }
 
-
   async findTransactionsByUserId(
     userId: string,
     page: number,
     limit: number,
-    filter: 'credit' | 'debit' | 'all' = 'all'
+    filter: 'credit' | 'debit' | 'all' = 'all',
   ): Promise<{
     transactions: Transaction[];
     total: number;
@@ -141,7 +140,7 @@ export class WalletRepository implements IWalletRepository {
           creditCount: 0,
           debitCount: 0,
           totalCredit: 0,
-          totalDebit: 0
+          totalDebit: 0,
         };
       }
 
@@ -166,9 +165,9 @@ export class WalletRepository implements IWalletRepository {
                   remark: '$transactions.remark',
                   type: '$transactions.type',
                   source: '$transactions.source',
-                  createdAt: '$transactions.createdAt'
-                }
-              }
+                  createdAt: '$transactions.createdAt',
+                },
+              },
             ],
             total: [{ $count: 'count' }],
             allTransactions: [
@@ -176,11 +175,11 @@ export class WalletRepository implements IWalletRepository {
                 $group: {
                   _id: '$transactions.type',
                   count: { $sum: 1 },
-                  totalAmount: { $sum: '$transactions.amount' }
-                }
-              }
-            ]
-          }
+                  totalAmount: { $sum: '$transactions.amount' },
+                },
+              },
+            ],
+          },
         },
         {
           $project: {
@@ -192,11 +191,11 @@ export class WalletRepository implements IWalletRepository {
                   $filter: {
                     input: '$allTransactions',
                     as: 'item',
-                    cond: { $eq: ['$$item._id', 'credit'] }
-                  }
+                    cond: { $eq: ['$$item._id', 'credit'] },
+                  },
                 },
-                0
-              ]
+                0,
+              ],
             },
             debitStats: {
               $arrayElemAt: [
@@ -204,13 +203,13 @@ export class WalletRepository implements IWalletRepository {
                   $filter: {
                     input: '$allTransactions',
                     as: 'item',
-                    cond: { $eq: ['$$item._id', 'debit'] }
-                  }
+                    cond: { $eq: ['$$item._id', 'debit'] },
+                  },
                 },
-                0
-              ]
-            }
-          }
+                0,
+              ],
+            },
+          },
         },
         {
           $project: {
@@ -219,21 +218,22 @@ export class WalletRepository implements IWalletRepository {
             creditCount: { $ifNull: ['$creditStats.count', 0] },
             debitCount: { $ifNull: ['$debitStats.count', 0] },
             totalCredit: { $ifNull: ['$creditStats.totalAmount', 0] },
-            totalDebit: { $ifNull: ['$debitStats.totalAmount', 0] }
-          }
-        }
+            totalDebit: { $ifNull: ['$debitStats.totalAmount', 0] },
+          },
+        },
       ]).exec();
 
       const agg = result[0] || {};
 
-      const transactions = agg.transactions?.map((t: any) => ({
-        id: t.id.toString(),
-        amount: t.amount,
-        remark: t.remark || '',
-        type: t.type,
-        source: t.source,
-        createdAt: t.createdAt
-      })) || [];
+      const transactions =
+        agg.transactions?.map((t: any) => ({
+          id: t.id.toString(),
+          amount: t.amount,
+          remark: t.remark || '',
+          type: t.type,
+          source: t.source,
+          createdAt: t.createdAt,
+        })) || [];
 
       return {
         transactions,
@@ -241,11 +241,14 @@ export class WalletRepository implements IWalletRepository {
         creditCount: agg.creditCount || 0,
         debitCount: agg.debitCount || 0,
         totalCredit: agg.totalCredit || 0,
-        totalDebit: agg.totalDebit || 0
+        totalDebit: agg.totalDebit || 0,
       };
     } catch (error) {
       console.error('❌ Error finding transactions by user ID:', error);
-      throw new CustomError(ERROR_MESSAGES.GENERAL.FAILED_FINDING_WALLET, HttpResCode.INTERNAL_SERVER_ERROR);
+      throw new CustomError(
+        ERROR_MESSAGES.GENERAL.FAILED_FINDING_WALLET,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -265,13 +268,21 @@ export class WalletRepository implements IWalletRepository {
 
     try {
       const user = await UserModel.findById(userId).session(session);
-      if(!user?.loyalityPoints){
-        throw new CustomError(ERROR_MESSAGES.GENERAL.FAILED_FINDING_LOYALITYPOINTS, HttpResCode.INTERNAL_SERVER_ERROR)
+      if (!user?.loyalityPoints) {
+        throw new CustomError(
+          ERROR_MESSAGES.GENERAL.FAILED_FINDING_LOYALITYPOINTS,
+          HttpResCode.INTERNAL_SERVER_ERROR,
+        );
       }
-      if (!user || user.loyalityPoints < amount) throw new CustomError(ERROR_MESSAGES.GENERAL.INSUFFIENT_BALANCE,HttpResCode.NOT_ACCEPTABLE);
+      if (!user || user.loyalityPoints < amount)
+        throw new CustomError(
+          ERROR_MESSAGES.GENERAL.INSUFFIENT_BALANCE,
+          HttpResCode.NOT_ACCEPTABLE,
+        );
 
       const wallet = await WalletModel.findOne({ userId }).session(session);
-      if (!wallet) throw new CustomError(ERROR_MESSAGES.GENERAL.WALLET_NOT_FOUND,HttpResCode.NO_CONTENT);
+      if (!wallet)
+        throw new CustomError(ERROR_MESSAGES.GENERAL.WALLET_NOT_FOUND, HttpResCode.NO_CONTENT);
 
       // Deduct loyalty points
       user.loyalityPoints -= amount;
@@ -281,7 +292,7 @@ export class WalletRepository implements IWalletRepository {
       wallet.balance += amount;
       wallet.transactions.push({
         ...transaction,
-        remark: transaction.remark ?? ''
+        remark: transaction.remark ?? '',
       });
       await wallet.save({ session });
 
@@ -296,7 +307,6 @@ export class WalletRepository implements IWalletRepository {
       throw new Error('Transaction failed');
     }
   }
-
 
   private mapToEntity(doc: any): Wallet {
     return new Wallet(

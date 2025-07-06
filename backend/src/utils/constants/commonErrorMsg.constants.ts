@@ -60,7 +60,7 @@ const ERROR_MESSAGES = {
     REVIEW_ALREADY_EXISTS: 'You have already submitted a review for this movie.',
     RATING_MUST_BETWEEN: 'Rating must be between 1 and 5.',
     THEATER_NOT_VERIFIED: 'Your theater not verified yet, contact support.',
-    INVALID_PAGINATION_PARAMS: 'Invalid Pagination Params.'
+    INVALID_PAGINATION_PARAMS: 'Invalid Pagination Params.',
   },
   DATABASE: {
     CONNECTION_FAILED: 'Database connection failed.',
@@ -132,7 +132,7 @@ const ERROR_MESSAGES = {
     SOMETHING_WENT_WRONG: 'Something Went wrong',
     FAILED_REDEEMING_POINTS: 'Failed to redeeming points.',
     SEATS_ALREADY_FILLED: 'Selected seats are already booked or unavailable.',
-    INVALID_SEAT_SELECTION: 'Invalid Seat Selection.'
+    INVALID_SEAT_SELECTION: 'Invalid Seat Selection.',
   },
   SECURITY: {
     ACCESS_DENIED: 'Access denied due to security restrictions.',

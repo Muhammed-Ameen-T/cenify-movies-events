@@ -13,7 +13,7 @@ export class FindMoviePassHistoryUseCase implements IFindMoviePassHistoryUseCase
   async execute(
     userId: string,
     page: number,
-    limit: number
+    limit: number,
   ): Promise<{
     history: MoviePassHistory[];
     total: number;
@@ -23,7 +23,10 @@ export class FindMoviePassHistoryUseCase implements IFindMoviePassHistoryUseCase
       return result;
     } catch (error) {
       console.error('❌ Error in FindMoviePassHistoryUseCase:', error);
-      throw new CustomError(ERROR_MESSAGES.GENERAL.FAILED_FINDING_MOVIE_PASS, HttpResCode.INTERNAL_SERVER_ERROR);
+      throw new CustomError(
+        ERROR_MESSAGES.GENERAL.FAILED_FINDING_MOVIE_PASS,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

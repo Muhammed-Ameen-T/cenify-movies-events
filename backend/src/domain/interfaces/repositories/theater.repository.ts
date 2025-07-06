@@ -26,7 +26,7 @@ export interface ITheaterRepository {
   }): Promise<{ theaters: Theater[]; totalCount: number }>;
   addRating(theaterId: string, newRating: number): Promise<Theater>;
   findAdminTheaters(params: FetchTheatersParams): Promise<{
-      theaters: Theater[];
-      totalCount: number;
-  }> 
+    theaters: Theater[];
+    totalCount: number;
+  }>;
 }

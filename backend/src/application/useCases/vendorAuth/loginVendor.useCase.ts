@@ -6,7 +6,7 @@ import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { ILoginVendorUseCase } from '../../../domain/interfaces/useCases/Vendor/loginVendor.interface';
 import { IUserRepository } from '../../../domain/interfaces/repositories/user.repository';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 @injectable()
 export class LoginVendorUseCase implements ILoginVendorUseCase {

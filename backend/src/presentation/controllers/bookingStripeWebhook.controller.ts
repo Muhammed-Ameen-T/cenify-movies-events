@@ -60,12 +60,16 @@ export class BookingStripeWebhookController {
             booking.bookedSeatsId.map((seat) => seat._id),
           );
           await this.showRepository.confirmBookedSeats(booking.showId._id.toString(), seatNumbers);
-          socketService.emitSeatUpdate(booking.showId._id.toString(), booking.bookedSeatsId.map(seat=>seat.toString()), 'booked');
+          socketService.emitSeatUpdate(
+            booking.showId._id.toString(),
+            booking.bookedSeatsId.map((seat) => seat.toString()),
+            'booked',
+          );
 
           await this.userRepository.incrementLoyalityPoints(userId, booking.bookedSeatsId.length);
           const show = await this.showRepository.findById(booking.showId._id.toString());
 
-          const now = new Date()
+          const now = new Date();
           const notification = new Notification(
             null as any,
             userId,
@@ -90,12 +94,12 @@ export class BookingStripeWebhookController {
             now,
             false,
             false,
-            []
+            [],
           );
 
           const adminNotification = new Notification(
             null as any,
-            null, 
+            null,
             'New Booking Received',
             'Booking',
             `Booking ${bookingId} has been confirmed and sent to vendor.`,
@@ -103,8 +107,8 @@ export class BookingStripeWebhookController {
             now,
             now,
             false,
-            true, 
-            []
+            true,
+            [],
           );
           await this.notificationRepository.createNotification(notification);
           await this.notificationRepository.createGlobalNotification(adminNotification);

@@ -59,5 +59,9 @@ export interface IShowRepository {
   pullExpiredSeats(showId: string): Promise<void>;
   confirmBookedSeats(showId: string, seatNumbers: string[]): Promise<Show>;
   findByIdSession(id: string, session?: mongoose.ClientSession): Promise<Show | null>;
-  updateBookedSeatsSession(showId: string, bookedSeats: any[], session?: mongoose.ClientSession): Promise<void>;
+  updateBookedSeatsSession(
+    showId: string,
+    bookedSeats: any[],
+    session?: mongoose.ClientSession,
+  ): Promise<void>;
 }

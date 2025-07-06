@@ -19,7 +19,8 @@ export class TheaterManagementController implements ITheaterManagementController
     private fetchTheaterUseCase: IFetchTheaterOfVendorUseCase,
     @inject('FetchTheatersUseCase') private fetchTheatersUseCase: IFetchTheatersUseCase,
     @inject('UpdateTheaterStatus') private updateTheaterStatusUseCase: IUpdateTheaterStatusUseCase,
-    @inject('FetchAdminTheatersUseCase') private fetchAdminTheatersUseCase: IFetchAdminTheatersUseCase,
+    @inject('FetchAdminTheatersUseCase')
+    private fetchAdminTheatersUseCase: IFetchAdminTheatersUseCase,
     @inject('UpdateTheater') private updateTheaterUseCase: IUpdateTheaterUseCase,
   ) {}
 
@@ -95,7 +96,8 @@ export class TheaterManagementController implements ITheaterManagementController
 
   async fetchTheatersByAdmin(req: Request, res: Response): Promise<void> {
     try {
-      const { page, limit, search, status, features, rating, location, sortBy, sortOrder } = req.query;
+      const { page, limit, search, status, features, rating, location, sortBy, sortOrder } =
+        req.query;
 
       // Build params object from query parameters
       const params = {

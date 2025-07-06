@@ -132,8 +132,8 @@ export class BookingRepository implements IBookingRepository {
       const sort: any = {};
       if (sortBy && sortOrder) {
         sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
-      }else {
-        sort.createdAt = -1;  
+      } else {
+        sort.createdAt = -1;
       }
 
       const bookingDocs = await BookingModel.find(query)
@@ -208,8 +208,8 @@ export class BookingRepository implements IBookingRepository {
       const sortQuery: any = {};
       if (sortBy && sortOrder) {
         sortQuery[sortBy] = sortOrder === 'asc' ? 1 : -1;
-      }else{
-        sortQuery.createdAt = -1
+      } else {
+        sortQuery.createdAt = -1;
       }
 
       const bookingDocs = await BookingModel.find(query)
@@ -240,7 +240,7 @@ export class BookingRepository implements IBookingRepository {
     }
   }
 
-  async cancelBooking(bookingId: string,reason:string): Promise<Booking | null> {
+  async cancelBooking(bookingId: string, reason: string): Promise<Booking | null> {
     try {
       const booking = await BookingModel.findOne({ _id: bookingId })
         .populate({ path: 'showId', select: '_id' }) // Only need showId
@@ -258,7 +258,7 @@ export class BookingRepository implements IBookingRepository {
 
       const updatedBookingDoc = await BookingModel.findByIdAndUpdate(
         booking._id,
-        { status: 'cancelled',reason: reason},
+        { status: 'cancelled', reason: reason },
         { new: true },
       )
         .populate({

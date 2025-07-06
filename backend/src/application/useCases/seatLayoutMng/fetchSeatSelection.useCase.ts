@@ -104,4 +104,3 @@ export class FetchSeatSelectionUseCase implements IFetchSeatSelectionUseCase {
     }
   }
 }
-  

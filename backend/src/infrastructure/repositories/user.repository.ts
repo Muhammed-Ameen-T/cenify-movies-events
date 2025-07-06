@@ -108,8 +108,8 @@ export class UserRepositoryImpl implements IUserRepository {
       const sort: any = {};
       if (sortBy) {
         sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
-      }else{
-        sort.createdAt = -1;  
+      } else {
+        sort.createdAt = -1;
       }
 
       const totalCount = await UserModel.countDocuments(query);

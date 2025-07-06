@@ -14,7 +14,7 @@ export class FindUserWalletTransactionsUseCase implements IFindUserWalletTransac
     userId: string,
     page: number,
     limit: number,
-    filter: 'credit' | 'debit' | 'all' = 'all'
+    filter: 'credit' | 'debit' | 'all' = 'all',
   ): Promise<{
     transactions: Transaction[];
     total: number;
@@ -24,20 +24,20 @@ export class FindUserWalletTransactionsUseCase implements IFindUserWalletTransac
     totalDebit: number;
   }> {
     try {
-      const result = await this.walletRepository.findTransactionsByUserId(userId, page, limit, filter);
+      const result = await this.walletRepository.findTransactionsByUserId(
+        userId,
+        page,
+        limit,
+        filter,
+      );
       // if (!result.transactions.length && result.total === 0) {
-        
+
       // }
       // Map raw transactions to domain Transaction entity
-      const transactions: Transaction[] = result?.transactions.map((t: any) => new Transaction(
-        t.id,
-        t.amount,
-        t.type,
-        t.source,
-        t.createdAt,
-        t.status,
-        t.remark
-      ));
+      const transactions: Transaction[] = result?.transactions.map(
+        (t: any) =>
+          new Transaction(t.id, t.amount, t.type, t.source, t.createdAt, t.status, t.remark),
+      );
       return {
         transactions,
         total: result.total,

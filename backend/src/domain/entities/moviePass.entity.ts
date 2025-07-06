@@ -15,11 +15,10 @@ export class MoviePass {
   ) {}
 }
 
-
 export class MoviePassHistory {
   constructor(
     public title: string,
     public date: Date,
-    public saved: number
+    public saved: number,
   ) {}
-} 
+}

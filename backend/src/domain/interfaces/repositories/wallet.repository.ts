@@ -31,7 +31,7 @@ export interface IWalletRepository {
     userId: string,
     page: number,
     limit: number,
-    filter?: 'credit' | 'debit' | 'all'
+    filter?: 'credit' | 'debit' | 'all',
   ): Promise<{
     transactions: Transaction[];
     total: number;
@@ -50,5 +50,5 @@ export interface IWalletRepository {
       source: 'loyality';
       createdAt: Date;
     },
-  ): Promise<Wallet | null>
+  ): Promise<Wallet | null>;
 }

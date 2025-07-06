@@ -39,8 +39,8 @@ const UserRoutes = () => {
           <Route path="show-selection/:movieId" element={<ShowSelectionPage />} />
           <Route path="actor-profile/:id" element={<ActorProfilePage />} />
         </Route>
+        <Route path="seat-selection/:showId" element={<TheaterSeatSelection />} />
         <Route element={<PrivateRoute allowedRoles={['user']} />}>
-          <Route path="seat-selection/:showId" element={<TheaterSeatSelection />} />
           <Route path="checkout/:showId" element={<CheckoutPage />} />
         </Route>  
         <Route path="booking-success/:id" element={<BookingSuccessPage />} />

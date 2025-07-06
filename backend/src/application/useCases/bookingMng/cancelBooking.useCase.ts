@@ -17,7 +17,7 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     @inject('WalletRepository') private walletRepository: IWalletRepository,
   ) {}
 
-  async execute(bookingId: string,reason:string): Promise<Booking> {
+  async execute(bookingId: string, reason: string): Promise<Booking> {
     const existingBooking = await this.bookingRepository.findByBookingId(bookingId);
 
     if (!existingBooking) {
@@ -42,7 +42,8 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
       throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
     const updatedBooking = await this.bookingRepository.cancelBooking(
-      existingBooking._id.toString(),reason
+      existingBooking._id.toString(),
+      reason,
     );
     if (!updatedBooking) {
       throw new CustomError(

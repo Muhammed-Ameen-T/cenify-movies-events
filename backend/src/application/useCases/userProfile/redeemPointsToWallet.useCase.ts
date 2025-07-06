@@ -8,35 +8,37 @@ import { IRedeemLoyalityToWalletUseCase } from '../../../domain/interfaces/useCa
 
 @injectable()
 export class RedeemLoyalityToWalletUseCase implements IRedeemLoyalityToWalletUseCase {
-    constructor(
-        @inject('WalletRepository') private walletRepository: IWalletRepository
-    ) {}
+  constructor(@inject('WalletRepository') private walletRepository: IWalletRepository) {}
 
-    async execute(
-        userId: string,
-        amount: number,
-    ): Promise<Wallet> {
-        try {
-            const transaction = {
-                amount: amount,
-                remark: `${amount} Loyaly points Redeemed and amount credited to wallet.`,
-                type: 'credit' as 'credit',
-                source: 'loyality' as 'loyality',
-                createdAt: new Date(),
-            }
+  async execute(userId: string, amount: number): Promise<Wallet> {
+    try {
+      const transaction = {
+        amount: amount,
+        remark: `${amount} Loyaly points Redeemed and amount credited to wallet.`,
+        type: 'credit' as 'credit',
+        source: 'loyality' as 'loyality',
+        createdAt: new Date(),
+      };
 
-            const updatedWallet = await this.walletRepository.redeemLoyalityPointsAndUpdateWallet(userId,amount,transaction)
+      const updatedWallet = await this.walletRepository.redeemLoyalityPointsAndUpdateWallet(
+        userId,
+        amount,
+        transaction,
+      );
 
-            if(!updatedWallet){
-                throw new CustomError(ERROR_MESSAGES.GENERAL.FAILED_REDEEMING_POINTS)
-            }
+      if (!updatedWallet) {
+        throw new CustomError(ERROR_MESSAGES.GENERAL.FAILED_REDEEMING_POINTS);
+      }
 
-            return updatedWallet;
-        } catch (error) {
-            if (error instanceof CustomError) {
-                throw error;
-            }
-            throw new CustomError(ERROR_MESSAGES.GENERAL.SOMETHING_WENT_WRONG, HttpResCode.INTERNAL_SERVER_ERROR);
-        }
+      return updatedWallet;
+    } catch (error) {
+      if (error instanceof CustomError) {
+        throw error;
+      }
+      throw new CustomError(
+        ERROR_MESSAGES.GENERAL.SOMETHING_WENT_WRONG,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
     }
+  }
 }

@@ -1,0 +1,35 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./.env:/app/.env
+    networks:
+      - mern-network
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://backend:3000/api
+    networks:
+      - mern-network
+    depends_on:
+      - backend
+
+networks:
+  mern-network:
+    driver: bridge

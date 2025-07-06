@@ -206,7 +206,10 @@ export class NotificationMngController implements INotificationMngController {
       const filter = (req.query.filter as string) || 'all';
 
       if (!['all', 'read', 'unread'].includes(filter)) {
-        throw new CustomError(ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS, HttpResCode.BAD_REQUEST);
+        throw new CustomError(
+          ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
+          HttpResCode.BAD_REQUEST,
+        );
       }
 
       const { notifications, total, unreadCount, readCount } =
@@ -226,7 +229,6 @@ export class NotificationMngController implements INotificationMngController {
       sendResponse(res, statusCode, errorMessage);
     }
   }
-
 
   /**
    * @route POST /api/notifications/vendor
@@ -274,7 +276,7 @@ export class NotificationMngController implements INotificationMngController {
    */
   async fetchAllAdminNotification(req: Request, res: Response): Promise<void> {
     try {
-      const adminId =  req.decoded?.userId;
+      const adminId = req.decoded?.userId;
       if (!adminId) {
         throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
@@ -283,17 +285,20 @@ export class NotificationMngController implements INotificationMngController {
       const filter = (req.query.filter as string) || 'all';
 
       if (!['all', 'read', 'unread'].includes(filter)) {
-        throw new CustomError(ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS, HttpResCode.BAD_REQUEST);
+        throw new CustomError(
+          ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
+          HttpResCode.BAD_REQUEST,
+        );
       }
 
-      const { notifications, total, unreadCount, readCount }  =
+      const { notifications, total, unreadCount, readCount } =
         await this.notificationService.fetchAdminNotifications(page, limit, filter);
-      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS,
-        {notifications,
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
+        notifications,
         total,
         unreadCount,
-        readCount}  
-      );
+        readCount,
+      });
     } catch (error: any) {
       const errorMessage =
         error instanceof CustomError ? error.message : 'Failed to fetch vendor notifications';

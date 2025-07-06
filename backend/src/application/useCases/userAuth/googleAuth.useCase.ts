@@ -32,7 +32,7 @@ export class GoogleAuthUseCase {
     @inject('IUserRepository') private userRepository: IUserRepository,
     @inject('WalletRepository') private walletRepository: IWalletRepository,
     @inject('JwtService') private jwtService: JwtService,
-    @inject('CloudinaryService') private cloudinaryService: CloudinaryService
+    @inject('CloudinaryService') private cloudinaryService: CloudinaryService,
   ) {
     this.googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   }
@@ -69,7 +69,7 @@ export class GoogleAuthUseCase {
         const fileBuffer = Buffer.from(response.data);
         profileImage = await this.cloudinaryService.uploadImage(
           fileBuffer,
-          `google-profile-${authId}-${Date.now()}`
+          `google-profile-${authId}-${Date.now()}`,
         );
       } catch (error) {
         console.warn('Failed to upload Google profile image to Cloudinary:', error);
@@ -93,14 +93,14 @@ export class GoogleAuthUseCase {
         false,
         'user',
         new Date(),
-        new Date()
+        new Date(),
       );
       user = await this.userRepository.create(user);
       user = await this.userRepository.findByEmail(user.email.toLowerCase());
       if (!user) {
         throw new CustomError(
           ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND,
-          HttpResCode.INTERNAL_SERVER_ERROR
+          HttpResCode.INTERNAL_SERVER_ERROR,
         );
       }
 
@@ -111,7 +111,7 @@ export class GoogleAuthUseCase {
         0,
         [],
         new Date(),
-        new Date()
+        new Date(),
       );
       await this.walletRepository.createWallet(newWallet);
     } else if (!user.authId || !user.profileImage) {
@@ -128,11 +128,11 @@ export class GoogleAuthUseCase {
     // Generate tokens
     const accessToken = this.jwtService.generateAccessToken(
       user._id ? user._id.toString() : '',
-      'user'
+      'user',
     );
     const refreshToken = this.jwtService.generateRefreshToken(
       user._id ? user._id.toString() : '',
-      'user'
+      'user',
     );
 
     return {

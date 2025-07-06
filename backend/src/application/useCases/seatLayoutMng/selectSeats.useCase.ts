@@ -21,7 +21,9 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
     @inject('SeatRepository') private seatRepository: ISeatRepository,
     @inject('ShowJobService') private showJobService: ShowJobService,
   ) {
-    console.log(`SelectSeatsUseCase initialized with SocketService instance ID: ${socketService.getInstanceId()}`);
+    console.log(
+      `SelectSeatsUseCase initialized with SocketService instance ID: ${socketService.getInstanceId()}`,
+    );
   }
 
   async execute(dto: SelectSeatDTO): Promise<{
@@ -36,10 +38,16 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
       if (!Array.isArray(seatIds) || seatIds.length === 0) {
-        throw new CustomError(ERROR_MESSAGES.GENERAL.INVALID_SEAT_SELECTION, HttpResCode.BAD_REQUEST);
+        throw new CustomError(
+          ERROR_MESSAGES.GENERAL.INVALID_SEAT_SELECTION,
+          HttpResCode.BAD_REQUEST,
+        );
       }
       if (!userId) {
-        throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.UNAUTHORIZED);
+        throw new CustomError(
+          ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND,
+          HttpResCode.UNAUTHORIZED,
+        );
       }
 
       console.log(`Selecting seats for showId: ${showId}, seatIds:`, seatIds);
@@ -54,7 +62,10 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SCREEN_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
       if (!screen.seatLayoutId) {
-        throw new CustomError(ERROR_MESSAGES.VALIDATION.SEAT_LAYOUT_NOT_FOUND, HttpResCode.BAD_REQUEST);
+        throw new CustomError(
+          ERROR_MESSAGES.VALIDATION.SEAT_LAYOUT_NOT_FOUND,
+          HttpResCode.BAD_REQUEST,
+        );
       }
 
       const seats = await this.seatRepository.findSeatsByIdsSession(
@@ -70,10 +81,7 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
       });
 
       if (invalidSeats.length > 0) {
-        throw new CustomError(
-          ERROR_MESSAGES.GENERAL.SEATS_ALREADY_FILLED,
-          HttpResCode.BAD_REQUEST,
-        );
+        throw new CustomError(ERROR_MESSAGES.GENERAL.SEATS_ALREADY_FILLED, HttpResCode.BAD_REQUEST);
       }
 
       const newBookedSeats = seats.map((seat) => ({
@@ -97,7 +105,11 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
         .map((seat) => (seat._id ? seat._id.toString() : null))
         .filter((id): id is string => id !== null);
       if (validSeatIds.length > 0) {
-        console.log(`Emitting seatUpdate for showId: ${showId}, seatIds:`, validSeatIds, `SocketService instance ID: ${socketService.getInstanceId()}`);
+        console.log(
+          `Emitting seatUpdate for showId: ${showId}, seatIds:`,
+          validSeatIds,
+          `SocketService instance ID: ${socketService.getInstanceId()}`,
+        );
         socketService.emitSeatUpdate(showId, validSeatIds, 'pending');
       } else {
         console.warn('No valid seat IDs to emit for socket update');
@@ -117,7 +129,9 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
       await session.abortTransaction();
       console.error('❌ Error selecting seats:', error);
       throw new CustomError(
-        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.FAILED_SELECTING_SEATS,
+        error instanceof CustomError
+          ? error.message
+          : ERROR_MESSAGES.GENERAL.FAILED_SELECTING_SEATS,
         error instanceof CustomError ? error.statusCode : HttpResCode.INTERNAL_SERVER_ERROR,
       );
     } finally {

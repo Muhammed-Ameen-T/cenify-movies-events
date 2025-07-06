@@ -6,5 +6,9 @@ export interface ISeatRepository {
   findSeatsByLayoutId(layoutIdd: string): Promise<Seat[]>;
   findSeatsByIds(layoutId: string, seatIds: string[]): Promise<Seat[]>;
   findSeatNumbersByIds(seatIds: Types.ObjectId[]): Promise<string[]>;
-  findSeatsByIdsSession(layoutId: string, seatIds: string[], session?: mongoose.ClientSession): Promise<Seat[]>;
+  findSeatsByIdsSession(
+    layoutId: string,
+    seatIds: string[],
+    session?: mongoose.ClientSession,
+  ): Promise<Seat[]>;
 }

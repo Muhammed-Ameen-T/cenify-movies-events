@@ -27,8 +27,10 @@ export class UserProfileController implements IUserProfileController {
     @inject('UpdateUserProfileUseCase') private updateUserDetailsUseCase: IupdateUserProfileUseCase,
     @inject('FindUserWalletUseCase') private findUserWalletUseCase: IFindUserWalletUseCase,
     @inject('ChangePasswordUseCase') private changePasswordUseCase: IChangePasswordUseCase,
-    @inject('WalletTransactionUseCase') private findWalletTransaction: IFindUserWalletTransactionsUseCase,
-    @inject('RedeemLoyalityToWalletUseCase') private redeemLoyalityToWalletUseCase: IRedeemLoyalityToWalletUseCase,
+    @inject('WalletTransactionUseCase')
+    private findWalletTransaction: IFindUserWalletTransactionsUseCase,
+    @inject('RedeemLoyalityToWalletUseCase')
+    private redeemLoyalityToWalletUseCase: IRedeemLoyalityToWalletUseCase,
     @inject('BookingRepository') private bookingRepository: IBookingRepository,
     @inject('WalletRepository') private walletRepository: IWalletRepository,
     @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
@@ -180,15 +182,26 @@ export class UserProfileController implements IUserProfileController {
     const pageNum = parseInt(page as string, 10);
     const limitNum = parseInt(limit as string, 10);
     const validFilters = ['all', 'credit', 'debit'];
-    const filterValue = validFilters.includes(filter as string) ? (filter as 'all' | 'credit' | 'debit') : 'all';
+    const filterValue = validFilters.includes(filter as string)
+      ? (filter as 'all' | 'credit' | 'debit')
+      : 'all';
 
     if (isNaN(pageNum) || pageNum < 1 || isNaN(limitNum) || limitNum < 1) {
-      sendResponse(res, HttpResCode.BAD_REQUEST, ERROR_MESSAGES.VALIDATION.INVALID_PAGINATION_PARAMS);
+      sendResponse(
+        res,
+        HttpResCode.BAD_REQUEST,
+        ERROR_MESSAGES.VALIDATION.INVALID_PAGINATION_PARAMS,
+      );
       return;
     }
 
     try {
-      const result = await this.findWalletTransaction.execute(userId, pageNum, limitNum, filterValue);
+      const result = await this.findWalletTransaction.execute(
+        userId,
+        pageNum,
+        limitNum,
+        filterValue,
+      );
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       const errorMessage =
@@ -225,5 +238,4 @@ export class UserProfileController implements IUserProfileController {
       sendResponse(res, statusCode, errorMessage);
     }
   }
-
 }

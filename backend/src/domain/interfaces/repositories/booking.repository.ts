@@ -30,6 +30,6 @@ export interface IBookingRepository {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ bookings: Booking[]; totalCount: number }>;
-  cancelBooking(bookingId: string,reason:string): Promise<Booking | null>;
+  cancelBooking(bookingId: string, reason: string): Promise<Booking | null>;
   countBookings(userId: string): Promise<number>;
 }

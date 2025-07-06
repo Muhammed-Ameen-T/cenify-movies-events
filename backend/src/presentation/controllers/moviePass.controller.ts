@@ -20,7 +20,8 @@ export class MoviePassController implements IMoviePassController {
   constructor(
     @inject('CreateMoviePassUseCase') private createMoviePassUseCase: ICreateMoviePassUseCase,
     @inject('FetchMoviePassUseCase') private fetchMoviePassUseCase: IFetchMoviePassUseCase,
-    @inject('FindMoviePassHistoryUseCase') private findMoviePassHistoryUseCase: IFindMoviePassHistoryUseCase,
+    @inject('FindMoviePassHistoryUseCase')
+    private findMoviePassHistoryUseCase: IFindMoviePassHistoryUseCase,
   ) {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
@@ -107,7 +108,10 @@ export class MoviePassController implements IMoviePassController {
     const limitNum = parseInt(limit as string, 10);
 
     if (isNaN(pageNum) || pageNum < 1 || isNaN(limitNum) || limitNum < 1) {
-      throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_PAGINATION_PARAMS, HttpResCode.BAD_REQUEST);
+      throw new CustomError(
+        ERROR_MESSAGES.VALIDATION.INVALID_PAGINATION_PARAMS,
+        HttpResCode.BAD_REQUEST,
+      );
     }
 
     try {
@@ -115,7 +119,11 @@ export class MoviePassController implements IMoviePassController {
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error: any) {
       console.error('❌ Error finding movie pass history:', error);
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, error.message || ERROR_MESSAGES.GENERAL.FAILED_FINDING_MOVIE_PASS);
+      sendResponse(
+        res,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+        error.message || ERROR_MESSAGES.GENERAL.FAILED_FINDING_MOVIE_PASS,
+      );
     }
   }
 }

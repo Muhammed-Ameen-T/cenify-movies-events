@@ -213,14 +213,14 @@ export class BookingMngController implements IBookingMngController {
   async cancelBooking(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const {reason} = req.body;
+      const { reason } = req.body;
       console.log('🚀 ~ BookingMngController ~ cancelBooking ~ id:', id);
 
       if (!id) {
         throw new CustomError('Missing booking ID', HttpResCode.BAD_REQUEST);
       }
 
-      const cancelledBooking = await this.cancelBookingUseCase.execute(id,reason);
+      const cancelledBooking = await this.cancelBookingUseCase.execute(id, reason);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, cancelledBooking);
     } catch (error: any) {
       console.error('❌ ~ BookingMngController ~ cancelBooking ~ error:', error);

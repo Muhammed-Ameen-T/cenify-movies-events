@@ -76,7 +76,7 @@ export class NotificationService {
     userId: string,
     page: number,
     limit: number,
-    filter: string
+    filter: string,
   ): Promise<{
     notifications: Notification[];
     total: number;
@@ -95,7 +95,7 @@ export class NotificationService {
   async fetchAdminNotifications(
     page: number,
     limit: number,
-    filter: string
+    filter: string,
   ): Promise<{
     notifications: Notification[];
     total: number;
@@ -112,7 +112,6 @@ export class NotificationService {
       );
     }
   }
-
 
   // Mark a single notification as read
   async markNotificationAsRead(notificationId: string, userId: string): Promise<boolean> {

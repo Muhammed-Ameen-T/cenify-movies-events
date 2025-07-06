@@ -101,13 +101,14 @@ export class ShowJobService {
           await this.cancelBooking.execute(bookingId, 'Payment not completed within time period');
           console.log(`🚫 Booking ${bookingId} auto-cancelled due to pending payment`);
         } else {
-          console.log(`✅ Booking ${bookingId} payment status: ${booking.payment.status}, skipping cancellation.`);
+          console.log(
+            `✅ Booking ${bookingId} payment status: ${booking.payment.status}, skipping cancellation.`,
+          );
         }
       } catch (error) {
         console.error(`❌ Error cancelling booking ${bookingId}:`, error);
       }
     });
-
   }
 
   async scheduleShowJobs(
@@ -161,16 +162,20 @@ export class ShowJobService {
       await this.agenda.schedule(new Date(Date.now() + 10 * 60 * 1000), 'cancelPendingBooking', {
         bookingId,
       });
-      console.log(`✅ Scheduled cancelPendingBooking job for bookingId: ${bookingId} to run in 10 minutes`);
+      console.log(
+        `✅ Scheduled cancelPendingBooking job for bookingId: ${bookingId} to run in 10 minutes`,
+      );
     } catch (error) {
-      console.error(`❌ Error scheduling cancelPendingBooking job for bookingId: ${bookingId}`, error);
+      console.error(
+        `❌ Error scheduling cancelPendingBooking job for bookingId: ${bookingId}`,
+        error,
+      );
       throw new CustomError(
         'Failed to schedule booking auto-cancel job',
         HttpResCode.INTERNAL_SERVER_ERROR,
       );
     }
   }
-
 
   async startAgenda(): Promise<void> {
     try {
