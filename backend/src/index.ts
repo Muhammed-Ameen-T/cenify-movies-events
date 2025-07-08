@@ -1,19 +1,21 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
+import 'reflect-metadata';
+import app from './app';
+import { connectDB } from './infrastructure/database/mongoose';
+import { env } from './config/env.config';
+import { SuccessMsg } from './utils/constants/commonSuccessMsg.constants';
 
-dotenv.config();
+const PORT = env.PORT;
 
-const app = express();
-const PORT = process.env.PORT;
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`${SuccessMsg.SERVER_RUNNING} ${PORT} 🚀`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+};
 
-app.use(cors());
-app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.send('Hello from MERN Backend!');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+startServer();
