@@ -331,7 +331,7 @@ For support and questions:
 
 - **Email**: support@cenify.com
 - **Documentation**: [docs.cenify.com](https://docs.cenify.com)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/cenify/issues)
+- **Issues**: [GitHub Issues](https://github.com/Muhammed-Ameen-T/cenify/issues)
 - **Community**: [Discord Server](https://discord.gg/cenify)
 
 ## 📜 License
@@ -347,10 +347,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📈 Stats
 
-![GitHub stars](https://img.shields.io/github/stars/yourusername/cenify?style=social)
-![GitHub forks](https://img.shields.io/github/forks/yourusername/cenify?style=social)
-![GitHub issues](https://img.shields.io/github/issues/yourusername/cenify)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/cenify)
+![GitHub stars](https://img.shields.io/github/stars/Muhammed-Ameen-T/cenify-movies-events?style=social)
+![GitHub forks](https://img.shields.io/github/forks/Muhammed-Ameen-T/cenify-movies-events?style=social)
+![GitHub issues](https://img.shields.io/github/issues/Muhammed-Ameen-T/cenify-movies-events)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/Muhammed-Ameen-T/cenify-movies-events)
 
 ---
 
@@ -361,6 +361,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <p align="center">
   <a href="https://cenify.com">Website</a> •
   <a href="https://docs.cenify.com">Documentation</a> •
-  <a href="https://github.com/yourusername/cenify/issues">Report Bug</a> •
-  <a href="https://github.com/yourusername/cenify/issues">Request Feature</a>
+  <a href="https://github.com/Muhammed-Ameen-T/cenify-movies-events/issues">Report Bug</a> •
+  <a href="https://github.com/Muhammed-Ameen-T/cenify-movies-events/issues">Request Feature</a>
 </p>
