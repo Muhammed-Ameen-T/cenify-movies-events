@@ -1,4 +1,4 @@
-import mongoose, { ObjectId,Schema } from "mongoose";
+import mongoose, { ObjectId, Schema } from 'mongoose';
 
 export class RegisterVendorDTO {
   constructor(
@@ -85,7 +85,6 @@ export class AuthResponseDTO {
   ) {}
 }
 
-
 // src/application/dtos/vendor.dto.ts
 export class TheaterResponseDTO {
   constructor(
@@ -109,6 +108,7 @@ export class TheaterResponseDTO {
     public email: string | null,
     public phone: number | null,
     public rating: number | null,
+    public ratingCount: number | null,
     public description: string | null,
     public vendorId: {
       id: string;
@@ -127,5 +127,3 @@ export interface IVendorSM {
   email: string;
   phone: number;
 }
-
-

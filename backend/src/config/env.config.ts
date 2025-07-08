@@ -240,6 +240,29 @@ export const env = {
     return process.env.PAYPAL_CLIENT_SECRET;
   },
 
+  get STRIPE_PUBLISH_KEY(): string {
+    if (!process.env.STRIPE_PUBLISH_KEY) {
+      throw new CustomError(EnvErrMsg.STRIPE_PUBLISH_UNDEFINED, HttpResCode.INTERNAL_SERVER_ERROR);
+    }
+    return process.env.STRIPE_PUBLISH_KEY;
+  },
+
+  get STRIPE_SECRET_KEY(): string {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new CustomError(EnvErrMsg.STRIPE_SECRET_UNDEFINES, HttpResCode.INTERNAL_SERVER_ERROR);
+    }
+    return process.env.STRIPE_SECRET_KEY;
+  },
+  get STRIPE_WEBHOOK_SECRET(): string {
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      throw new CustomError(
+        EnvErrMsg.STRIPE_WEBHOOK_SECRET_UNDEFINES,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return process.env.STRIPE_WEBHOOK_SECRET;
+  },
+
   // Cloudinary Configuration
   get CLOUDINARY_CLOUD_NAME(): string {
     if (!process.env.CLOUDINARY_CLOUD_NAME) {

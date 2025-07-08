@@ -14,20 +14,14 @@ export class FindMovieByIdUseCase implements IFindMovieByIdUseCase {
     try {
       const movie = await this.movieRepository.findById(id);
       if (!movie) {
-        throw new CustomError(
-          ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND,
-          HttpResCode.NOT_FOUND
-        );
+        throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
       }
       return movie;
     } catch (error) {
       if (error instanceof CustomError) {
         throw error;
       }
-      throw new CustomError(
-        ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND,
-        HttpResCode.NOT_FOUND
-      );
+      throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
   }
 }

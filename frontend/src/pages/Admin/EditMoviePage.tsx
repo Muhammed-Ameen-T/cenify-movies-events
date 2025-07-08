@@ -13,8 +13,7 @@ import { uploadToCloudinary } from '../../services/Vendor/theaterApi';
 import { movieService } from '../../services/Admin/movieApi';
 import ImageCropper from '../../components/Shared/ImageCropperMovie';
 import BackButton from '../../components/Buttons/BackButton';
-import Navbar from '../../components/Admin/Navbar';
-import Sidebar from '../../components/Admin/Sidebar';
+
 
 // Movie form schema (same as MovieCreationForm)
 const movieSchema = z.object({
@@ -34,9 +33,7 @@ const movieSchema = z.object({
     message: 'Duration must not exceed 10 hours',
     path: ['hours'],
   }),
-  releaseDate: z.string().refine(date => new Date(date) >= new Date(new Date().setHours(0, 0, 0, 0)), {
-    message: 'Release date cannot be in the past',
-  }),
+  releaseDate: z.string(),
   is3D: z.boolean(),
   crew: z.array(z.object({
     id: z.string().optional(),
@@ -434,9 +431,7 @@ const EditMovieForm: React.FC = () => {
       exit="out"
       variants={pageVariants}
     >
-      <Sidebar activePage="movies" />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Navbar title="Edit Movie" />
         <main className="flex-1 overflow-y-auto p-6">
           <AnimatePresence mode="wait">
             {formSubmitted ? (
@@ -674,7 +669,6 @@ const EditMovieForm: React.FC = () => {
                         {...register('releaseDate')}
                         id="releaseDate"
                         type="date"
-                        min={new Date().toISOString().split('T')[0]}
                         className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none ${
                           errors.releaseDate ? 'border-red-500' : ''
                         }`}

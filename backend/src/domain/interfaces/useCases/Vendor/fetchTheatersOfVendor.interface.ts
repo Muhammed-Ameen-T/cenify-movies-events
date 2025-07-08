@@ -1,4 +1,4 @@
-import { Theater } from "../../../entities/theater.entity";
+import { Theater } from '../../../entities/theater.entity';
 
 export interface IFetchTheaterOfVendorUseCase {
   execute(params?: {

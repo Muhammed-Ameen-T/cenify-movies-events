@@ -3,18 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Upload, Info, CheckCircle2, Plus } from 'lucide-react';
+import { Loader2, Upload, Info, CheckCircle2, Plus, ChevronDown } from 'lucide-react';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
 import { uploadToCloudinary } from '../../services/Vendor/theaterApi';
-import { movieService} from '../../services/Admin/movieApi';
+import { movieService } from '../../services/Admin/movieApi';
 import ImageCropper from '../../components/Shared/ImageCropperMovie';
 import BackButton from '../../components/Buttons/BackButton';
-import Navbar from '../../components/Admin/Navbar';
-import Sidebar from '../../components/Admin/Sidebar';
+
 
 // Movie form schema
 const movieSchema = z.object({
@@ -116,14 +115,28 @@ const MovieCreationForm: React.FC = () => {
   const [newCrewRole, setNewCrewRole] = useState(CREW_ROLES[0]);
   const [newCastName, setNewCastName] = useState('');
   const [newCastCharacter, setNewCastCharacter] = useState('');
+  const [isGenreDropdownOpen, setIsGenreDropdownOpen] = useState(false); // New state for dropdown
 
   const watchedTrailerLink = watch('trailerLink');
   const watchedCrew = watch('crew');
   const watchedCast = watch('cast');
   const watchedPoster = watch('poster');
+  const watchedGenres = watch('genre'); // Watch genre field
 
   const crewSearchInputRef = useRef<HTMLInputElement>(null);
   const castSearchInputRef = useRef<HTMLInputElement>(null);
+  const genreDropdownRef = useRef<HTMLDivElement>(null); // Ref for dropdown
+
+  // Handle clicks outside the genre dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (genreDropdownRef.current && !genreDropdownRef.current.contains(event.target as Node)) {
+        setIsGenreDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const searchTMDB = useCallback(
     debounce(async (query: string, setSuggestions: React.Dispatch<React.SetStateAction<any[]>>, setIsSearching: React.Dispatch<React.SetStateAction<boolean>>) => {
@@ -207,7 +220,6 @@ const MovieCreationForm: React.FC = () => {
 
     try {
       console.log('Received cropped base64:', croppedImageBase64.slice(0, 50), '...');
-      // Validate base64 string
       if (!croppedImageBase64.startsWith('data:image/jpeg;base64,')) {
         console.error('Invalid base64 format:', croppedImageBase64.slice(0, 50));
         toast.error('Invalid cropped image format');
@@ -216,7 +228,6 @@ const MovieCreationForm: React.FC = () => {
 
       console.log('Received cropped base64 length:', croppedImageBase64.length);
 
-      // Convert base64 to blob
       const byteString = atob(croppedImageBase64.split(',')[1]);
       const mimeString = croppedImageBase64.split(',')[0].split(':')[1].split(';')[0];
       const ab = new ArrayBuffer(byteString.length);
@@ -226,15 +237,12 @@ const MovieCreationForm: React.FC = () => {
       }
       const blob = new Blob([ab], { type: mimeString });
 
-      // Create file from blob
       const file = new File([blob], `movie-poster-${Date.now()}.jpg`, { type: 'image/jpeg' });
 
-      // Set preview and file
       setPosterFile(file);
       setPosterPreview(croppedImageBase64);
       console.log('Set posterPreview with base64 length:', croppedImageBase64.length);
 
-      // Upload to Cloudinary
       const url = await uploadToCloudinary(file);
       console.log('Cloudinary upload URL:', url);
       setValue('poster', url, { shouldValidate: true, shouldDirty: true });
@@ -384,9 +392,7 @@ const MovieCreationForm: React.FC = () => {
       exit="out"
       variants={pageVariants}
     >
-      <Sidebar activePage="movies" />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Navbar title="Create New Movie" />
         <main className="flex-1 overflow-y-auto p-6">
           <AnimatePresence mode="wait">
             {formSubmitted ? (
@@ -476,24 +482,59 @@ const MovieCreationForm: React.FC = () => {
                         name="genre"
                         control={control}
                         render={({ field }) => (
-                          <select
-                            multiple
-                            value={field.value}
-                            onChange={(e) => {
-                              const selected = Array.from(e.target.selectedOptions).map(option => option.value);
-                              field.onChange(selected);
-                            }}
-                            className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none h-32 ${
-                              errors.genre ? 'border-red-500' : ''
-                            }`}
-                          >
-                            {GENRES.map(genre => (
-                              <option key={genre} value={genre}>{genre}</option>
-                            ))}
-                          </select>
+                          <div className="relative" ref={genreDropdownRef}>
+                            <button
+                              type="button"
+                              onClick={() => setIsGenreDropdownOpen(!isGenreDropdownOpen)}
+                              className={`w-full py-3 px-4 rounded-lg bg-gray-700 border text-left text-white flex justify-between items-center ${
+                                errors.genre ? 'border-red-500' : 'border-gray-600'
+                              } focus:ring-blue-500 focus:border-blue-500`}
+                            >
+                              <span>
+                                {field.value.length > 0
+                                  ? `${field.value.join(', ')}`
+                                  : 'Select genres'}
+                              </span>
+                              <ChevronDown className="w-5 h-5 text-gray-400" />
+                            </button>
+                            <AnimatePresence>
+                              {isGenreDropdownOpen && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -10 }}
+                                  className="absolute z-10 w-full mt-2 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+                                >
+                                  {GENRES.map(genre => (
+                                    <label
+                                      key={genre}
+                                      className="flex items-center px-4 py-2 hover:bg-gray-600 cursor-pointer"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={field.value.includes(genre)}
+                                        onChange={(e) => {
+                                          const updatedGenres = e.target.checked
+                                            ? [...field.value, genre]
+                                            : field.value.filter(g => g !== genre);
+                                          if (updatedGenres.length <= 5) {
+                                            field.onChange(updatedGenres);
+                                          } else {
+                                            toast.error('Maximum 5 genres allowed');
+                                          }
+                                        }}
+                                        className="mr-2 accent-blue-500"
+                                      />
+                                      <span className="text-white">{genre}</span>
+                                    </label>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
                         )}
                       />
-                      <p className="text-sm text-gray-400">Hold Ctrl/Cmd to select multiple genres</p>
+                      <p className="text-sm text-gray-400">Select up to 5 genres</p>
                       {errors.genre && <p className="text-red-400 text-sm">{errors.genre.message}</p>}
                     </motion.div>
 
@@ -593,11 +634,9 @@ const MovieCreationForm: React.FC = () => {
                             placeholder="Minutes"
                             min="0"
                             max="59"
-                            className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none ${
-                              errors.duration?.minutes ? 'border-red-500' : ''
-                            }`}
+                            className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 text-sm focus:ring-blue-500 focus:border-blue-500'}`}
                           />
-                          {errors.duration?.minutes && <p className="text-red-400 text-sm">{errors.duration.minutes.message}</p>}
+                            {errors.duration?.minutes && <p className="text-red-400 text-sm">{errors.duration.minutes.message}</p>}
                         </div>
                         <div>
                           <input
@@ -606,9 +645,7 @@ const MovieCreationForm: React.FC = () => {
                             placeholder="Seconds"
                             min="0"
                             max="59"
-                            className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none ${
-                              errors.duration?.seconds ? 'border-red-500' : ''
-                            }`}
+                            className={`w-full py-3 px-4 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500'}`}
                           />
                           {errors.duration?.seconds && <p className="text-red-400 text-sm">{errors.duration.seconds.message}</p>}
                         </div>
@@ -732,8 +769,7 @@ const MovieCreationForm: React.FC = () => {
                             value={newCastCharacter}
                             onChange={(e) => setNewCastCharacter(e.target.value)}
                             placeholder="Enter character name"
-                            className="py-2 px-3 rounded-lg bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
-                          />
+                            className="py-2 px-3 rounded-lg bg-gray-600 border-gray-500 border text-gray-600 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500" />
                           <motion.button
                             type="button"
                             onClick={handleAddNewCast}
@@ -782,7 +818,7 @@ const MovieCreationForm: React.FC = () => {
                     </motion.div>
 
                     {/* Movie Crew */}
-                    <motion.div className="space-y-3" variants={itemVariants}>
+                    <motion.div className="space-y-3" variants={itemVariants}/>
                       <label className="text-base font-medium text-gray-200">
                         Movie Crew
                       </label>
@@ -850,208 +886,209 @@ const MovieCreationForm: React.FC = () => {
                         </motion.div>
                       )}
                       {/* Manual Crew Addition */}
-                      <div className="mt-4 p-4 bg-gray-700 rounded-lg">
-                        <h3 className="text-sm font-medium text-gray-200 mb-2">Add New Crew Member</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <input
-                            type="text"
-                            value={newCrewName}
-                            onChange={(e) => setNewCrewName(e.target.value)}
-                            placeholder="Enter crew member name"
-                            className="py-2 px-3 rounded-lg bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
-                          />
-                          <select
-                            value={newCrewRole}
-                            onChange={(e) => setNewCrewRole(e.target.value)}
-                            className="py-2 px-3 rounded-lg bg-gray-600 border border-gray-500 text-white focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
-                          >
-                            {CREW_ROLES.map(role => (
-                              <option key={role} value={role}>{role}</option>
+                      <motion.div>
+                        <div className="mt-4 p-4 bg-gray-700 rounded-lg">
+                          <h3 className="text-sm font-medium text-gray-200 mb-2">Add New Crew Member</h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <input
+                              type="text"
+                              value={newCrewName}
+                              onChange={(e) => setNewCrewName(e.target.value)}
+                              placeholder="Enter crew member name"
+                              className="py-2 px-3 rounded-lg bg-gray-600 border border-gray-500 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                            />
+                            <select
+                              value={newCrewRole}
+                              onChange={(e) => setNewCrewRole(e.target.value)}
+                              className="py-2 px-3 rounded-lg bg-gray-600 border border-gray-500 text-white focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                            >
+                              {CREW_ROLES.map(role => (
+                                <option key={role} value={role}>{role}</option>
+                              ))}
+                            </select>
+                            <motion.button
+                              type="button"
+                              onClick={handleAddNewCrew}
+                              className="py-2 px-4 bg-blue-600 text-white rounded-lg flex items-center justify-center hover:bg-blue-700"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <Plus className="w-4 h-4 mr-2" /> Add Crew
+                            </motion.button>
+                          </div>
+                        </div>
+                        {/* Crew Preview */}
+                        {watchedCrew.length > 0 && (
+                          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {watchedCrew.map((crew, index) => (
+                              <motion.div
+                                key={crew.id || index}
+                                className="flex items-center space-x-3 bg-gray-700 p-3 rounded-lg"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                              >
+                                <img
+                                  src={crew.profileImage || DEFAULT_PROFILE_IMAGE}
+                                  alt={crew.name}
+                                  className="w-12 h-12 rounded-full object-cover"
+                                  onError={(e) => {
+                                    console.error(`Failed to load crew image for ${crew.name}:`, crew.profileImage);
+                                    e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                                  }}
+                                />
+                                <div className="flex-1">
+                                  <p className="text-white font-medium">{crew.name}</p>
+                                  <p className="text-gray-400 text-sm">{crew.role}</p>
+                                </div>
+                                <button
+                                  onClick={() => removeCrewMember(index)}
+                                  className="text-red-400 hover:text-red-300"
+                                >
+                                  Remove
+                                </button>
+                              </motion.div>
                             ))}
-                          </select>
-                          <motion.button
-                            type="button"
-                            onClick={handleAddNewCrew}
-                            className="py-2 px-4 bg-blue-600 text-white rounded-lg flex items-center justify-center hover:bg-blue-700"
+                          </div>
+                        )}
+                        {errors.crew && <p className="text-red-400 text-sm mt-2">{errors.crew.message}</p>}
+                      </motion.div>
+
+                      {/* Poster Upload */}
+                      <motion.div className="space-y-3" variants={itemVariants}>
+                        <label className="text-base font-medium text-gray-200">
+                          Movie Poster (1402x2048 pixels)
+                        </label>
+                        {posterPreview && (
+                          <motion.div
+                            className="mt-4"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                          >
+                            <img
+                              src={posterPreview}
+                              alt="Poster Preview"
+                              className="w-40 h-auto rounded-lg shadow-md mx-auto"
+                            />
+                            <button
+                              onClick={() => {
+                                setPosterFile(null);
+                                setPosterPreview(null);
+                                setValue('poster', '', { shouldValidate: true, shouldDirty: true });
+                              }}
+                              className="mt-2 text-red-400 hover:text-red-300 text-sm"
+                            >
+                              Remove Poster
+                            </button>
+                          </motion.div>
+                        )}
+                        {!posterPreview && (
+                          <motion.div
+                            className="mt-3"
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                           >
-                            <Plus className="w-4 h-4 mr-2" /> Add Crew
-                          </motion.button>
-                        </div>
-                      </div>
-                      {/* Crew Preview */}
-                      {watchedCrew.length > 0 && (
-                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {watchedCrew.map((crew, index) => (
-                            <motion.div
-                              key={crew.id || index}
-                              className="flex items-center space-x-3 bg-gray-700 p-3 rounded-lg"
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
+                            <label
+                              className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer ${
+                                uploading
+                                  ? 'bg-gray-700 border-gray-600'
+                                  : 'bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-blue-500'
+                              }`}
                             >
-                              <img
-                                src={crew.profileImage || DEFAULT_PROFILE_IMAGE}
-                                alt={crew.name}
-                                className="w-12 h-12 rounded-full object-cover"
-                                onError={(e) => {
-                                  console.error(`Failed to load crew image for ${crew.name}:`, crew.profileImage);
-                                  e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
-                                }}
-                              />
-                              <div className="flex-1">
-                                <p className="text-white font-medium">{crew.name}</p>
-                                <p className="text-gray-400 text-sm">{crew.role}</p>
+                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                {uploading ? (
+                                  <div className="text-center">
+                                    <motion.div
+                                      className="w-8 h-8 border-4 border-t-blue-500 border-blue-500/30 rounded-full mx-auto mb-2"
+                                      animate={{ rotate: 360 }}
+                                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                    ></motion.div>
+                                    <p className="text-sm text-gray-400">Uploading...</p>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <Upload className="w-8 h-8 mb-3 text-gray-400" />
+                                    <p className="mb-1 text-sm text-gray-300">
+                                      <span className="font-semibold">Click to upload</span> or drag and drop
+                                    </p>
+                                    <p className="text-xs text-gray-400">JPG, JPEG or PNG (MAX. 5MB)</p>
+                                  </>
+                                )}
                               </div>
-                              <button
-                                onClick={() => removeCrewMember(index)}
-                                className="text-red-400 hover:text-red-300"
-                              >
-                                Remove
-                              </button>
-                            </motion.div>
-                          ))}
-                        </div>
-                      )}
-                      {errors.crew && <p className="text-red-400 text-sm mt-2">{errors.crew.message}</p>}
-                    </motion.div>
-
-                    {/* Poster Upload */}
-                    <motion.div className="space-y-3" variants={itemVariants}>
-                      <label className="text-base font-medium text-gray-200">
-                        Movie Poster (1402x2048 pixels)
-                      </label>
-                      {posterPreview && (
-                        <motion.div
-                          className="mt-4"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                        >
-                          <img
-                            src={posterPreview}
-                            alt="Poster Preview"
-                            className="w-40 h-auto rounded-lg shadow-md mx-auto"
-                          />
-                          <button
-                            onClick={() => {
-                              setPosterFile(null);
-                              setPosterPreview(null);
-                              setValue('poster', '', { shouldValidate: true, shouldDirty: true });
-                            }}
-                            className="mt-2 text-red-400 hover:text-red-300 text-sm"
-                          >
-                            Remove Poster
-                          </button>
-                        </motion.div>
-                      )}
-                      {!posterPreview && (
-                        <motion.div
-                          className="mt-3"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <label
-                            className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer ${
-                              uploading
-                                ? 'bg-gray-700 border-gray-600'
-                                : 'bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-blue-500'
-                            }`}
-                          >
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              {uploading ? (
-                                <div className="text-center">
-                                  <motion.div
-                                    className="w-8 h-8 border-4 border-t-blue-500 border-blue-500/30 rounded-full mx-auto mb-2"
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                  ></motion.div>
-                                  <p className="text-sm text-gray-400">Uploading...</p>
-                                </div>
-                              ) : (
-                                <>
-                                  <Upload className="w-8 h-8 mb-3 text-gray-400" />
-                                  <p className="mb-1 text-sm text-gray-300">
-                                    <span className="font-semibold">Click to upload</span> or drag and drop
-                                  </p>
-                                  <p className="text-xs text-gray-400">JPG, JPEG or PNG (MAX. 5MB)</p>
-                                </>
-                              )}
-                            </div>
-                            <input
-                              type="file"
-                              className="hidden"
-                              accept="image/jpeg,image/jpg,image/png"
-                              onChange={handleImageUpload}
-                              disabled={uploading}
-                            />
-                          </label>
-                        </motion.div>
-                      )}
-                      {errors.poster && <p className="text-red-400 text-sm mt-1">{errors.poster.message}</p>}
-                    </motion.div>
-
-                    {/* Submit Button */}
-                    <motion.div variants={itemVariants} className="pt-4">
-                      <motion.button
-                        type="submit"
-                        disabled={isSubmitting || !watchedPoster || createMovieMutation.isPending}
-                        className={`w-full py-4 px-4 rounded-lg font-semibold text-white transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 ${
-                          isSubmitting || !watchedPoster || createMovieMutation.isPending
-                            ? 'bg-gray-600 cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700'
-                        }`}
-                        whileHover={
-                          isSubmitting || !watchedPoster || createMovieMutation.isPending
-                            ? {}
-                            : { scale: 1.02, backgroundColor: '#2563EB' }
-                        }
-                        whileTap={
-                          isSubmitting || !watchedPoster || createMovieMutation.isPending
-                            ? {}
-                            : { scale: 0.98 }
-                        }
-                      >
-                        {createMovieMutation.isPending ? (
-                          <div className="flex items-center justify-center">
-                            <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                            Processing...
-                          </div>
-                        ) : (
-                          'Create Movie'
+                              <input
+                                type="file"
+                                className="hidden"
+                                accept="image/jpeg,image/jpg,image/png"
+                                onChange={handleImageUpload}
+                                disabled={uploading}
+                              />
+                            </label>
+                          </motion.div>
                         )}
-                      </motion.button>
-                      {!watchedPoster && (
-                        <motion.div
-                          className="flex items-center justify-center mt-4 text-amber-400 text-sm"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.5 }}
-                        >
-                          <Info className="w-4 h-4 mr-2" />
-                          Please upload a movie poster to continue
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  </form>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <AnimatePresence>
-            {cropImage && (
-              <ImageCropper
-                src={cropImage}
-                onImageCropped={handleCroppedImage}
-                onCancel={() => setCropImage(null)}
-                aspectRatio={1402 / 2048}
-                fixedSize={{ width: 1402, height: 2048 }}
-              />
-            )}
-          </AnimatePresence>
-        </main>
-      </div>
-    </motion.div>
-  );
-};
+                        {errors.poster && <p className="text-red-400 text-sm mt-1">{errors.poster.message}</p>}
+                      </motion.div>
 
-export default MovieCreationForm;
+                      {/* Submit Button */}
+                      <motion.div variants={itemVariants} className="pt-4">
+                        <motion.button
+                          type="submit"
+                          disabled={isSubmitting || !watchedPoster || createMovieMutation.isPending}
+                          className={`w-full py-4 px-4 rounded-lg font-semibold text-white transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 ${
+                            isSubmitting || !watchedPoster || createMovieMutation.isPending
+                              ? 'bg-gray-600 cursor-not-allowed'
+                              : 'bg-blue-600 hover:bg-blue-700'
+                          }`}
+                          whileHover={
+                            isSubmitting || !watchedPoster || createMovieMutation.isPending
+                              ? {}
+                              : { scale: 1.02, backgroundColor: '#2563EB' }
+                          }
+                          whileTap={
+                            isSubmitting || !watchedPoster || createMovieMutation.isPending
+                              ? {}
+                              : { scale: 0.98 }
+                          }
+                        >
+                          {createMovieMutation.isPending ? (
+                            <div className="flex items-center justify-center">
+                              <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                              Processing...
+                            </div>
+                          ) : (
+                            'Create Movie'
+                          )}
+                        </motion.button>
+                        {!watchedPoster && (
+                          <motion.div
+                            className="flex items-center justify-center mt-4 text-amber-400 text-sm"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                          >
+                            <Info className="w-4 h-4 mr-2" />
+                            Please upload a movie poster to continue
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    </form>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <AnimatePresence>
+              {cropImage && (
+                <ImageCropper
+                  src={cropImage}
+                  onImageCropped={handleCroppedImage}
+                  onCancel={() => setCropImage(null)}
+                  aspectRatio={1402 / 2048}
+                  fixedSize={{ width: 1402, height: 2048 }}
+                />
+              )}
+            </AnimatePresence>
+          </main>
+        </div>
+      </motion.div>
+    );
+  };
+
+  export default MovieCreationForm;

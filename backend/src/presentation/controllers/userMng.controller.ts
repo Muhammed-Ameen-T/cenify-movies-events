@@ -7,14 +7,15 @@ import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.
 import { CustomError } from '../../utils/errors/custom.error';
 import { IFetchUsersUseCase } from '../../domain/interfaces/useCases/Admin/fetchUsers.interface';
 import { IUpdateUserBlockStatusUseCase } from '../../domain/interfaces/useCases/Admin/updateUserBlockStatus.interface';
-import {IUserManagementController} from '../controllers/interface/userMng.controller.interface'
+import { IUserManagementController } from '../controllers/interface/userMng.controller.interface';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class UserManagementController implements IUserManagementController {
   constructor(
     @inject('FetchUsersUseCase') private fetchUsersUseCase: IFetchUsersUseCase,
-    @inject('UpdateUserBlockStatusUseCase') private updateUserBlockStatusUseCase: IUpdateUserBlockStatusUseCase,
+    @inject('UpdateUserBlockStatusUseCase')
+    private updateUserBlockStatusUseCase: IUpdateUserBlockStatusUseCase,
   ) {}
 
   async getUsers(req: Request, res: Response): Promise<void> {
@@ -68,9 +69,7 @@ export class UserManagementController implements IUserManagementController {
     } catch (error) {
       console.error('UserManagementController.getUsers error:', error);
       const errorMessage =
-        error instanceof CustomError
-          ? error.message
-          : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_USERS;
+        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_USERS;
       sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
     }
   }
@@ -94,4 +93,4 @@ export class UserManagementController implements IUserManagementController {
       sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
     }
   }
-}   
+}

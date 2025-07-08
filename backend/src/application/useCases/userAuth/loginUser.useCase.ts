@@ -6,7 +6,7 @@ import { JwtService } from '../../../infrastructure/services/jwt.service';
 import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 /**
  * Handles the user login process using dependency injection for authentication and database operations.

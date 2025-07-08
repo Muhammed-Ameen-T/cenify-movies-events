@@ -2,10 +2,11 @@
 import { IAuthRepository } from '../../domain/interfaces/repositories/userAuth.types';
 import { User } from '../../domain/entities/user.entity';
 import mongoose, { Model } from 'mongoose';
-import { IUser } from '../../domain/interfaces/user.interface';
+import { IUser } from '../../domain/interfaces/model/user.interface';
 import { CustomError } from '../../utils/errors/custom.error';
 import { HttpResCode } from '../../utils/constants/httpResponseCode.utils';
-
+import { injectable } from 'tsyringe';
+@injectable()
 export class AuthRepository implements IAuthRepository {
   private userModel: Model<IUser>;
 

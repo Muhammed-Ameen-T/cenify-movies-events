@@ -1,4 +1,3 @@
 export interface IForgotPasswordVerifyOtpUseCase {
-    execute(email: string,otp:string): Promise<void>;
+  execute(email: string, otp: string): Promise<void>;
 }
-  

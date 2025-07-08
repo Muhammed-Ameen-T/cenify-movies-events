@@ -19,7 +19,7 @@ router.post('/login', VendorAuthController.login.bind(VendorAuthController));
 router.post('/verify-otp', VendorAuthController.verifyOtp.bind(VendorAuthController));
 router.post(
   '/create-theater',
-  verifyAccessToken,    
+  verifyAccessToken,
   authorizeRoles(['vendor']),
   VendorAuthController.createNewTheater.bind(VendorAuthController),
 );

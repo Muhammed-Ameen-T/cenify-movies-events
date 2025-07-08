@@ -1,8 +1,55 @@
 export const AUTH_MESSAGES = {
     SESSION_EXPIRED: "Your session has expired. Please log in again.",
-    BLOCKED_ACCOUNT: "Your account is blocked. Please contact support.",
+    BLOCKED_ACCOUNT: "User is blocked, please contact support!",
     LOGIN_FAILED: "Login failed. Please check your credentials.",
     OTP_FAILED: "Failed to send or verify OTP. Please try again.",
     REFRESH_FAILED: "Failed to refresh token. Please log in again.",
     INVALID_OTP: "Invalid OTP or login faile",
+    PROFILE_UPDATE_FAILED: "Failed to update profile. Please try again.",
+    FETCH_USER_FAILED: "Failed to fetch user data. Please try again.",
+    INVALID_OR_EXPIRED_REFRESH_TOKEN: "Invalid or expired refresh token"
+};
+
+export const ERROR_MESSAGES = {
+    FAILED_CREATE_LAYOUT: "Failed to create seat layout",
+    NETWORK_ERROR: "Network error. Please try again later.",
+    CAUGHT_ERROR : "Caught an error:",
+    SOMETHING_WENT_WRONG : "Oops! Something went wrong.",
+    UNEXPECTED_ISSUE_TRY_AGAIN : "We've encountered an unexpected issue . Please try again later.",
+    SERVER_ERROR : "Server error, please try again",
+    UNAUTHORIZED_ERROR : "Unauthorized access. Please log in.",
+    INTERCEPTOR_REQUEST_ERROR : "INTERCEPTOR REQUEST ERROR : ",
+    INTERCEPTOR_RESPONSE_ERROR : "INTERCEPTOR RESPONSE ERROR : ",
+    TRAINER_APPLICATION_SUBMIT_ERROR : "There was an error submitting your application. Please try again.",
+    PAYMENT_ERROR : "Payment system error. Please try again.",
+    UPVOTE_ARTICLE_ERROR : "Error upvoting article:",
+    NOT_AN_IMAGE_ERROR : "Please upload an image file",
+    MAX_IMAGE_SIZE_ERROR : "Image size should be less than 5MB",
+    TIMEOUT_IMAGE_UPLOAD : "Image upload took too long. Please try again with a smaller image or check your internet connection.",
+    CREATING_SCREEN_FAILED : "Failed to create screen",
+    UPDATING_SCREEN_FAILED : "Failed to update screen",
+    TIME_CONFLICT: 'Selected time slot conflicts with an existing show.',
+    CREATING_SHOW_FAILED: "Failed to create show",
+    FETCH_USER_MOVIES_FAILED: "Failed to fetch user movies. Please try again.",
+    FETCH_MOVIE_PASS_FAILED: "Failed to fetch movie pass.",
+    CREATE_CHECKOUT_FAILED : "Create Checkout sesssion failed.",
+    FETCH_SHOW_DETAILS_FAILED: 'Failed to fetch show details',
+    FETCH_PAYMENT_OPTIONS_FAILED: 'Failed to load payment options',
+    CREATE_BOOKING_FAILED: 'Failed to create booking',
+    FETCH_BOOKING_FAILED: 'Failed to fetch booking details',
+    CANCEL_BOOKING_FAILED: 'Failed to cancel booking',
+    FETCH_DASHBOARD_FAILED: 'Failed to fetch dashboard data',
+    FAILED_CHANGING_PASSWORD: 'Failed to change password.',
+    FETCH_WALLET_TRANSACTIONS_FAILED: 'Failed to fetch wallet transactions',
+    FETCH_MOVIE_PASS_HISTORY_FAILED: 'Feth movie pass '
+};
+
+// src/constants/notification.messages.ts
+export const NOTIFICATION_MESSAGES = {
+  CREATE_GLOBAL_FAILED: 'Failed to create global notification',
+  CREATE_USER_FAILED: 'Failed to create user notification',
+  CREATE_VENDOR_FAILED: 'Failed to create vendor notification',
+  MARK_READ_FAILED: 'Failed to mark notification as read',
+  MARK_ALL_READ_FAILED: 'Failed to mark all notifications as read',
+  FETCH_NOTIFICATIONS_FAILED: 'Failed to fetch notifications',
 };

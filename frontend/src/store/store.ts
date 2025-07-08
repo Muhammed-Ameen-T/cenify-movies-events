@@ -6,6 +6,8 @@ import storage from 'redux-persist/lib/storage';
 
 import authReducer from './slices/authSlice';
 
+import locationReducer from './slices/locationSlice';
+
 import loadingReducer from './slices/loadingSlice';
 
 
@@ -30,6 +32,8 @@ export const store = configureStore({
         auth: persistedAuthReducer,
 
         loading: loadingReducer,
+
+        location: locationReducer,
 
     },
 

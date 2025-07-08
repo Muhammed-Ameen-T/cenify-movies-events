@@ -11,9 +11,11 @@ export interface IFetchUsersUseCase {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{
-      currentPage: any;
-      hasPrevPage: any;
-      hasNextPage: any;
-      totalPages: any; users: UserResponseDTO[]; totalCount: number 
-}>;
+    currentPage: any;
+    hasPrevPage: any;
+    hasNextPage: any;
+    totalPages: any;
+    users: UserResponseDTO[];
+    totalCount: number;
+  }>;
 }

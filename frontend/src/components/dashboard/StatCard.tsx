@@ -33,7 +33,7 @@ const StatCard: React.FC<StatCardProps> = ({
                 ml-2 text-xs font-medium flex items-center 
                 ${change.isPositive ? 'text-green-400' : 'text-red-400'}
               `}>
-                {change.isPositive ? '↑' : '↓'} {Math.abs(change.value)}%
+                {change.isPositive ? '↑' : '↓'}
               </span>
             )}
           </div>

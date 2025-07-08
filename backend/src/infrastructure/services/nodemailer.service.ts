@@ -1,5 +1,5 @@
-import nodemailer, { Transporter } from "nodemailer";
-import { env } from "../../config/env.config";
+import nodemailer, { Transporter } from 'nodemailer';
+import { env } from '../../config/env.config';
 
 class NodemailerService {
   private transporter: Transporter;
@@ -38,8 +38,8 @@ class NodemailerService {
       });
       console.log(`✅ Email sent to ${recipient}: ${subject}`);
     } catch (error) {
-      console.error("❌ Email sending failed:", error);
-      throw new Error("Failed to send email");
+      console.error('❌ Email sending failed:', error);
+      throw new Error('Failed to send email');
     }
   }
 }

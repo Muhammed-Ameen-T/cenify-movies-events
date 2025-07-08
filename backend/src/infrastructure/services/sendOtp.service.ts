@@ -1,4 +1,4 @@
-import { EmailService } from "./nodemailer.service";
+import { EmailService } from './nodemailer.service';
 
 /**
  * Sends an OTP email to a user.
@@ -15,5 +15,5 @@ export const sendOtp = async (email: string, otp: string) => {
     </div>
   `;
 
-  await EmailService.sendEmail(email, "Your OTP Code", htmlContent);
+  await EmailService.sendEmail(email, 'Your OTP Code', htmlContent);
 };

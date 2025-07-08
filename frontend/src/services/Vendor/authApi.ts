@@ -1,11 +1,12 @@
 import axios from "axios";
-import {API_BASE_URL, VENDOR_ENDPOINTS,ADMIN_ENDPOINTS } from "../../constants/apiEndPoint";
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+import {VENDOR_ENDPOINTS,ADMIN_ENDPOINTS } from "../../constants/apiEndPoint";
+// const api = axios.create({
+//   baseURL: API_BASE_URL,
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+// });
+import api from "../../config/axios.config";
 
 export const registerVendor = async (data: {
   email: string;

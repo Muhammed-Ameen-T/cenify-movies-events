@@ -34,7 +34,7 @@ const TheaterManagement: React.FC = () => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [editingTheater, setEditingTheater] = useState<Theater | null>(null);
 
-  const vendorId = '68136be091d98d82eb9e9947';
+  // const vendorId = '68136be091d98d82eb9e9947';
 
   // Debounced search handler
   const debouncedSetSearch = useMemo(
@@ -47,10 +47,9 @@ const TheaterManagement: React.FC = () => {
 
   // Fetch theaters
   const { data, isLoading, error } = useQuery({
-    queryKey: ['theaters', vendorId, currentPage, pageSize, filters],
+    queryKey: ['theaters', currentPage, pageSize, filters],
     queryFn: () =>
       fetchTheatersByVendor({
-        vendorId,
         page: currentPage,
         limit: pageSize,
         search: filters.search || undefined,
@@ -68,7 +67,7 @@ const TheaterManagement: React.FC = () => {
     mutationFn: ({ id, data }: { id: string; data: TheaterUpdateFormData }) => updateTheater(id, data),
     onSuccess: () => {
       toast.success('Theater updated successfully!');
-      queryClient.invalidateQueries({ queryKey: ['theaters', vendorId] });
+      queryClient.invalidateQueries({ queryKey: ['theaters'] });
       setIsUpdateModalOpen(false);
       setEditingTheater(null);
     },

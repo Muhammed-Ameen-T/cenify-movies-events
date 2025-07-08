@@ -9,5 +9,5 @@ export const VerifyOtpSchema = z.object({
   email: z.string().email('Invalid email format'),
   otp: z.string().length(6, 'OTP must be exactly 6 digits'),
   password: z.string().min(8, 'Password must be at least 8 characters long'),
-  accountType: z.string().nonempty('Account type is required'), 
+  accountType: z.string().nonempty('Account type is required'),
 });

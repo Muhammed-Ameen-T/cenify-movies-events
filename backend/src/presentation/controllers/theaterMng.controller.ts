@@ -9,12 +9,18 @@ import { ITheaterManagementController } from './interface/theaterMng.controller.
 import { IUpdateTheaterStatusUseCase } from '../../domain/interfaces/useCases/Vendor/updateTheaterStatus.interface';
 import { IFetchTheaterOfVendorUseCase } from '../../domain/interfaces/useCases/Vendor/fetchTheatersOfVendor.interface';
 import { IUpdateTheaterUseCase } from '../../domain/interfaces/useCases/Vendor/updateTheater.interfase';
+import { IFetchTheatersUseCase } from '../../domain/interfaces/useCases/Vendor/fetchTheaters.interface';
+import { IFetchAdminTheatersUseCase } from '../../domain/interfaces/useCases/Admin/fetchAdminTheaters.interface';
 
 @injectable()
 export class TheaterManagementController implements ITheaterManagementController {
   constructor(
-    @inject('FetchTheaterOfVendorUseCase') private fetchTheatersUseCase: IFetchTheaterOfVendorUseCase,
+    @inject('FetchTheaterOfVendorUseCase')
+    private fetchTheaterUseCase: IFetchTheaterOfVendorUseCase,
+    @inject('FetchTheatersUseCase') private fetchTheatersUseCase: IFetchTheatersUseCase,
     @inject('UpdateTheaterStatus') private updateTheaterStatusUseCase: IUpdateTheaterStatusUseCase,
+    @inject('FetchAdminTheatersUseCase')
+    private fetchAdminTheatersUseCase: IFetchAdminTheatersUseCase,
     @inject('UpdateTheater') private updateTheaterUseCase: IUpdateTheaterUseCase,
   ) {}
 
@@ -44,8 +50,6 @@ export class TheaterManagementController implements ITheaterManagementController
 
   async updateTheater(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
-    console.log("🚀 ~ TheaterManagementController ~ updateTheater ~  req.body:",  )
-
     try {
       await this.updateTheaterUseCase.execute(id, req.body, res);
     } catch (error) {
@@ -61,7 +65,10 @@ export class TheaterManagementController implements ITheaterManagementController
   getTheatersOfVendor = async (req: Request, res: Response): Promise<void> => {
     try {
       const { page, limit, search, status, location, sortBy, sortOrder } = req.query;
-      const vendorId = req.params.vendorId;
+      const vendorId = req.decoded?.userId;
+      if (!vendorId) {
+        throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
+      }
 
       // Convert query parameters directly
       const params = {
@@ -76,12 +83,44 @@ export class TheaterManagementController implements ITheaterManagementController
       };
 
       // Fetch theaters using the use case
-      const result = await this.fetchTheatersUseCase.execute(params);
+      const result = await this.fetchTheaterUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       const errorMessage =
-        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_THEATERS;
+        error instanceof CustomError
+          ? error.message
+          : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_THEATERS;
       sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
     }
-  };          
+  };
+
+  async fetchTheatersByAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const { page, limit, search, status, features, rating, location, sortBy, sortOrder } =
+        req.query;
+
+      // Build params object from query parameters
+      const params = {
+        page: page ? parseInt(page as string) : undefined,
+        limit: limit ? parseInt(limit as string) : undefined,
+        search: search ? (search as string) : undefined,
+        status: status ? (status as string).split(',') : undefined,
+        features: features ? (features as string).split(',') : undefined,
+        rating: rating ? parseFloat(rating as string) : undefined,
+        location: location ? (location as string) : undefined,
+        sortBy: sortBy ? (sortBy as string) : undefined,
+        sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
+      };
+
+      // Fetch theaters using the use case
+      const result = await this.fetchAdminTheatersUseCase.execute(params);
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
+    } catch (error) {
+      const errorMessage =
+        error instanceof CustomError
+          ? error.message
+          : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_THEATERS;
+      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+    }
+  }
 }

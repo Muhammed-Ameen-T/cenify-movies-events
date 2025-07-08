@@ -36,8 +36,8 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.USER_ALREADY_EXISTS, HttpResCode.BAD_REQUEST);
     }
 
-    const hashedPassword = await hashPassword(dto.password)
-    
+    const hashedPassword = await hashPassword(dto.password);
+
     let vendor = new User(
       null as any,
       dto.name,
@@ -64,7 +64,7 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
     }
 
     const createdVendor = await this.authRepository.findByEmail(dto.email);
-    console.log('created Vendor:',createdVendor)
+    console.log('created Vendor:', createdVendor);
     if (!createdVendor) {
       throw new CustomError(
         ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND,

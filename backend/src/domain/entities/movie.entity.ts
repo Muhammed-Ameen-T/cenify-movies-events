@@ -1,5 +1,5 @@
-import { ObjectId } from 'mongoose';
-import { ICast, ICrew, IDuration, IMovie, IReview } from '../interfaces/movie.interface';
+import { ObjectId, Types } from 'mongoose';
+import { ICast, ICrew, IDuration, IMovie, IReview } from '../interfaces/model/movie.interface';
 
 export class Movie {
   constructor(
@@ -9,18 +9,18 @@ export class Movie {
     public trailer: string,
     public rating: number,
     public poster: string,
-    public duration: IDuration, 
+    public duration: IDuration,
     public description: string,
     public language: string,
     public releaseDate: Date,
     public status: string,
     public likes?: number,
-    public interests?: number,
+    public likedBy?: Types.ObjectId[],
     public is3D?: boolean,
     public crew?: ICrew[],
     public cast?: ICast[],
     public reviews?: IReview[],
     public createdAt?: Date,
-    public updatedAt?: Date
+    public updatedAt?: Date,
   ) {}
 }
