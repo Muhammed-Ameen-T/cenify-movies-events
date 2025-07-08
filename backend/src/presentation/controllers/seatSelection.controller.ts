@@ -23,11 +23,11 @@ export class SeatSelectionController implements ISeatSelectionController {
   async getSeatSelection(req: Request, res: Response): Promise<void> {
     try {
       const { showId } = req.params;
-      const userId = req.decoded?.userId;
+      // const userId = req.decoded?.userId;
 
-      if (!userId) {
-        throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
-      }
+      // if (!userId) {
+      //   throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
+      // }
 
       if (!mongoose.Types.ObjectId.isValid(showId)) {
         throw new CustomError('Invalid show ID', HttpResCode.BAD_REQUEST);
