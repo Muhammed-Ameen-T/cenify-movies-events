@@ -77,7 +77,6 @@ export class ShowManagementController implements IShowManagementController {
           scheduleError,
         );
       }
-      console.log('🚀 ~ ShowManagementController ~ updateShow ~ show:', show);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
     } catch (error: any) {
       console.error('❌ ~ ShowManagementController ~ updateShow ~ Error:', error);

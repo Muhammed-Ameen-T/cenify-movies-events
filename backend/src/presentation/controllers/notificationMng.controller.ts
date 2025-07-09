@@ -97,7 +97,6 @@ export class NotificationMngController implements INotificationMngController {
    */
   async readOneNotification(req: Request, res: Response): Promise<void> {
     try {
-      console.log('🚀 ~ NotificationMngController ~ readOneNotification ~ userId:');
       const { id: notificationId } = req.params;
       const userId = req.decoded?.userId;
 

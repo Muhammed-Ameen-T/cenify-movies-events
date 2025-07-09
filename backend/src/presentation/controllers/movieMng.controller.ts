@@ -41,7 +41,6 @@ export class MovieMngController implements IMovieMngController {
 
   async createMovie(req: Request, res: Response): Promise<void> {
     try {
-      console.log('🚀 ~ MovieMngController ~ createMovie ~ req.body:', req.body);
       const {
         name,
         genre,
@@ -69,7 +68,6 @@ export class MovieMngController implements IMovieMngController {
         crew,
         cast,
       );
-      console.log('🚀 ~ MovieMngController ~ createMovie ~ dto:', dto);
       const movie = await this.createMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_ADDED, movie);
     } catch (error) {
@@ -248,7 +246,6 @@ export class MovieMngController implements IMovieMngController {
   async submitRating(req: Request, res: Response): Promise<void> {
     try {
       const { movieId, theaterId, movieRating, theaterRating, review } = req.body;
-      console.log('🚀 ~ MovieMngController ~ submitRating ~ req.body:', req.body);
 
       const userId = req.decoded?.userId;
 

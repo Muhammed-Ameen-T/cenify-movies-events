@@ -26,7 +26,6 @@ export class SeatLayoutController implements ISeatLayoutController {
     try {
       const { uuid, vendorId, layoutName, seatPrice, rowCount, columnCount, seats, capacity } =
         req.body;
-      console.log('🚀 ~ SeatLayoutController ~ createSeatLayout ~ req.body:', req.body);
       const dto = new CreateSeatLayoutDTO(
         uuid,
         vendorId,

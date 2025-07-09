@@ -74,7 +74,6 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
     );
 
     const savedUser = await this.authRepository.create(user);
-    console.log('🚀 ~ VerifyOtpUseCase ~ execute ~ savedUser:', savedUser);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     const createdUser = await this.authRepository.findByEmail(user.email.toLocaleLowerCase());
     console.log('newcreatedUser:', createdUser);

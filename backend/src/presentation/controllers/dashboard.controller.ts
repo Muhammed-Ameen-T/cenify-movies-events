@@ -34,7 +34,6 @@ export class DashboardController implements IDashboardController {
       };
 
       const result = await this.fetchDashboardUseCase.execute(vendorId, params);
-      console.log('🚀 ~ DashboardController ~ getDashboardData ~ result:', result);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       const errorMessage =

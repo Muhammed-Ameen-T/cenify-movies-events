@@ -333,9 +333,6 @@ export class ShowRepository implements IShowRepository {
       const Theater = mongoose.model('Theater');
       const theaterIds = await Theater.find({ vendorId }).distinct('_id');
 
-      // Log theaterIds for debugging
-      console.log('🚀 ~ findShowsByVendor ~ theaterIds:', theaterIds);
-
       // Build match stage for the aggregation pipeline
       const match: any = {
         theaterId: { $in: theaterIds.map((id: any) => new mongoose.Types.ObjectId(id)) },
@@ -429,15 +426,8 @@ export class ShowRepository implements IShowRepository {
         ];
       }
 
-      // Log countQuery for debugging
-      console.log('🚀 ~ findShowsByVendor ~ countQuery:', countQuery);
-
       const totalCount = await ShowModel.countDocuments(countQuery).exec();
       const totalPages = Math.ceil(totalCount / limit);
-
-      // Log totalCount and totalPages
-      console.log('🚀 ~ findShowsByVendor ~ totalCount:', totalCount);
-      console.log('🚀 ~ findShowsByVendor ~ totalPages:', totalPages);
 
       return {
         shows: showDocs.map((doc: any) => this.mapToEntity(doc)),

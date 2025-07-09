@@ -54,7 +54,6 @@ export class BookingMngController implements IBookingMngController {
         req.body.moviePassDiscount,
         new Date(Date.now() + 5 * 60 * 1000), // 5-minute expiry
       );
-      console.log('🚀 ~ BookingMngController ~ createBooking ~ req.body:', req.body);
 
       const result = await this.createBookingUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
@@ -98,7 +97,6 @@ export class BookingMngController implements IBookingMngController {
   async fetchBookings(req: Request, res: Response): Promise<void> {
     try {
       const { page, limit, search, status, sortBy, sortOrder } = req.query;
-      console.log('🚀 ~ BookingMngController ~ fetchBookings ~ req.query:', req.query);
       // Convert query parameters
       const params: {
         page?: number;
@@ -150,7 +148,6 @@ export class BookingMngController implements IBookingMngController {
       };
 
       const result = await this.findBookingsOfVendorUseCase.execute(params);
-      console.log('🚀 ~ BookingMngController ~ findBookingsOfVendor ~ result:', result);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       const errorMessage =
@@ -162,7 +159,6 @@ export class BookingMngController implements IBookingMngController {
   async findBookingById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      console.log('🚀 ~ BookingMngController ~ findBookingById ~ id:', id);
       if (!id) {
         throw new CustomError('Missing booking ID', HttpResCode.BAD_REQUEST);
       }
@@ -177,12 +173,10 @@ export class BookingMngController implements IBookingMngController {
   async findBookingsOfUser(req: Request, res: Response): Promise<void> {
     try {
       const { page, limit, status, sortBy, sortOrder } = req.query;
-      console.log('🚀 ~ BookingMngController ~ findBookingsOfUser ~ req.query:', req.query);
       const userId = req.decoded?.userId;
       if (!userId) {
         throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
-      console.log('🚀 ~ BookingMngController ~ findBookingsOfUser ~ userId:', userId);
       // Convert query parameters
       const params: {
         userId: string;
@@ -201,7 +195,6 @@ export class BookingMngController implements IBookingMngController {
       };
 
       const result = await this.findBookingsOfUserUseCase.execute(params);
-      console.log('🚀 ~ BookingMngController ~ findBookingsOfUser ~ result:', result);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       const errorMessage =
@@ -214,7 +207,6 @@ export class BookingMngController implements IBookingMngController {
     try {
       const { id } = req.params;
       const { reason } = req.body;
-      console.log('🚀 ~ BookingMngController ~ cancelBooking ~ id:', id);
 
       if (!id) {
         throw new CustomError('Missing booking ID', HttpResCode.BAD_REQUEST);

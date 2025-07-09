@@ -9,10 +9,10 @@ import { INotificationRepository } from '../../domain/interfaces/repositories/no
 import { Notification } from '../../domain/entities/notification.entity';
 import BookingModel from '../../infrastructure/database/booking.model';
 import { ISeatRepository } from '../../domain/interfaces/repositories/seat.repository';
-import { IBookingRepository } from '../../domain/interfaces/repositories/booking.repository';
 import { IShowRepository } from '../../domain/interfaces/repositories/show.repository';
 import { IUserRepository } from '../../domain/interfaces/repositories/user.repository';
 import { socketService } from '../../infrastructure/services/socket.service';
+import { SuccessMsg } from '../../utils/constants/commonSuccessMsg.constants';
 
 @injectable()
 export class BookingStripeWebhookController {
@@ -43,84 +43,153 @@ export class BookingStripeWebhookController {
       const session = event.data.object as Stripe.Checkout.Session;
       const { userId, bookingId } = session.metadata || {};
 
-      if (userId && bookingId) {
-        try {
-          const booking = await BookingModel.findOne({ bookingId });
-          if (!booking) {
-            throw new CustomError('Booking not found', HttpResCode.BAD_REQUEST);
-          }
+      if (!userId || !bookingId) {
+        console.error('Missing userId or bookingId in session metadata:', { userId, bookingId });
+        sendResponse(res, HttpResCode.BAD_REQUEST, 'Invalid metadata');
+        return;
+      }
 
-          booking.payment.status = 'completed';
-          booking.payment.paymentId = session.payment_intent as string;
-          await booking.save();
-
-          // const seatNumbers:string[] = await this.seatRepository.findSeatNumbersByIds(booking.bookedSeatsId)
-          // await this.showRepository.confirmBookedSeats(booking.showId.toString(),seatNumbers)
-          const seatNumbers: string[] = await this.seatRepository.findSeatNumbersByIds(
-            booking.bookedSeatsId.map((seat) => seat._id),
-          );
-          await this.showRepository.confirmBookedSeats(booking.showId._id.toString(), seatNumbers);
-          socketService.emitSeatUpdate(
-            booking.showId._id.toString(),
-            booking.bookedSeatsId.map((seat) => seat.toString()),
-            'booked',
-          );
-
-          await this.userRepository.incrementLoyalityPoints(userId, booking.bookedSeatsId.length);
-          const show = await this.showRepository.findById(booking.showId._id.toString());
-
-          const now = new Date();
-          const notification = new Notification(
-            null as any,
-            userId,
-            'Booking Confirmed',
-            'Booking',
-            `Your booking ${bookingId} has been successfully confirmed!`,
-            null,
-            now,
-            now,
-            false,
-            false,
-            [],
-          );
-          const vendorNotification = new Notification(
-            null as any,
-            show?.vendorId,
-            'New Booking Received',
-            'Booking',
-            `A new booking ${bookingId} has been made by a customer.`,
-            booking._id?.toString() || '',
-            now,
-            now,
-            false,
-            false,
-            [],
-          );
-
-          const adminNotification = new Notification(
-            null as any,
-            null,
-            'New Booking Received',
-            'Booking',
-            `Booking ${bookingId} has been confirmed and sent to vendor.`,
-            booking._id?.toString() || '',
-            now,
-            now,
-            false,
-            true,
-            [],
-          );
-          await this.notificationRepository.createNotification(notification);
-          await this.notificationRepository.createGlobalNotification(adminNotification);
-          await this.notificationRepository.createNotification(vendorNotification);
-
-          console.log(`✅ Booking ${bookingId} confirmed for user ${userId}`);
-        } catch (error: any) {
-          console.error(`❌ Failed to confirm booking ${bookingId}:`, error.message);
+      try {
+        const booking = await BookingModel.findOne({ bookingId });
+        if (!booking) {
+          throw new CustomError('Booking not found', HttpResCode.BAD_REQUEST);
         }
+
+        booking.payment.status = 'completed';
+        booking.payment.paymentId = session.payment_intent as string;
+        await booking.save();
+
+        const seatNumbers: string[] = await this.seatRepository.findSeatNumbersByIds(
+          booking.bookedSeatsId.map((seat) => seat._id),
+        );
+        await this.showRepository.confirmBookedSeats(booking.showId._id.toString(), seatNumbers);
+        console.log(`Emitting seatUpdate to show-${booking.showId._id}:`, {
+          seatIds: booking.bookedSeatsId.map((seat) => seat.toString()),
+          status: 'booked',
+        });
+        socketService.emitSeatUpdate(
+          booking.showId._id.toString(),
+          booking.bookedSeatsId.map((seat) => seat.toString()),
+          'booked',
+        );
+
+        await this.userRepository.incrementLoyalityPoints(userId, booking.bookedSeatsId.length);
+        const show = await this.showRepository.findById(booking.showId._id.toString());
+        if (!show) {
+          console.error(`Show not found for booking ${bookingId}`);
+          throw new CustomError(
+            'Show not found when creating vendor notification',
+            HttpResCode.INTERNAL_SERVER_ERROR,
+          );
+        }
+
+        const now = new Date();
+
+        // Create notifications
+        const userNotification = new Notification(
+          null as any,
+          userId,
+          'Booking Confirmed',
+          'booking',
+          `Your booking ${bookingId} has been successfully confirmed!`,
+          booking._id?.toString() || '',
+          now,
+          now,
+          false,
+          false,
+          [],
+        );
+
+        const vendorNotification = new Notification(
+          null as any,
+          show.vendorId.toString(),
+          'New Booking Received',
+          'booking',
+          `A new booking ${bookingId} has been made by a customer.`,
+          null,
+          now,
+          now,
+          false,
+          false,
+          [],
+        );
+
+        const adminNotification = new Notification(
+          null as any,
+          null,
+          'New Booking Received',
+          'booking',
+          `Booking ${bookingId} has been confirmed and sent to vendor.`,
+          null,
+          now,
+          now,
+          false,
+          true,
+          [],
+        );
+
+        // Save notifications to database
+        const savedUserNotification = await this.notificationRepository.createNotification(userNotification);
+        const savedVendorNotification = await this.notificationRepository.createNotification(vendorNotification);
+        const savedAdminNotification = await this.notificationRepository.createGlobalNotification(adminNotification);
+
+        // Emit notifications with consistent structure
+        const userNotificationPayload = {
+          _id: savedUserNotification._id?.toString() || '',
+          userId: userId,
+          title: savedUserNotification.title,
+          type: savedUserNotification.type,
+          description: savedUserNotification.description,
+          bookingId: savedUserNotification.bookingId,
+          createdAt: savedUserNotification.createdAt,
+          updatedAt: savedUserNotification.updatedAt,
+          isRead: savedUserNotification.isRead,
+          isGlobal: savedUserNotification.isGlobal,
+          readedUsers: savedUserNotification.readedUsers
+        };
+        console.log(`Emitting user notification to user-${userId}:`, userNotificationPayload);
+        socketService.emitNotification(`user-${userId}`, userNotificationPayload);
+
+        const vendorNotificationPayload = {
+          _id: savedVendorNotification._id?.toString() || '',
+          userId: savedVendorNotification.userId,
+          title: savedVendorNotification.title,
+          type: savedVendorNotification.type,
+          description: savedVendorNotification.description,
+          bookingId: savedVendorNotification.bookingId,
+          createdAt: savedVendorNotification.createdAt,
+          updatedAt: savedVendorNotification.updatedAt,
+          isRead: savedVendorNotification.isRead,
+          isGlobal: savedVendorNotification.isGlobal,
+          readedUsers: savedUserNotification.readedUsers
+        };
+        console.log(`Emitting vendor notification to vendor-${show.vendorId}:`, vendorNotificationPayload);
+        socketService.emitNotification(`vendor-${show.vendorId}`, vendorNotificationPayload);
+
+        const adminNotificationPayload = {
+          _id: savedAdminNotification._id?.toString() || '',
+          userId: savedAdminNotification.userId,
+          title: savedAdminNotification.title,
+          type: savedAdminNotification.type,
+          description: savedAdminNotification.description,
+          bookingId: savedAdminNotification.bookingId,
+          createdAt: savedAdminNotification.createdAt,
+          updatedAt: savedAdminNotification.updatedAt,
+          isRead: savedAdminNotification.isRead,
+          isGlobal: savedAdminNotification.isGlobal,
+          readedUsers: savedUserNotification.readedUsers
+        };
+        console.log(`Emitting admin notification to admin-global:`, adminNotificationPayload);
+        socketService.emitNotification('admin-global', adminNotificationPayload);
+
+        console.log(`✅ Booking ${bookingId} confirmed for user ${userId}`);
+      } catch (error: any) {
+        console.error(`❌ Failed to confirm booking ${bookingId}:`, error.message);
+        sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, 'Failed to process booking');
+        return;
       }
     }
 
-    sendResponse(res, HttpResCode.OK, 'Webhook received');
+    sendResponse(res, HttpResCode.OK, SuccessMsg.WEBHOOK_RECIEVED);
   }
 }

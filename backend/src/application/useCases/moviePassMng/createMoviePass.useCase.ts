@@ -9,6 +9,7 @@ import { INotificationRepository } from '../../../domain/interfaces/repositories
 import { Notification } from '../../../domain/entities/notification.entity';
 import { MoviePassJobService } from '../../../infrastructure/services/moviePass.service';
 import { ICreateMoviePassUseCase } from '../../../domain/interfaces/useCases/User/moviePass.interface';
+import { socketService } from '../../../infrastructure/services/socket.service';
 
 @injectable()
 export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
@@ -80,6 +81,8 @@ export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
       [],
     );
     await this.notificationRepository.createNotification(notification);
+    socketService.emitNotification(`user-${dto.userId}`, notification);
+
 
     // Schedule expiration job
     await this.moviePassJobService.scheduleMoviePassExpiration(dto.userId, dto.expireDate);

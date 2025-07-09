@@ -23,7 +23,6 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
   ) {}
 
   async execute(dto: VerifyOtpVendorDTO): Promise<AuthResponseDTO> {
-    console.log('🚀 ~ VerifyOtpVendorUseCase ~ execute ~ dto:', dto);
 
     const storedOtp = await this.redisService.get(`otp:${dto.email}`);
     console.log('storedOtp:', storedOtp);
@@ -58,9 +57,8 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
 
     try {
       const created = await this.authRepository.create(vendor);
-      console.log('🚀 ~ VerifyOtpVendorUseCase ~ execute ~ created:', created);
     } catch (error) {
-      console.log('🚀 ~ VerifyOtpVendorUseCase ~ execute ~ error:', error);
+      console.log(error);
     }
 
     const createdVendor = await this.authRepository.findByEmail(dto.email);

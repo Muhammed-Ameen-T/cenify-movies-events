@@ -26,7 +26,6 @@ export class FindSeatLayoutByIdUseCase implements IFindSeatLayoutByIdUseCase {
 
       return seatLayout;
     } catch (error) {
-      console.error('🚀 ~ FindSeatLayoutByIdUseCase ~ execute ~ error:', error);
       const errorMessage =
         error instanceof CustomError ? error.message : 'Failed to fetch seat layout';
       throw new CustomError(errorMessage, error instanceof CustomError ? error.statusCode : 500);

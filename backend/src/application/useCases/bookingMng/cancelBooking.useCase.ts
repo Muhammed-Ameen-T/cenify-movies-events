@@ -8,6 +8,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { Notification } from '../../../domain/entities/notification.entity';
 import { ICancelBookingUseCase } from '../../../domain/interfaces/useCases/User/cancelBooking.interface';
 import { IWalletRepository } from '../../../domain/interfaces/repositories/wallet.repository';
+import { socketService } from '../../../infrastructure/services/socket.service';
 
 @injectable()
 export class CancelBookingUseCase implements ICancelBookingUseCase {
@@ -56,7 +57,7 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
       null as any,
       existingBooking.userId._id.toString(),
       'Booking Cancelled',
-      'Booking',
+      'booking',
       `Your booking ${bookingId} has been cancelled. If payment was completed, the amount has been refunded to your wallet`,
       null,
       new Date(),
@@ -66,6 +67,8 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
       [],
     );
     await this.notificationRepository.createNotification(notification);
+    socketService.emitNotification(`user-${existingBooking.userId._id.toString()}`, notification);
+    
 
     if (updatedBooking.payment.status === 'completed') {
       const cancellationFeePercentage = 15;

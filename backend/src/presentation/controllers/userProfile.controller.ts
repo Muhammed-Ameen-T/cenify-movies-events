@@ -44,7 +44,6 @@ export class UserProfileController implements IUserProfileController {
         return;
       }
       const user = await this.getUserDetailsUseCase.execute(userId);
-      console.log('🚀 ~ UserProfileController ~ getCurrentUser ~ user:', user);
       if (!user) {
         sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
         return;
@@ -76,7 +75,6 @@ export class UserProfileController implements IUserProfileController {
     }
 
     try {
-      console.log('🚀 ~ UserProfileController ~ updateUserProfile ~ req.body:', req.body);
       const jwtService = container.resolve<JwtService>('JwtService');
       const decoded = jwtService.verifyAccessToken(token);
 

@@ -235,7 +235,6 @@ export class SeatLayoutRepository implements ISeatLayoutRepository {
   }
 
   async findById(id: string): Promise<SeatLayout | null> {
-    console.log('🚀 ~ SeatLayoutRepository ~ findById ~ id:', id);
     try {
       // if (!mongoose.Types.ObjectId.isValid(id)) {
       //   throw new CustomError('Invalid seat layout ID', 400);

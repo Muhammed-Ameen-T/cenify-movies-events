@@ -91,13 +91,11 @@ export class MoviePassRepository implements IMoviePassRepository {
       // Check if movie pass exists
       const moviePass = await this.model.findOne({ userId: objectId }).lean();
       if (!moviePass) {
-        console.log(`🚀 ~ MoviePassRepository ~ No movie pass found for userId: ${userId}`);
         return { history: [], total: 0 };
       }
 
       // Check if history array is empty
       if (!moviePass.history || moviePass.history.length === 0) {
-        console.log(`🚀 ~ MoviePassRepository ~ No history found for userId: ${userId}`);
         return { history: [], total: 0 };
       }
 

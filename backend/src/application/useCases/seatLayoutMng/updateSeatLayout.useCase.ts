@@ -138,7 +138,6 @@ export class UpdateSeatLayoutUseCase implements IUpdateSeatLayoutUseCase {
       // Update SeatLayout with new seatIds and other fields
       return await this.seatLayoutRepository.update(seatLayout);
     } catch (error) {
-      console.error('🚀 ~ UpdateSeatLayoutUseCase ~ execute ~ error:', error);
       if (error instanceof z.ZodError) {
         throw new CustomError(
           `Validation error: ${error.errors.map((e) => e.message).join(', ')}`,

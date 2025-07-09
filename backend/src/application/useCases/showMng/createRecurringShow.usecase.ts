@@ -52,7 +52,6 @@ export class CreateRecurringShowUseCase implements ICreateRecurringShowUseCase {
         screenId: originalShow.screenId?._id?.toString(),
         vendorId: originalShow.vendorId?.toString(),
       };
-      console.log('🚀 ~ CreateRecurringShowUseCase ~ execute ~ idsToValidate:', idsToValidate);
 
       for (const [key, id] of Object.entries(idsToValidate)) {
         if (!id || typeof id !== 'string' || !mongoose.Types.ObjectId.isValid(id)) {

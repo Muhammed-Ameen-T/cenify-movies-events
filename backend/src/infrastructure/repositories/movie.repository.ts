@@ -14,7 +14,6 @@ export class MovieRepository implements IMovieRepository {
   async create(movie: Movie): Promise<Movie> {
     try {
       const newMovie = new MovieModel(movie);
-      console.log('🚀 ~ MovieRepository ~ create ~ newMovie:', newMovie);
       const savedMovie = await newMovie.save();
       return this.mapToEntity(savedMovie);
     } catch (error) {

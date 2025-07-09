@@ -37,7 +37,6 @@ export class ShowJobService {
     this.agenda.define('startShow', async (job: Job) => {
       const { showId } = job.attrs.data;
       try {
-        console.log(`🚀 Processing job to start show for showId: ${showId}`);
         const show = await this.showRepository.findById(showId);
         if (!show) {
           throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
@@ -56,7 +55,6 @@ export class ShowJobService {
     this.agenda.define('completeShow', async (job: Job) => {
       const { showId } = job.attrs.data;
       try {
-        console.log(`🚀 Processing job to complete show for showId: ${showId}`);
         const show = await this.showRepository.findById(showId);
         if (!show) {
           throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
@@ -76,7 +74,6 @@ export class ShowJobService {
       const { showId } = job.attrs.data;
 
       try {
-        console.log(`🚀 Checking and removing expired pending seats for showId: ${showId}`);
 
         await this.showRepository.pullExpiredSeats(showId);
 

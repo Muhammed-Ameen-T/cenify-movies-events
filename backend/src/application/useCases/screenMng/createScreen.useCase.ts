@@ -37,7 +37,6 @@ export class CreateScreenUseCase implements ICreateScreenUseCase {
       );
     }
 
-    console.log('🚀 ~ CreateScreenUseCase ~ execute ~ newScreen:', newScreen);
 
     try {
       const savedScreen = await this.screenRepository.create(newScreen);

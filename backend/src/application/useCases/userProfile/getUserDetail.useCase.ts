@@ -13,7 +13,6 @@ export class getUserDetailsUseCase implements IgetUserDetailsUseCase {
   async execute(id: string): Promise<User> {
     try {
       const user = await this.userRepository.findById(id);
-      console.log('🚀 ~ getUserDetailsUseCase ~ execute ~ user:', user);
       if (!user) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
       }
