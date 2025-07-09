@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle,
@@ -9,7 +9,6 @@ import {
   AlertTriangle,
   Calendar,
   TrendingUp,
-  ChevronDown,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -22,8 +21,10 @@ import { Notification } from '../../types/index';
 import toast from 'react-hot-toast';
 import { formatRelativeTime } from '../../utils/timeFormator';
 import ShimmerNotification from '../User/NotificationShimmer';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 
-// Animation Variants
+// Animation Variants (unchanged)
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -67,29 +68,14 @@ const modalVariants = {
   exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
 };
 
-const dropdownVariants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.2,
-      staggerChildren: 0.05,
-    },
-  },
-  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-};
-
-const dropdownItemVariants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: { opacity: 1, x: 0 },
-};
-
 const NotificationsTab: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  const userId = user?.id || '';
+
 
   // Parse URL query parameters with validation
   const queryParams = new URLSearchParams(location.search);
@@ -106,7 +92,6 @@ const NotificationsTab: React.FC = () => {
   const [currentFilter, setCurrentFilter] = useState<'all' | 'unread' | 'read'>(filter);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Update URL when limit or filter changes
   const updateUrl = useCallback(
@@ -127,10 +112,10 @@ const NotificationsTab: React.FC = () => {
     isError,
     error,
   } = useQuery({
-    queryKey: ['notifications', currentLimit, currentFilter],
+    queryKey: ['notifications', userId, currentLimit, currentFilter],
     queryFn: async () =>
       fetchAllUserNotifications({
-        page: 1, // Always page 1 since we're using limit
+        page: 1,
         limit: currentLimit,
         filter: currentFilter,
       }),
@@ -141,16 +126,16 @@ const NotificationsTab: React.FC = () => {
   const markAsReadMutation = useMutation<void, Error, string>({
     mutationFn: markNotificationAsRead,
     onMutate: async (notificationId) => {
-      await queryClient.cancelQueries({ queryKey: ['notifications', currentLimit, currentFilter] });
-      const previousData = queryClient.getQueryData(['notifications', currentLimit, currentFilter]);
-      queryClient.setQueryData(['notifications', currentLimit, currentFilter], (oldData: any) => {
+      await queryClient.cancelQueries({ queryKey: ['notifications', userId, currentLimit, currentFilter] });
+      const previousData = queryClient.getQueryData(['notifications', userId, currentLimit, currentFilter]);
+      queryClient.setQueryData(['notifications', userId, currentLimit, currentFilter], (oldData: any) => {
         if (!oldData) return oldData;
         const notification = oldData.notifications.find((n: Notification) => n._id === notificationId);
-        if (!notification || notification.read) return oldData;
+        if (!notification || notification.isRead) return oldData;
         return {
           ...oldData,
           notifications: oldData.notifications.map((n: Notification) =>
-            n._id === notificationId ? { ...n, read: true } : n
+            n._id === notificationId ? { ...n, isRead: true } : n
           ),
           unreadCount: oldData.unreadCount - 1,
           readCount: oldData.readCount + 1,
@@ -159,14 +144,14 @@ const NotificationsTab: React.FC = () => {
       return { previousData };
     },
     onError: (err, _, context) => {
-      queryClient.setQueryData(['notifications', currentLimit, currentFilter], context?.previousData);
+      queryClient.setQueryData(['notifications', userId, currentLimit, currentFilter], context?.previousData);
       toast.error('Failed to mark notification as read');
     },
     onSuccess: () => {
       toast.success('Notification marked as read');
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications', currentLimit, currentFilter] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', userId, currentLimit, currentFilter] });
     },
   });
 
@@ -174,15 +159,15 @@ const NotificationsTab: React.FC = () => {
   const markAllAsReadMutation = useMutation<void, Error>({
     mutationFn: markAllNotificationsAsRead,
     onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ['notifications', currentLimit, currentFilter] });
-      const previousData = queryClient.getQueryData(['notifications', currentLimit, currentFilter]);
-      queryClient.setQueryData(['notifications', currentLimit, currentFilter], (oldData: any) => {
+      await queryClient.cancelQueries({ queryKey: ['notifications', userId, currentLimit, currentFilter] });
+      const previousData = queryClient.getQueryData(['notifications', userId, currentLimit, currentFilter]);
+      queryClient.setQueryData(['notifications', userId, currentLimit, currentFilter], (oldData: any) => {
         if (!oldData) return oldData;
         return {
           ...oldData,
           notifications: oldData.notifications.map((notification: Notification) => ({
             ...notification,
-            read: true,
+            isRead: true,
           })),
           unreadCount: 0,
           readCount: oldData.total,
@@ -191,7 +176,7 @@ const NotificationsTab: React.FC = () => {
       return { previousData };
     },
     onError: (err, _, context) => {
-      queryClient.setQueryData(['notifications', currentLimit, currentFilter], context?.previousData);
+      queryClient.setQueryData(['notifications', userId, currentLimit, currentFilter], context?.previousData);
       toast.error('Failed to mark all notifications as read');
     },
     onSuccess: () => {
@@ -199,7 +184,7 @@ const NotificationsTab: React.FC = () => {
       setShowConfirmModal(false);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
     },
   });
 
@@ -213,22 +198,9 @@ const NotificationsTab: React.FC = () => {
   // Handle filter change
   const handleFilterChange = (newFilter: 'all' | 'unread' | 'read') => {
     setCurrentFilter(newFilter);
-    setCurrentLimit(5); // Reset limit when filter changes
-    setIsDropdownOpen(false);
+    setCurrentLimit(5);
     updateUrl(5, newFilter);
   };
-
-  // Handle clicking outside dropdown to close it
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      setIsDropdownOpen(false);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [handleClickOutside]);
 
   // Handle marking a single notification as read
   const handleMarkRead = (id: string) => {
@@ -250,7 +222,7 @@ const NotificationsTab: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-gradient- to-br from-gray-50 to-white py-8 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white py-8 px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -304,7 +276,7 @@ const NotificationsTab: React.FC = () => {
                     Mark All Read
                   </motion.button>
                 )}
-                 <select
+                <select
                   value={currentFilter}
                   onChange={(e) => handleFilterChange(e.target.value as 'all' | 'unread' | 'read')}
                   className="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-all font-medium text-sm"

@@ -491,13 +491,6 @@ const TheaterSeatSelection: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 py-3">
         {/* Seat Selection */}
         <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 py-1 px-6 mb-24">
-          <div className="text-center ml-10 mt-5">
-            <div className="relative mx-auto w-full max-w-[190px]">
-              <img src={screenDummy} alt="Screen preview" className="w-full h-auto object-contain" />
-            </div>
-            <p className="text-xs mb-0">All eyes on this way please!</p>
-          </div>
-
           {/* Seat Layout */}
           <div className="space-y-0 mb-5 mt-3">
             {rowsWithSeatTypes.map((rowData) => (
@@ -556,6 +549,13 @@ const TheaterSeatSelection: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="text-center ml-10 mb-3">
+            <div className="relative mx-auto w-full max-w-[190px]">
+              <img src={screenDummy} alt="Screen preview" className="w-full h-auto object-contain" />
+            </div>
+            <p className="text-xs mb-0">All eyes on this way please!</p>
           </div>
 
           {/* Seat Info Legend */}

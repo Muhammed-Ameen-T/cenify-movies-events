@@ -93,6 +93,7 @@ export const login = async (email: string,password: string): Promise<AuthRespons
     if (!response.data.success) {
       throw new Error(response.data.message || AUTH_MESSAGES.LOGIN_FAILED);
     }
+    console.log("🚀 ~ login ~ response:", response)
 
     return response.data.data;
   } catch (error) {

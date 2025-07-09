@@ -10,6 +10,7 @@ import locationReducer from './slices/locationSlice';
 
 import loadingReducer from './slices/loadingSlice';
 
+import popupNotificationReducer from './slices/notificationSlice';
 
 const authPersistConfig = {
 
@@ -34,6 +35,8 @@ export const store = configureStore({
         loading: loadingReducer,
 
         location: locationReducer,
+
+        popupNotification: popupNotificationReducer,
 
     },
 
