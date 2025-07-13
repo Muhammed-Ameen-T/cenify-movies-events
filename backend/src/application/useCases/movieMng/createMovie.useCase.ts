@@ -31,7 +31,6 @@ export class CreateMovieUseCase implements ICreateMovieUseCase {
       dto.cast,
       [],
     );
-    console.log('🚀 ~ CreateMovieUseCase ~ execute ~ newMovie:', newMovie);
 
     try {
       const savedMovie = await this.movieRepository.create(newMovie);

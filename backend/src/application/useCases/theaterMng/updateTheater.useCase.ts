@@ -18,7 +18,6 @@ export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
   constructor(@inject('TheaterRepository') private theaterRepository: ITheaterRepository) {}
 
   async execute(id: string, data: Partial<Theater>, res: Response): Promise<void> {
-    console.log('🚀 ~ UpdateTheaterUseCase ~ execute ~ data:', data);
     try {
       //   const validatedData = theaterUpdateSchema.parse(data);
 

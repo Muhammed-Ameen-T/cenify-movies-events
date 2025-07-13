@@ -27,9 +27,9 @@ import { NotificationDocument } from '../../types/index';
 import { toast } from 'react-hot-toast';
 import { formatRelativeTime } from '../../utils/timeFormator';
 import BackButton from '../../components/Buttons/BackButton';
-import 'react-toastify/dist/ReactToastify.css';
-import Loader from '../../components/Shared/Loading';
 import ShimmerNotification from '../../components/Admin/NotificationShimmer';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 
 // Simplified Notification interface for display
 interface VendorNotification {
@@ -152,6 +152,8 @@ const VendorNotifications: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const userId = user?.id || '';
 
   // Parse URL query parameters with validation
   const queryParams = new URLSearchParams(location.search);
@@ -189,7 +191,7 @@ const VendorNotifications: React.FC = () => {
     isError,
     error,
   } = useQuery({
-    queryKey: ['vendor-notifications', currentLimit, currentFilter],
+    queryKey: ['vendor-notifications', userId, currentLimit, currentFilter],
     queryFn: async () => {
       const response = await fetchAllUserNotifications({
         page: 1,
@@ -211,15 +213,16 @@ const VendorNotifications: React.FC = () => {
       };
     },
     staleTime: 5000,
+    enabled: !!userId, // Only fetch if userId is available
   });
 
   // Mutation for marking a single notification as read
   const markAsReadMutation = useMutation<void, Error, string>({
     mutationFn: markNotificationAsRead,
     onMutate: async (notificationId) => {
-      await queryClient.cancelQueries({ queryKey: ['vendor-notifications', currentLimit, currentFilter] });
-      const previousData = queryClient.getQueryData(['vendor-notifications', currentLimit, currentFilter]);
-      queryClient.setQueryData(['vendor-notifications', currentLimit, currentFilter], (oldData: any) => {
+      await queryClient.cancelQueries({ queryKey: ['vendor-notifications', userId, currentLimit, currentFilter] });
+      const previousData = queryClient.getQueryData(['vendor-notifications', userId, currentLimit, currentFilter]);
+      queryClient.setQueryData(['vendor-notifications', userId, currentLimit, currentFilter], (oldData: any) => {
         if (!oldData) return oldData;
         return {
           ...oldData,
@@ -233,14 +236,14 @@ const VendorNotifications: React.FC = () => {
       return { previousData };
     },
     onError: (err, _, context) => {
-      queryClient.setQueryData(['vendor-notifications', currentLimit, currentFilter], context?.previousData);
+      queryClient.setQueryData(['vendor-notifications', userId, currentLimit, currentFilter], context?.previousData);
       toast.error('Failed to mark notification as read');
     },
     onSuccess: () => {
       toast.success('Notification marked as read');
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendor-notifications', currentLimit, currentFilter] });
+      queryClient.invalidateQueries({ queryKey: ['vendor-notifications', userId, currentLimit, currentFilter] });
     },
   });
 
@@ -248,9 +251,9 @@ const VendorNotifications: React.FC = () => {
   const markAllAsReadMutation = useMutation<void, Error>({
     mutationFn: markAllNotificationsAsRead,
     onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ['vendor-notifications', currentLimit, currentFilter] });
-      const previousData = queryClient.getQueryData(['vendor-notifications', currentLimit, currentFilter]);
-      queryClient.setQueryData(['vendor-notifications', currentLimit, currentFilter], (oldData: any) => {
+      await queryClient.cancelQueries({ queryKey: ['vendor-notifications', userId, currentLimit, currentFilter] });
+      const previousData = queryClient.getQueryData(['vendor-notifications', userId, currentLimit, currentFilter]);
+      queryClient.setQueryData(['vendor-notifications', userId, currentLimit, currentFilter], (oldData: any) => {
         if (!oldData) return oldData;
         return {
           ...oldData,
@@ -265,7 +268,7 @@ const VendorNotifications: React.FC = () => {
       return { previousData };
     },
     onError: (err, _, context) => {
-      queryClient.setQueryData(['vendor-notifications', currentLimit, currentFilter], context?.previousData);
+      queryClient.setQueryData(['vendor-notifications', userId, currentLimit, currentFilter], context?.previousData);
       toast.error('Failed to mark all notifications as read');
     },
     onSuccess: () => {
@@ -273,7 +276,7 @@ const VendorNotifications: React.FC = () => {
       setShowConfirmModal(false);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendor-notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['vendor-notifications', userId] });
     },
   });
 

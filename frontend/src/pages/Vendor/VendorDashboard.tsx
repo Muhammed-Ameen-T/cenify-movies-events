@@ -16,6 +16,7 @@ import Button from '../../components/ui/Button';
 import Insights from '../../components/Vendor/Insights';
 import { fetchDashboardData } from '../../services/Vendor/dashboardApi';
 import { VendorDashboardData, DashboardQueryParams } from '../../types/vendorDashboard';
+import Loader from '../../components/Shared/Loading';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -148,9 +149,7 @@ const VendorDashboard: React.FC = () => {
 
               {/* Loading State */}
               {isLoading && (
-                <motion.div variants={itemVariants} className="text-white text-center">
-                  Loading dashboard data...
-                </motion.div>
+                <Loader/>
               )}
 
               {/* Error State */}

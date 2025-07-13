@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
@@ -26,7 +26,7 @@ export class MoviePassController implements IMoviePassController {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
-  async createCheckoutSession(req: Request, res: Response): Promise<void> {
+  async createCheckoutSession(req: Request, res: Response, next:NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
@@ -55,12 +55,11 @@ export class MoviePassController implements IMoviePassController {
       });
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { sessionId: session.id });
-    } catch (error: any) {
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, error.message);
-    }
+    } catch (error) {
+next(error)    }
   }
 
-  async createMoviePass(req: Request, res: Response): Promise<void> {
+  async createMoviePass(req: Request, res: Response, next:NextFunction): Promise<void> {
     const userId = req.body.userId;
     if (!userId) {
       throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
@@ -78,12 +77,11 @@ export class MoviePassController implements IMoviePassController {
       });
 
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, moviePass);
-    } catch (error: any) {
-      sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
-    }
+    } catch (error) {
+next(error)    }
   }
 
-  async getMoviePass(req: Request, res: Response): Promise<void> {
+  async getMoviePass(req: Request, res: Response, next:NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
@@ -92,12 +90,11 @@ export class MoviePassController implements IMoviePassController {
     try {
       const moviePass = await this.fetchMoviePassUseCase.execute(userId);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, moviePass || {});
-    } catch (error: any) {
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, error.message);
-    }
+    } catch (error) {
+next(error)    }
   }
 
-  async findMoviePassHistory(req: Request, res: Response): Promise<void> {
+  async findMoviePassHistory(req: Request, res: Response, next:NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
@@ -117,13 +114,8 @@ export class MoviePassController implements IMoviePassController {
     try {
       const result = await this.findMoviePassHistoryUseCase.execute(userId, pageNum, limitNum);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
-    } catch (error: any) {
-      console.error('❌ Error finding movie pass history:', error);
-      sendResponse(
-        res,
-        HttpResCode.INTERNAL_SERVER_ERROR,
-        error.message || ERROR_MESSAGES.GENERAL.FAILED_FINDING_MOVIE_PASS,
-      );
+    } catch (error) {
+      next(error)
     }
   }
 }

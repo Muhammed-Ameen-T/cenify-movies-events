@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import Stripe from 'stripe';
 import { env } from '../../config/env.config';
@@ -18,7 +18,7 @@ export class StripeWebhookController implements IStripeWebhookController {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
-  async handleWebhook(req: Request, res: Response): Promise<void> {
+  async handleWebhook(req: Request, res: Response, next:NextFunction): Promise<void> {
     const sig = req.headers['stripe-signature'] as string;
     let event: Stripe.Event;
 
@@ -46,8 +46,8 @@ export class StripeWebhookController implements IStripeWebhookController {
             expireDate,
           });
           console.log(`✅ Movie Pass created for user ${userId}`);
-        } catch (error: any) {
-          console.error(`❌ Failed to create Movie Pass for user ${userId}:`, error.message);
+        } catch (error) {
+          console.error(`❌ Failed to create Movie Pass for user ${userId}:`, error);
         }
       }
     }

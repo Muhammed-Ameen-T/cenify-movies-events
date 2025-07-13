@@ -9,7 +9,6 @@ import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import { BookingGenerateService } from '../../../infrastructure/services/bookingIdGenerate.service';
 import mongoose from 'mongoose';
-import BookingModel from '../../../infrastructure/database/booking.model';
 import { PaymentService } from '../../../infrastructure/services/checkoutPayment.service';
 import { IMoviePassRepository } from '../../../domain/interfaces/repositories/moviePass.repository';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
@@ -92,7 +91,6 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
 
     await this.bookingRepository.create(newBooking);
     const savedBooking = await this.bookingRepository.findByBookingId(bookingId);
-    console.log('🚀 ~ CreateBookingUseCase ~ execute ~ savedBooking:', savedBooking);
     if (!savedBooking) {
       throw new CustomError(
         ERROR_MESSAGES.GENERAL.FAILED_CREATING_BOOKING,
@@ -124,7 +122,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         null as any,
         dto.userId,
         'Booking Confirmed',
-        'Booking',
+        'booking',
         `Your booking ${bookingId} has been successfully confirmed!`,
         savedBooking._id?.toString() || '',
         now,
@@ -133,7 +131,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         false,
         [],
       );
-
+      
       // Send to vendor
       const show = await this.showRepository.findById(savedBooking.showId._id.toString());
       if (!show) {
@@ -146,34 +144,38 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         null as any,
         show.vendorId,
         'New Booking Received',
-        'Booking',
+        'booking',
         `A new booking ${bookingId} has been made by a customer.`,
-        savedBooking._id?.toString() || '',
+        null,
         now,
         now,
         false,
         false,
         [],
       );
-
+      
       const adminNotification = new Notification(
         null as any,
         null,
         'New Booking Received',
-        'Booking',
+        'booking',
         `Booking ${bookingId} has been confirmed and sent to vendor.`,
-        savedBooking._id?.toString() || '',
+        null,
         now,
         now,
         false,
         true,
         [],
       );
-
+      
       await this.notificationRepository.createNotification(userNotification);
       await this.notificationRepository.createNotification(vendorNotification);
       await this.notificationRepository.createGlobalNotification(adminNotification);
-
+      socketService.emitNotification(`vendor-${show.vendorId}`, vendorNotification);
+      socketService.emitNotification('admin-global', adminNotification);
+      socketService.emitNotification(`user-${dto.userId}`, userNotification);
+      
+   
       await this.userRepository.incrementLoyalityPoints(
         dto.userId,
         savedBooking.bookedSeatsId.length,
@@ -207,3 +209,45 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
     throw new CustomError(ERROR_MESSAGES.GENERAL.INVALID_PAYMENT_METHOD, HttpResCode.BAD_REQUEST);
   }
 }
+
+   // socketService.emitNotification(dto.userId, {
+      //   _id: userNotification._id?.toString() || '',
+      //   userId: dto.userId,
+      //   title: userNotification.title,
+      //   type: userNotification.type,
+      //   description: userNotification.description,
+      //   bookingId: userNotification?.bookingId,
+      //   createdAt: userNotification.createdAt,
+      //   updatedAt: now,
+      //   isRead: userNotification.isRead,
+      //   isGlobal: userNotification.isGlobal,
+      //   readedUsers: []
+      // });
+
+      // socketService.emitNotification(show.vendorId, {
+      //   _id: vendorNotification._id?.toString() || '',
+      //   userId: show.vendorId,
+      //   title: vendorNotification.title,
+      //   type: vendorNotification.type,
+      //   description: vendorNotification.description,
+      //   bookingId: vendorNotification?.bookingId,
+      //   createdAt: vendorNotification.createdAt,
+      //   updatedAt: now,
+      //   isRead: vendorNotification.isRead,
+      //   isGlobal: vendorNotification.isGlobal,
+      //   readedUsers: []
+      // });
+
+      // socketService.emitNotification(null, {
+      //   _id: adminNotification._id?.toString() || '',
+      //   userId: null,
+      //   title: adminNotification.title,
+      //   type: adminNotification.type,
+      //   description: adminNotification.description,
+      //   bookingId: adminNotification?.bookingId,
+      //   createdAt: adminNotification.createdAt,
+      //   updatedAt: now,
+      //   isRead: adminNotification.isRead,
+      //   isGlobal: adminNotification.isGlobal,
+      //   readedUsers: []
+      // });

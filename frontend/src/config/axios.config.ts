@@ -29,7 +29,7 @@ const refreshAccessToken = async () => {
     console.error("Failed to refresh access token:", error);
     store.dispatch(clearAuth());
     localStorage.removeItem("accessToken");
-    throw error;
+    // throw error;
   }
 };
 

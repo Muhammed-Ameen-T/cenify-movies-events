@@ -294,6 +294,46 @@ export const env = {
     return process.env.CLOUDINARY_API_SECRET;
   },
 
+  get FAST2SMS_API_KEY(): string {
+    if (!process.env.FAST2SMS_API_KEY) {
+      throw new CustomError(
+        EnvErrMsg.FAST2SMS_API_KEY_UNDEFINED,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return process.env.FAST2SMS_API_KEY;
+  },
+
+  get TWILIO_AUTH_TOKEN(): string {
+    if (!process.env.TWILIO_AUTH_TOKEN) {
+      throw new CustomError(
+        EnvErrMsg.TWILIO_AUTH_TOKEN_UNDEFINED,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return process.env.TWILIO_AUTH_TOKEN;
+  },
+
+  get TWILIO_PHONE(): string {
+    if (!process.env.TWILIO_PHONE) {
+      throw new CustomError(
+        EnvErrMsg.TWILIO_PHONE_UNDEFINED,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return process.env.TWILIO_PHONE;
+  },
+
+  get TWILIO_ACCOUNT_SID(): string {
+    if (!process.env.TWILIO_ACCOUNT_SID) {
+      throw new CustomError(
+        EnvErrMsg.TWILIO_ACCOUNT_SID_UNDEFINED,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return process.env.TWILIO_ACCOUNT_SID;
+  },
+
   // AWS Configuration (optional, added for completeness)
   get AWS_ACCESS_KEY_ID(): string | undefined {
     return process.env.AWS_ACCESS_KEY_ID; // Optional

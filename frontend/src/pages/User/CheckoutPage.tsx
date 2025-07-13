@@ -132,7 +132,7 @@ const CheckoutPage: React.FC = () => {
   const createBookingMutation = useMutation({
     mutationFn: (payload: CreateBookingPayload) => BookingService.createBooking(payload),
     onSuccess: ({ booking, stripeSessionUrl }) => {
-      toast.success('Booking confirmed!', { id: 'booking-confirmed' });
+      // toast.success('Booking confirmed!', { id: 'booking-confirmed' });
       localStorage.removeItem('selectedSeats');
       localStorage.removeItem(`timerStart_${showId}`);
       if (paymentMethod === 'wallet') {

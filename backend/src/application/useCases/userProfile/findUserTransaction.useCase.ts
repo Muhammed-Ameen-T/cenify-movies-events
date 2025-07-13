@@ -30,10 +30,7 @@ export class FindUserWalletTransactionsUseCase implements IFindUserWalletTransac
         limit,
         filter,
       );
-      // if (!result.transactions.length && result.total === 0) {
 
-      // }
-      // Map raw transactions to domain Transaction entity
       const transactions: Transaction[] = result?.transactions.map(
         (t: any) =>
           new Transaction(t.id, t.amount, t.type, t.source, t.createdAt, t.status, t.remark),
@@ -47,9 +44,6 @@ export class FindUserWalletTransactionsUseCase implements IFindUserWalletTransac
         totalDebit: result.totalDebit,
       };
     } catch (error) {
-      if (error instanceof CustomError) {
-        throw error;
-      }
       throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
   }

@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
 import { v4 as uuidv4 } from 'uuid';
+import { Notification } from '../../domain/entities/notification.entity';
 
 class SocketService {
   private io: Server | null = null;
@@ -50,6 +51,32 @@ class SocketService {
     }
 
     this.io.on('connection', (socket: Socket) => {
+      console.log(`Socket connected: ${socket.id}, instance ID: ${this.instanceId}`);
+
+      // Handle joinNotificationRoom
+      socket.on('joinNotificationRoom', (room: string) => {
+        if (!room) {
+          socket.emit('error', { message: 'Invalid room' });
+          return;
+        }
+        socket.join(room);
+        console.log(
+          `Socket ${socket.id} joined notification room: ${room}, rooms:`,
+          Array.from(socket.rooms),
+          `instance ID: ${this.instanceId}`,
+        );
+        socket.emit('joinedNotificationRoom', { room, socketId: socket.id });
+
+        this.io!.in(room)
+          .allSockets()
+          .then((sockets) => {
+            console.log(`Clients in room ${room} after join:`, Array.from(sockets));
+          })
+          .catch((err) => {
+            console.error(`Error fetching clients in room ${room}:`, err);
+          });
+      });
+
       socket.on('joinShowRoom', (showId: string) => {
         if (!showId) {
           socket.emit('error', { message: 'Invalid showId' });
@@ -101,10 +128,6 @@ class SocketService {
       `status: ${status}, instance ID: ${this.instanceId}`,
     );
     if (!this.isInitialized || !this.io) {
-      console.log(
-        `🚀 ~ SocketService ~ emitSeatUpdate ~ this.isInitialized: ${this.isInitialized}`,
-      );
-      console.log(`🚀 ~ SocketService ~ emitSeatUpdate ~ this.io: ${this.io}`);
       console.error(
         `Socket.IO server not initialized, cannot emit seatUpdate, instance ID: ${this.instanceId}`,
       );
@@ -141,6 +164,44 @@ class SocketService {
       });
   }
 
+  emitNotification(room: string | null, notification: Notification) {
+    if (!this.isInitialized || !this.io) {
+      console.error(
+        `Socket.IO server not initialized, cannot emit notification, instance ID: ${this.instanceId}`,
+      );
+      return;
+    }
+    if (!room) {
+      console.warn(
+        `Cannot emit notification: invalid room, instance ID: ${this.instanceId}`,
+      );
+      return;
+    }
+    console.log(
+      `Emitting notification to room ${room}:`,
+      notification,
+      `instance ID: ${this.instanceId}`,
+    );
+    this.io.to(room).emit('notification', notification);
+    this.io
+      .in(room)
+      .allSockets()
+      .then((sockets) => {
+        console.log(
+          `Clients in room ${room} received notification:`,
+          Array.from(sockets),
+          `instance ID: ${this.instanceId}`,
+        );
+      })
+      .catch((err) => {
+        console.error(
+          `Error fetching clients in room ${room}:`,
+          err,
+          `instance ID: ${this.instanceId}`,
+        );
+      });
+  }
+
   emitError(socketId: string, error: string) {
     if (!this.isInitialized || !this.io) {
       console.error(
@@ -157,6 +218,5 @@ class SocketService {
   }
 }
 
-// Create and export a single instance
 const socketService = new SocketService();
 export { socketService };

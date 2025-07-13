@@ -61,6 +61,11 @@ const ERROR_MESSAGES = {
     RATING_MUST_BETWEEN: 'Rating must be between 1 and 5.',
     THEATER_NOT_VERIFIED: 'Your theater not verified yet, contact support.',
     INVALID_PAGINATION_PARAMS: 'Invalid Pagination Params.',
+    INVALID_PHONE: 'Invalid Phone Number.',
+    PHONE_ALREADY_EXISTS: 'User with this phone already exist.',
+    TWILIO_CONFIG_MISSING: 'Twilio configuration missing: ACCOUNT_SID or AUTH_TOKEN not set',
+    TWILIO_PHONE_MISSING: 'Twilio phone number not configured',
+    PHONE_UNCHANGED: 'Phone number unchanged.,'
   },
   DATABASE: {
     CONNECTION_FAILED: 'Database connection failed.',
@@ -133,6 +138,7 @@ const ERROR_MESSAGES = {
     FAILED_REDEEMING_POINTS: 'Failed to redeeming points.',
     SEATS_ALREADY_FILLED: 'Selected seats are already booked or unavailable.',
     INVALID_SEAT_SELECTION: 'Invalid Seat Selection.',
+    FAILE_SENDING_SMS: 'Failed Sending SMS.'
   },
   SECURITY: {
     ACCESS_DENIED: 'Access denied due to security restrictions.',

@@ -25,7 +25,7 @@ export const verifyVendorOtp = async (data: {
 }): Promise<{
   accessToken: string;
   refreshToken: string;
-  user: { id: string; email: string; name: string; phone: number; profileImage: string; role: string };
+  user: { id: string; email: string; name: string; phone: number; profileImage: string; role: "user" | "admin" | "vendor"};
 }> => {
   const response = await api.post(VENDOR_ENDPOINTS.verifyOtp, data);
   return response.data.data;

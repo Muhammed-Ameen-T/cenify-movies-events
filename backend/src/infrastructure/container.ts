@@ -195,6 +195,11 @@ import { IFetchAdminTheatersUseCase } from '../domain/interfaces/useCases/Admin/
 import { FetchAdminTheatersUseCase } from '../application/useCases/theaterMng/fetchAdminTheaters.useCase';
 import { RedeemLoyalityToWalletUseCase } from '../application/useCases/userProfile/redeemPointsToWallet.useCase';
 import { IRedeemLoyalityToWalletUseCase } from '../domain/interfaces/useCases/User/redeemLoyalityToWallet.interface';
+import { SmsService } from './services/sms.service';
+import { SendOtpPhoneUseCase } from '../application/useCases/userProfile/sendOtpPhone.useCase';
+import { VerifyOtpPhoneUseCase } from '../application/useCases/userProfile/verifyOtpPhone.useCase';
+import { ISendOtpPhoneUseCase } from '../domain/interfaces/useCases/User/sendOtpPhone.interface';
+import { IVerifyOtpPhoneUseCase } from '../domain/interfaces/useCases/User/verifyOtpPhone.interface';
 
 //Controller Registration
 container.register<IUserAuthController>('UserAuthController', { useClass: UserAuthController });
@@ -328,6 +333,9 @@ container.register<IRedeemLoyalityToWalletUseCase>('RedeemLoyalityToWalletUseCas
 container.register<IUserProfileController>('UserProfileController', {
   useClass: UserProfileController,
 });
+container.register('SmsService', { useClass: SmsService });
+container.register<ISendOtpPhoneUseCase>('SendOtpPhoneUseCase', { useClass: SendOtpPhoneUseCase });
+container.register<IVerifyOtpPhoneUseCase>('VerifyOtpPhoneUseCase', { useClass: VerifyOtpPhoneUseCase });
 
 // Screen Management UseCase, Controller, Repository Registration
 container.register<IScreenRepository>('ScreenRepository', { useClass: ScreenRepository });

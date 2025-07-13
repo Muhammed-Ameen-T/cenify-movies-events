@@ -3,18 +3,6 @@ import { AUTH_MESSAGES } from "../../constants/auth.messages";
 import { USER_AUTH_ENDPOINTS } from "../../constants/apiEndPoint"
 import { AuthResponse } from "../../store/types/auth.type";
 import { handleAxiosError } from "../../utils/exios-error-handler";
-import axios from "axios";
-// export interface AuthResponse {
-//   accessToken: string;
-//   user: {
-//     id: string;
-//     name: string;
-//     email: string;
-//     phone: number;
-//     profileImage: string | null;
-//     role:string | null;
-//   };
-// }
 
 export const sendOtp = async (email: string): Promise<void> => {
   try {
@@ -27,11 +15,10 @@ export const sendOtp = async (email: string): Promise<void> => {
     handleAxiosError(error, AUTH_MESSAGES.OTP_FAILED);
   }
 };
+
 export const getCurrentUser = async (): Promise<any> => {
   try {
-    console.log("🚀 ~ getCurrentUser ~ response:")
     const response = await api.get(USER_AUTH_ENDPOINTS.getUser);
-    console.log("🚀 ~ getCurrentUser ~ response:", response)
     return response.data.data;
   } catch (error) {
     console.log("Error fetching current user:", error);
@@ -96,6 +83,7 @@ export const login = async (email: string,password: string): Promise<AuthRespons
 
     return response.data.data;
   } catch (error) {
+    console.log("🚀 ~ login ~ error:", error)
     handleAxiosError(error, AUTH_MESSAGES.LOGIN_FAILED);
   }
 };

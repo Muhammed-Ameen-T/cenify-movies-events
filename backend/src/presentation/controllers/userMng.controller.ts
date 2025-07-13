@@ -1,6 +1,6 @@
 // src/infrastructure/controllers/userMng.controller.ts
 import 'reflect-metadata';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
@@ -18,7 +18,7 @@ export class UserManagementController implements IUserManagementController {
     private updateUserBlockStatusUseCase: IUpdateUserBlockStatusUseCase,
   ) {}
 
-  async getUsers(req: Request, res: Response): Promise<void> {
+  async getUsers(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const {
         page = '1',
@@ -67,14 +67,11 @@ export class UserManagementController implements IUserManagementController {
         },
       });
     } catch (error) {
-      console.error('UserManagementController.getUsers error:', error);
-      const errorMessage =
-        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_USERS;
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+      next(error)
     }
   }
 
-  async updateUserBlockStatus(req: Request, res: Response): Promise<void> {
+  async updateUserBlockStatus(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const { isBlocked } = req.body;
@@ -85,12 +82,7 @@ export class UserManagementController implements IUserManagementController {
 
       await this.updateUserBlockStatusUseCase.execute(id, { isBlocked }, res);
     } catch (error) {
-      console.error('UserManagementController.updateUserBlockStatus error:', error);
-      const errorMessage =
-        error instanceof CustomError
-          ? error.message
-          : ERROR_MESSAGES.GENERAL.FAILED_UPDATING_BLOCK_STATUS;
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+      next(error)
     }
   }
 }

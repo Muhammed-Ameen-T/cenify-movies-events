@@ -1,6 +1,6 @@
 // src/presentation/controllers/auth.controller.ts
 import 'reflect-metadata';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { container } from 'tsyringe';
 
@@ -32,6 +32,7 @@ import { IForgotPasswordVerifyOtpUseCase } from '../../domain/interfaces/useCase
 import jwt from 'jsonwebtoken';
 import { IUserRepository } from '../../domain/interfaces/repositories/user.repository';
 import { IgetUserDetailsUseCase } from '../../domain/interfaces/useCases/User/getUserDetails.interface';
+import { SuccessMsg } from '../../utils/constants/commonSuccessMsg.constants';
 @injectable()
 export class UserAuthController implements IUserAuthController {
   constructor(
@@ -47,7 +48,7 @@ export class UserAuthController implements IUserAuthController {
     @inject('IUserRepository') private userRepository: IUserRepository,
   ) {}
 
-  async googleCallback(req: Request, res: Response): Promise<void> {
+  async googleCallback(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const result = await this.googleAuthUseCase.execute(req.body);
       res.cookie('refreshToken', result.refreshToken, {
@@ -61,19 +62,14 @@ export class UserAuthController implements IUserAuthController {
         user: result.user,
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : ERROR_MESSAGES.AUTHENTICATION.GOOGLE_AUTH_FAILED;
-      console.error('googleCallback error:', errorMessage);
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+     next(error)
     }
   }
 
-  async refreshToken(req: Request, res: Response): Promise<void> {
+  async refreshToken(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
-      console.log('AuthController.refreshToken: Checking cookies');
 
       if (!req.cookies.refreshToken) {
-        console.log('AuthController.refreshToken: No refresh token found');
         sendResponse(
           res,
           HttpResCode.UNAUTHORIZED,
@@ -83,13 +79,11 @@ export class UserAuthController implements IUserAuthController {
       }
 
       const refreshToken = req.cookies.refreshToken;
-      console.log('AuthController.refreshToken: Received refresh token');
 
       // Decode first to check expiration
       const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
 
       if (!decoded || !decoded.exp || Date.now() >= decoded.exp * 1000) {
-        console.log('AuthController.refreshToken: Refresh token expired');
         sendResponse(
           res,
           HttpResCode.UNAUTHORIZED,
@@ -106,31 +100,21 @@ export class UserAuthController implements IUserAuthController {
       const user = await this.userRepository.findById(verifiedDecoded.userId);
 
       if (!user) {
-        console.log('AuthController.refreshToken: User not found');
         sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
         return;
       }
 
       // Generate new access token
       const newAccessToken = jwtService.generateAccessToken(user._id.toString(), user.role);
-      console.log('AuthController.refreshToken: New access token generated');
 
       // Send new token response
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { accessToken: newAccessToken });
     } catch (error) {
-      console.error(
-        'AuthController.refreshToken error:',
-        error || ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-      );
-      sendResponse(
-        res,
-        HttpResCode.UNAUTHORIZED,
-        ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-      );
+      next(error)
     }
   }
 
-  async getCurrentUser(req: Request, res: Response): Promise<void> {
+  async getCurrentUser(req: Request, res: Response, next:NextFunction): Promise<void> {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
       sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
@@ -156,36 +140,29 @@ export class UserAuthController implements IUserAuthController {
         joinedDate: user.createdAt.toDateString(),
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : ERROR_MESSAGES.AUTHENTICATION.INVALID_ACCESS_TOKEN;
-      console.error('getCurrentUser error:', errorMessage);
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+      next(error)
     }
   }
 
-  async sendOtp(req: Request, res: Response): Promise<void> {
+  async sendOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { email } = req.body;
 
       if (!email || typeof email !== 'string' || !email.trim()) {
-        sendResponse(res, HttpResCode.BAD_REQUEST, 'Email is required.');
+        sendResponse(res, HttpResCode.BAD_REQUEST, ERROR_MESSAGES.VALIDATION.EMAIL_FORMAT_INVALID);
         return;
       }
       await this.sendOtpUseCase.execute(email.trim());
 
-      console.log('AuthController.sendOtp: OTP process completed.');
-      sendResponse(res, HttpResCode.OK, 'OTP sent successfully.');
+      sendResponse(res, HttpResCode.OK, SuccessMsg.OTP_SENT);
     } catch (error) {
-      const errorMessage = error instanceof CustomError ? error.message : 'Failed to send OTP.';
-      console.error('AuthController.sendOtp error:', { errorMessage, email: req.body.email });
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+      next(error)
     }
   }
 
-  async verifyOtp(req: Request, res: Response): Promise<void> {
+  async verifyOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { name, email, password, otp } = req.body;
-      console.log('AuthController.verifyOtp: Received request:', { email, otp });
 
       const dto = new VerifyOtpDTO(name, email, otp, password);
       const result = await this.verifyOtpUseCase.execute(dto);
@@ -195,18 +172,16 @@ export class UserAuthController implements IUserAuthController {
         sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-      sendResponse(res, HttpResCode.OK, 'Register successful.', {
+      sendResponse(res, HttpResCode.OK, SuccessMsg.USER_REGISTERED, {
         accessToken: result.accessToken,
         user: result.user,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to verify OTP.';
-      console.error('AuthController.verifyOtp error:', errorMessage);
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+      next(error)
     }
   }
 
-  async login(req: Request, res: Response): Promise<void> {
+  async login(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { email, password } = req.body;
 
@@ -220,78 +195,55 @@ export class UserAuthController implements IUserAuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      sendResponse(res, HttpResCode.OK, 'Login successful.', {
+      sendResponse(res, HttpResCode.OK, SuccessMsg.USER_LOGGED_IN, {
         accessToken: response.accessToken,
         user: response.user,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to verify OTP.';
-      console.error('AuthController.verifyOtp error:', errorMessage);
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+      console.log("🚀 ~ UserAuthController ~ login ~ error:", error)
+      next(error)
     }
   }
 
-  async logout(req: Request, res: Response): Promise<void> {
+  async logout(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       res.clearCookie('refreshToken');
-      sendResponse(res, HttpResCode.OK, 'Successfully logged out');
+      sendResponse(res, HttpResCode.OK, SuccessMsg.USER_LOGGED_OUT);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to logout.';
-      console.error('Logout failed:', error);
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+      next(error)
     }
   }
 
-  async forgotPassSendOtp(req: Request, res: Response): Promise<void> {
+  async forgotPassSendOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { email } = req.body as ForgotPassSendOtpDTO;
-      console.log('AuthController.requestPasswordReset: Received request:', { email });
 
       await this.forgotPassSendOtpUseCase.execute(email.trim());
-      console.log('AuthController.requestPasswordReset: OTP process completed');
-      sendResponse(res, HttpResCode.OK, 'OTP sent successfully');
+      sendResponse(res, HttpResCode.OK, SuccessMsg.OTP_SENT);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError ? error.message : ERROR_MESSAGES.GENERAL.FAILED_SENDING_OTP;
-      console.error('AuthController.requestPasswordReset error:', {
-        errorMessage,
-        email: req.body.email,
-      });
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+      next(error)
     }
   }
 
-  async forgotPassVerifyOtp(req: Request, res: Response): Promise<void> {
+  async forgotPassVerifyOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { email, otp } = req.body as ForgotPassVerifyOtpDTO;
-      console.log('AuthController.verifyOtp: Received request:', { email, otp });
 
       await this.forgotPassVerifyOtpUseCase.execute(email, otp);
-      console.log('AuthController.verifyOtp: OTP verified successfully');
-      sendResponse(res, HttpResCode.OK, 'OTP verified successfully');
+      sendResponse(res, HttpResCode.OK, SuccessMsg.OTP_VERIFIED);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError ? error.message : ERROR_MESSAGES.VALIDATION.INVALID_OTP;
-      console.error('AuthController.verifyOtp error:', errorMessage);
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+      next(error)
     }
   }
 
-  async forgotPassUpdatePassword(req: Request, res: Response): Promise<void> {
+  async forgotPassUpdatePassword(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { email, password } = req.body as ForgotPassUpdateDTO;
-      console.log('AuthController.updatePassword: Received request:', { email });
 
       await this.forgotPassUpdatePassUseCase.execute(email, password);
-      console.log('AuthController.updatePassword: Password updated successfully');
-      sendResponse(res, HttpResCode.OK, 'Password updated successfully');
+      sendResponse(res, HttpResCode.OK, SuccessMsg.PASSWORD_UPDATED);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError
-          ? error.message
-          : ERROR_MESSAGES.GENERAL.FAILED_TO_UPDATE_PASSWORD;
-      console.error('AuthController.updatePassword error:', errorMessage);
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+      next(error)
     }
   }
 }

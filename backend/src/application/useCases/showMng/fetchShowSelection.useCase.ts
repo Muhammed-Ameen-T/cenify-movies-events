@@ -20,7 +20,6 @@ export class FetchShowSelectionUseCase implements IFetchShowSelectionUseCase {
     timeSlots?: { start: string; end: string }[];
     facilities?: string[];
   }): Promise<ShowSelectionResponseDTO> {
-    console.log('🚀 ~ FetchShowSelectionUseCase ~ priceRanges:', params);
     try {
       return await this.showRepository.findShowSelection(params);
     } catch (error) {

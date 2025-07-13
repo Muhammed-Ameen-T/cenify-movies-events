@@ -20,6 +20,7 @@ import {
 import jsPDF from 'jspdf';
 import { BookingService } from '../../services/User/bookingApi';
 import { CreateBookingResponse, BookingData } from '../../types/bookingResponse';
+import Loader from '../../components/Shared/Loading';
 
 const BookingSuccessPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -499,7 +500,7 @@ const BookingSuccessPage: React.FC = () => {
   }, [bookingData?.bookingId]);
 
   if (isLoading) {
-    return <div className="text-center py-10">Loading...</div>;
+    return <div className="text-center py-10"><Loader/></div>;
   }
 
   if (error || !bookingData) {

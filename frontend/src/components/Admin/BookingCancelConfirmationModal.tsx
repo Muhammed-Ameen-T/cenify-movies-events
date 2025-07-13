@@ -5,6 +5,7 @@ import { X, AlertTriangle, Loader2 } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { BookingService } from '../../services/User/bookingApi';
+import { AxiosError } from 'axios';
 
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.8 },
@@ -39,10 +40,15 @@ const CancelConfirmationModal: React.FC<CancelConfirmationModalProps> = ({
       onSuccess();
       onClose();
     },
-    onError: (error: any) => {
-      const errorMessage =
-        error.response?.data?.message || error.message || 'Failed to cancel booking';
-      toast.error(errorMessage);
+    onError: (error) => {
+      let message = 'Failed to cancel booking';
+
+      if (error instanceof AxiosError) {
+        message = error.response?.data?.message || error.message || message;
+      } else if (error instanceof Error) {
+        message = error.message || message;
+      }
+      toast.error(message);
     },
   });
 
@@ -158,11 +164,11 @@ const CancelConfirmationModal: React.FC<CancelConfirmationModalProps> = ({
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleCancel}
-            disabled={cancelMutation.isLoading}
+            disabled={cancelMutation.isPending}
             className="bg-red-500 text-white px-6 py-2 rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50 hover:bg-red-600"
             aria-label="Confirm cancel booking"
           >
-            {cancelMutation.isLoading ? (
+            {cancelMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <X className="w-4 h-4" />

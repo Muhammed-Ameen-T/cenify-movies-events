@@ -3,7 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import helmet from 'helmet';
 import { requestLogger } from './presentation/middleware/logger.middleware';
 import errorHandler from './presentation/middleware/errorHandler.middleware';
 import './infrastructure/container';
@@ -36,20 +35,11 @@ app.use(cookieParser());
 app.use(express.json());
 
 
-// app.use(
-//   helmet({
-//     crossOriginOpenerPolicy: { policy: "unsafe-none" },
-//     crossOriginResourcePolicy: { policy: "cross-origin" },
-//     crossOriginEmbedderPolicy: { policy: "require-corp" },
-//   })
-// );
-
 // 🔹 Routes
 import vendorRoutes from './presentation/routes/vendorAuth.routes';
 import authRoutes from './presentation/routes/userAuth.routes';
 import profileRoutes from './presentation/routes/userProfile.routes';
 import adminAuthRoutes from './presentation/routes/adminAuth.routes';
-import vendorMngRoutes from './presentation/routes/vendorMng.routes';
 import adminMngRoutes from './presentation/routes/adminMng.routes';
 import seatLayoutRoutes from './presentation/routes/seatMng.routes';
 import screenMngRoutes from './presentation/routes/screenMng.routes';
@@ -65,7 +55,6 @@ import theaterRoutes from './presentation/routes/theaterMng.routes';
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/auth/admin', adminAuthRoutes);
-app.use('/api/vendor', vendorMngRoutes);
 app.use('/api/vendor', vendorRoutes);
 app.use('/api/admin', adminMngRoutes);
 app.use('/api/vendor', seatLayoutRoutes);

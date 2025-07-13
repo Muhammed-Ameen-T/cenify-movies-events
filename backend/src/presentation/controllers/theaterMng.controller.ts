@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
@@ -24,20 +24,16 @@ export class TheaterManagementController implements ITheaterManagementController
     @inject('UpdateTheater') private updateTheaterUseCase: IUpdateTheaterUseCase,
   ) {}
 
-  async getTheaters(req: Request, res: Response): Promise<void> {
+  async getTheaters(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const theaters = await this.fetchTheatersUseCase.execute();
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, theaters);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError
-          ? error.message
-          : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_THEATERS;
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+      next(error)
     }
   }
 
-  async updateTheaterStatus(req: Request, res: Response): Promise<void> {
+  async updateTheaterStatus(req: Request, res: Response, next:NextFunction): Promise<void> {
     const { id } = req.params;
     const { status } = req.body;
 
@@ -48,13 +44,12 @@ export class TheaterManagementController implements ITheaterManagementController
     }
   }
 
-  async updateTheater(req: Request, res: Response): Promise<void> {
+  async updateTheater(req: Request, res: Response, next:NextFunction): Promise<void> {
     const { id } = req.params;
     try {
       await this.updateTheaterUseCase.execute(id, req.body, res);
     } catch (error) {
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, 'Failed to update status');
-    }
+next(error)    }
   }
   /**
    * Fetches theaters for a specific vendor.
@@ -62,7 +57,7 @@ export class TheaterManagementController implements ITheaterManagementController
    * @param res - The response object.
    * @returns A promise that resolves to void.
    */
-  getTheatersOfVendor = async (req: Request, res: Response): Promise<void> => {
+  getTheatersOfVendor = async (req: Request, res: Response, next:NextFunction): Promise<void> => {
     try {
       const { page, limit, search, status, location, sortBy, sortOrder } = req.query;
       const vendorId = req.decoded?.userId;
@@ -86,15 +81,11 @@ export class TheaterManagementController implements ITheaterManagementController
       const result = await this.fetchTheaterUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError
-          ? error.message
-          : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_THEATERS;
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+      next(error)
     }
   };
 
-  async fetchTheatersByAdmin(req: Request, res: Response): Promise<void> {
+  async fetchTheatersByAdmin(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, features, rating, location, sortBy, sortOrder } =
         req.query;
@@ -116,11 +107,7 @@ export class TheaterManagementController implements ITheaterManagementController
       const result = await this.fetchAdminTheatersUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError
-          ? error.message
-          : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_THEATERS;
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+      next(error)
     }
   }
 }

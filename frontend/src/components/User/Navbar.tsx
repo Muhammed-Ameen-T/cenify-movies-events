@@ -23,6 +23,7 @@ import NotificationDropdown from '../userNav/NotificationModak';
 import CitySelectionModal from '../userNav/CitySelectionModal';
 import SearchModal from '../userNav/SearchModal'; // Import the new SearchModal component
 import api from '../../config/axios.config';
+import LoginModal from './LoginModal';
 
 interface Notification {
   id: number;
@@ -31,11 +32,9 @@ interface Notification {
   read: boolean;
 }
 
-interface NavbarProps {
-  onLoginClick: () => void;
-}
 
-const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
+
+const Navbar: React.FC = () => {
   const newUser = useSelector((state: RootState) => state.auth.user);
   const user = newUser?.role === 'user' ? newUser : null;
   const selectedLocation = useSelector((state: RootState) => state.location.selectedLocation); // Use Redux state
@@ -47,6 +46,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); // New state for search modal
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const cityModalRef = useRef<HTMLDivElement>(null);
@@ -204,7 +205,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
               </div>
             ) : (
               <button
-                onClick={onLoginClick}
+                onClick={()=> setShowLoginModal(true)}
                 className="hidden md:block bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-bold text-white px-4 py-2 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-md hover:shadow-yellow-400/25 border border-yellow-300"
               >
                 Sign In
@@ -316,6 +317,10 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
         selectedLocation={selectedLocation} // Use Redux state
         setSelectedLocation={(location: string) => dispatch(setSelectedLocation(location))} // Dispatch Redux action
         cityModalRef={cityModalRef}
+      />
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={()=>setShowLoginModal(false)}
       />
     </>
   );

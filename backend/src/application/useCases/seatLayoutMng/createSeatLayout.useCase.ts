@@ -146,7 +146,6 @@ export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
 
       sendResponse(res, HttpResCode.OK, SuccessMsg.SEAT_LAYOUT_CREATED, responseData);
     } catch (error) {
-      console.error('🚀 ~ CreateSeatLayoutUseCase ~ execute ~ error:', error);
       if (error instanceof z.ZodError) {
         sendResponse(res, HttpResCode.BAD_REQUEST, error.errors.map((e) => e.message).join(', '));
         return;

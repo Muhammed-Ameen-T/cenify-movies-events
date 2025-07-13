@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Play, Info } from 'lucide-react';
 import axios from 'axios';
+import Navbar from './CarouselNav';
 
 // TMDB Credentials
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -10,7 +11,7 @@ const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w1280';
 const FALLBACK_IMAGE = 'https://via.placeholder.com/1280x720?text=No+Image+Available';
 
 // Interface for TMDB movie data
-interface Movie {
+interface Movie {     
   id: number;
   title: string;
   tagline?: string;
@@ -153,8 +154,10 @@ const ModernCarousel = () => {
   const currentSlideData = slides[currentSlide];
 
   return (
-    <div className="relative w-full h-96 md:h-[710.5px] overflow-hidden bg-black group">
+    <div className="relative w-full h-screen overflow-hidden bg-black group">
+      <Navbar/>
       {/* Main Image Container */}
+
       <div className="relative w-full h-full">
         {/* Background Image with Smooth Transition */}
         <div
@@ -309,7 +312,7 @@ const ModernCarousel = () => {
       </div>
 
       {/* Thumbnail Preview (Hidden on mobile) */}
-      <div className="hidden lg:block absolute right-8 top-145 -translate-y-1/2 z-20">
+      <div className="hidden lg:block absolute right-0 bottom-0 z-20 p-4">
         <div className="flex flex-col gap-2">
           {slides.map((slide, index) => (
             <button
@@ -330,6 +333,7 @@ const ModernCarousel = () => {
           ))}
         </div>
       </div>
+
     </div>
   );
 };

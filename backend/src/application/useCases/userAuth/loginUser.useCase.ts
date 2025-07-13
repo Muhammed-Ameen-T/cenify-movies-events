@@ -46,7 +46,6 @@ export class LoginUserUseCase implements ILoginUserUseCase {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.YOUR_NOT_USER, HttpResCode.UNAUTHORIZED);
     }
 
-    console.log(dto.password, user.password);
     const isMatch = await bcrypt.compare(dto.password, user.password!);
     if (!isMatch) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.PASSWORD_MISMATCH, HttpResCode.UNAUTHORIZED);

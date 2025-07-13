@@ -31,9 +31,6 @@ export class MoviePassJobService {
     this.agenda.define('expireMoviePass', async (job: Job) => {
       const { userId } = job.attrs.data;
       try {
-        console.log(
-          `🚀 MoviePassJobService ~ expireMoviePass ~ Processing job for userId: ${userId}`,
-        );
         const moviePass = await this.moviePassRepository.findByUserId(userId);
         if (!moviePass) {
           throw new CustomError('Movie Pass not found', HttpResCode.BAD_REQUEST);

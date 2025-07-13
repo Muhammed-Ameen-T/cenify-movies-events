@@ -5,11 +5,7 @@ import { verifyAccessToken } from '../middleware/verifyToken.middleware';
 import { authorizeRoles } from '../middleware/rbac.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
 import {
-  CreateGlobalNotificationSchema,
-  CreateUserNotificationSchema,
-  CreateVendorNotificationSchema,
-  ReadOneNotificationSchema,
-} from '../validation/notification.validation';
+  CreateGlobalNotificationSchema} from '../validation/notification.validation';
 import { INotificationMngController } from '../controllers/interface/notificationMng.controller.interface';
 
 const NotificationMngController = container.resolve<INotificationMngController>(
@@ -18,27 +14,28 @@ const NotificationMngController = container.resolve<INotificationMngController>(
 
 const router = Router();
 
-// POST /api/notifications/global - Create a global notification (Admin only)
-router.post(
-  '/global',
-  verifyAccessToken,
-  authorizeRoles(['admin']),
-  validateRequest(CreateGlobalNotificationSchema),
-  NotificationMngController.createGlobalNotification.bind(NotificationMngController),
-);
+// // POST /api/notifications/global - Create a global notification (Admin only)
+// router.post(
+//   '/global',
+//   verifyAccessToken,
+//   authorizeRoles(['admin']),
+//   validateRequest(CreateGlobalNotificationSchema),
+//   NotificationMngController.createGlobalNotification.bind(NotificationMngController),
+// );
 
 // POST /api/notifications/user - Create a user-specific notification (Authenticated User)
-router.post(
-  '/crea-user',
-  verifyAccessToken,
-  validateRequest(CreateUserNotificationSchema),
-  NotificationMngController.createUserNotification.bind(NotificationMngController),
-);
+// router.post(
+//   '/crea-user',
+//   verifyAccessToken,
+//   validateRequest(CreateUserNotificationSchema),
+//   NotificationMngController.createUserNotification.bind(NotificationMngController),
+// );
 
 // PATCH /api/notifications/:id/read - Mark a specific notification as read (Authenticated User)
 router.patch(
   '/read/:id',
   verifyAccessToken,
+  authorizeRoles(['vendor','user','admin']),
   NotificationMngController.readOneNotification.bind(NotificationMngController),
 );
 
@@ -46,12 +43,14 @@ router.patch(
 router.patch(
   '/read-all',
   verifyAccessToken,
+  authorizeRoles(['vendor','user']),
   NotificationMngController.readAllNotification.bind(NotificationMngController),
 );
 
 router.patch(
   '/read-all-admin',
   verifyAccessToken,
+  authorizeRoles(['admin']),
   NotificationMngController.readAllAdminNotification.bind(NotificationMngController),
 );
 
@@ -59,17 +58,18 @@ router.patch(
 router.get(
   '/user',
   verifyAccessToken,
+  authorizeRoles(['user','vendor']),
   NotificationMngController.fetchAllUserNotification.bind(NotificationMngController),
 );
 
 // POST /api/notifications/vendor - Create a vendor-specific notification (Admin or Vendor Management)
-router.post(
-  '/vendor',
-  verifyAccessToken,
-  authorizeRoles(['admin']),
-  validateRequest(CreateVendorNotificationSchema),
-  NotificationMngController.createVendorNotification.bind(NotificationMngController),
-);
+// router.post(
+//   '/vendor',
+//   verifyAccessToken,
+//   authorizeRoles(['admin']),
+//   validateRequest(CreateVendorNotificationSchema),
+//   NotificationMngController.createVendorNotification.bind(NotificationMngController),
+// );
 
 // GET /api/notifications/vendor/:vendorId - Fetch all notifications for a specific vendor
 router.get(
