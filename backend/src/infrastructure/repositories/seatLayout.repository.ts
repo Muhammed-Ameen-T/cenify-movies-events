@@ -124,7 +124,7 @@ export class SeatLayoutRepository implements ISeatLayoutRepository {
       );
 
       return this.mapToEntity(seatLayoutDoc);
-    } catch (error: any) {
+    } catch (error) {
       console.error('🚖 Error creating seat layout:', error);
       throw new CustomError('Error creating seat layout', 500);
     }
@@ -161,7 +161,7 @@ export class SeatLayoutRepository implements ISeatLayoutRepository {
       }
 
       return this.mapToEntity(seatLayoutDoc);
-    } catch (error: any) {
+    } catch (error) {
       console.error('🚖 Error updating seat layout:', error);
       if (error instanceof CustomError) {
         throw error;
@@ -199,11 +199,8 @@ export class SeatLayoutRepository implements ISeatLayoutRepository {
       );
 
       return seatDocs.map((doc: any) => this.mapSeatToEntity(doc));
-    } catch (error: any) {
+    } catch (error) {
       console.error('🚖 Error creating seats:', error);
-      if (error.code === 11000) {
-        throw new CustomError(`Duplicate UUID found for one or more seats`, 400);
-      }
       throw new CustomError('Error creating seats', 500);
     }
   }
@@ -225,11 +222,8 @@ export class SeatLayoutRepository implements ISeatLayoutRepository {
       );
 
       return seatDocs.map((doc: any) => this.mapSeatToEntity(doc));
-    } catch (error: any) {
+    } catch (error) {
       console.error('🚖 Error replacing seats:', error);
-      if (error.code === 11000) {
-        throw new CustomError(`Duplicate UUID found for one or more seats`, 400);
-      }
       throw new CustomError('Error replacing seats', 500);
     }
   }
@@ -258,7 +252,7 @@ export class SeatLayoutRepository implements ISeatLayoutRepository {
       };
 
       return this.mapToEntity(mappedSeatLayout);
-    } catch (error: any) {
+    } catch (error) {
       console.error('🚖 Error fetching seat layout by ID:', error);
       if (error instanceof CustomError) {
         throw error;

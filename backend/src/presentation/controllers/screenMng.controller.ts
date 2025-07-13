@@ -1,10 +1,9 @@
 import 'reflect-metadata';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import { CustomError } from '../../utils/errors/custom.error';
-import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 import { IScreenManagementController } from '../controllers/interface/screenMng.controller.interface';
 import { ICreateScreenUseCase } from '../../domain/interfaces/useCases/Vendor/createScreen.interface';
 import { IUpdateScreenUseCase } from '../../domain/interfaces/useCases/Vendor/updateScreen.interface';
@@ -19,27 +18,25 @@ export class ScreenManagementController implements IScreenManagementController {
     private fetchScreensOfVendorUseCase: IFetchScreensOfVendorUseCase,
   ) {}
 
-  async createScreen(req: Request, res: Response): Promise<void> {
+  async createScreen(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const screen = await this.createScreenUseCase.execute(req.body);
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, screen);
-    } catch (error: any) {
-      sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
-    }
+    } catch (error) {
+next(error)    }
   }
 
-  async updateScreen(req: Request, res: Response): Promise<void> {
+  async updateScreen(req: Request, res: Response, next:NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
       const screen = await this.updateScreenUseCase.execute(id, req.body);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, screen);
-    } catch (error: any) {
-      sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
-    }
+    } catch (error) {
+next(error)    }
   }
 
-  async getScreensOfVendor(req: Request, res: Response): Promise<void> {
+  async getScreensOfVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { page, limit, search, theaterId, sortBy, sortOrder } = req.query;
       const vendorId = req.decoded?.userId;
@@ -60,8 +57,7 @@ export class ScreenManagementController implements IScreenManagementController {
 
       const result = await this.fetchScreensOfVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
-    } catch (error: any) {
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, error.message);
-    }
+    } catch (error) {
+next(error)    }
   }
 }

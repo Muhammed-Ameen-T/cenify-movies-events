@@ -5,6 +5,7 @@ import { validateRequest } from '../middleware/validate.middleware';
 import {} from '../validation/userAuth.validation';
 import { IUserProfileController } from '../controllers/interface/userProfile.controller.interface';
 import { authorizeRoles } from '../middleware/rbac.middleware';
+import { SendOtpPhoneSchema, VerifyOtpPhoneSchema } from '../validation/profile.validation';
 
 const userAuthController = container.resolve<IUserProfileController>('UserProfileController');
 
@@ -19,33 +20,55 @@ router.get(
 router.patch(
   '/update',
   verifyAccessToken,
+  authorizeRoles(['user']),
   userAuthController.updateUserProfile.bind(userAuthController),
 );
 router.get(
   '/wallet',
   verifyAccessToken,
+  authorizeRoles(['user']),
   userAuthController.findUserWallet.bind(userAuthController),
 );
 router.get(
   '/transactions',
   verifyAccessToken,
+  authorizeRoles(['user']),
   userAuthController.findUserWalletTransactions.bind(userAuthController),
 );
 router.get(
   '/content',
   verifyAccessToken,
+  authorizeRoles(['user']),
   userAuthController.findProfileContents.bind(userAuthController),
 );
 router.put(
   '/changePassword',
   verifyAccessToken,
+  authorizeRoles(['user']),
   userAuthController.changePassword.bind(userAuthController),
 );
 
 router.put(
   '/redeem-points',
   verifyAccessToken,
+  authorizeRoles(['user']),
   userAuthController.redeemLoyaltyPoints.bind(userAuthController),
+);
+
+router.post(
+  '/send-otp-phone',
+  verifyAccessToken,
+  authorizeRoles(['user']),
+  validateRequest(SendOtpPhoneSchema),
+  userAuthController.sendOtpPhone.bind(userAuthController),
+);
+
+router.post(
+  '/verify-otp-phone',
+  verifyAccessToken,
+  authorizeRoles(['user']),
+  validateRequest(VerifyOtpPhoneSchema),
+  userAuthController.verifyOtpPhone.bind(userAuthController),
 );
 
 export default router;

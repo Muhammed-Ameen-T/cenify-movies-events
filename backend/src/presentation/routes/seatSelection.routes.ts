@@ -9,11 +9,11 @@ const router = Router();
 const seatSelectionController =
   container.resolve<ISeatSelectionController>('SeatSelectionController');
 
-router.get('/:showId', (req, res) =>
-  seatSelectionController.getSeatSelection(req, res),
+router.get('/:showId',(req, res, next) =>
+  seatSelectionController.getSeatSelection(req, res, next),
 );
-router.post('/:showId/select', verifyAccessToken,authorizeRoles(['user']), (req, res) =>
-  seatSelectionController.selectSeats(req, res),
+router.post('/:showId/select', verifyAccessToken,authorizeRoles(['user']),(req, res, next) =>
+  seatSelectionController.selectSeats(req, res, next),
 );
 
 export default router;

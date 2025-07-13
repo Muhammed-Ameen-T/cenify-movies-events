@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import Stripe from 'stripe';
 import { env } from '../../config/env.config';
@@ -27,14 +27,13 @@ export class BookingStripeWebhookController {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
-  async handleWebhook(req: Request, res: Response): Promise<void> {
+  async handleWebhook(req: Request, res: Response, next:NextFunction): Promise<void> {
     const sig = req.headers['stripe-signature'] as string;
     let event: Stripe.Event;
 
     try {
       event = this.stripe.webhooks.constructEvent(req.body, sig, env.STRIPE_WEBHOOK_SECRET);
-    } catch (err: any) {
-      console.error('Webhook signature verification failed:', err.message);
+    } catch (err) {
       sendResponse(res, HttpResCode.BAD_REQUEST, 'Webhook Error');
       return;
     }
@@ -183,8 +182,8 @@ export class BookingStripeWebhookController {
         socketService.emitNotification('admin-global', adminNotificationPayload);
 
         console.log(`✅ Booking ${bookingId} confirmed for user ${userId}`);
-      } catch (error: any) {
-        console.error(`❌ Failed to confirm booking ${bookingId}:`, error.message);
+      } catch (error) {
+        console.error(`❌ Failed to confirm booking ${bookingId}:`, error);
         sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, 'Failed to process booking');
         return;
       }

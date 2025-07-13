@@ -26,6 +26,11 @@ export class UserRepositoryImpl implements IUserRepository {
     return user ? this.toEntity(user) : null;
   }
 
+  async findByPhone(phone: number): Promise<User | null> {
+    const user = await UserModel.findOne({ phone });
+    return user ? this.toEntity(user) : null;
+  }
+
   async create(user: User): Promise<User> {
     console.log('📝 Creating user:', user);
     user.email = user.email.toLowerCase(); // Ensure email is stored in lowercase

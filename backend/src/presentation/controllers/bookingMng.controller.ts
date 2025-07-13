@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
@@ -33,7 +33,7 @@ export class BookingMngController implements IBookingMngController {
     @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
   ) {}
 
-  async createBooking(req: Request, res: Response): Promise<void> {
+  async createBooking(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
@@ -57,14 +57,12 @@ export class BookingMngController implements IBookingMngController {
 
       const result = await this.createBookingUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
-    } catch (error: any) {
-      const errorMessage =
-        error instanceof CustomError ? error.message : 'Failed to create booking';
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    } catch (error) {
+      next(error)
     }
   }
 
-  async checkPaymentOptions(req: Request, res: Response): Promise<void> {
+  async checkPaymentOptions(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
@@ -87,14 +85,12 @@ export class BookingMngController implements IBookingMngController {
         stripe: { enabled: true },
         moviePass: { active: isMoviePassActive },
       });
-    } catch (error: any) {
-      const errorMessage =
-        error instanceof CustomError ? error.message : 'Failed to check payment options';
-      sendResponse(res, HttpResCode.BAD_REQUEST, errorMessage);
+    } catch (error) {
+      next(error)
     }
   }
 
-  async fetchBookings(req: Request, res: Response): Promise<void> {
+  async fetchBookings(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, sortBy, sortOrder } = req.query;
       // Convert query parameters
@@ -117,13 +113,11 @@ export class BookingMngController implements IBookingMngController {
       const result = await this.fetchBookingsUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND;
-      sendResponse(res, HttpResCode.NOT_FOUND, errorMessage);
+      next(error)
     }
   }
 
-  async findBookingsOfVendor(req: Request, res: Response): Promise<void> {
+  async findBookingsOfVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { page, limit, status, sortBy, sortOrder } = req.query;
       const vendorId = req.decoded?.userId;
@@ -150,13 +144,11 @@ export class BookingMngController implements IBookingMngController {
       const result = await this.findBookingsOfVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND;
-      sendResponse(res, HttpResCode.NOT_FOUND, errorMessage);
+     next(error)
     }
   }
 
-  async findBookingById(req: Request, res: Response): Promise<void> {
+  async findBookingById(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       if (!id) {
@@ -166,11 +158,10 @@ export class BookingMngController implements IBookingMngController {
       const booking = await this.findBookingByIdUseCase.execute(id);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, booking);
     } catch (error) {
-      sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND);
-    }
+next(error)    }
   }
 
-  async findBookingsOfUser(req: Request, res: Response): Promise<void> {
+  async findBookingsOfUser(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { page, limit, status, sortBy, sortOrder } = req.query;
       const userId = req.decoded?.userId;
@@ -197,13 +188,11 @@ export class BookingMngController implements IBookingMngController {
       const result = await this.findBookingsOfUserUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND;
-      sendResponse(res, HttpResCode.NOT_FOUND, errorMessage);
+      next(error)
     }
   }
 
-  async cancelBooking(req: Request, res: Response): Promise<void> {
+  async cancelBooking(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const { reason } = req.body;
@@ -214,13 +203,8 @@ export class BookingMngController implements IBookingMngController {
 
       const cancelledBooking = await this.cancelBookingUseCase.execute(id, reason);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, cancelledBooking);
-    } catch (error: any) {
-      console.error('❌ ~ BookingMngController ~ cancelBooking ~ error:', error);
-      sendResponse(
-        res,
-        HttpResCode.BAD_REQUEST,
-        error.message || ERROR_MESSAGES.GENERAL.FAILED_CANCELLING_BOOKING,
-      );
+    } catch (error) {
+      next(error)
     }
   }
 }

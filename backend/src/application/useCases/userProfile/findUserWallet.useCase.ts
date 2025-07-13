@@ -18,9 +18,6 @@ export class FindUserWalletUseCase implements IFindUserWalletUseCase {
       }
       return wallet;
     } catch (error) {
-      if (error instanceof CustomError) {
-        throw error;
-      }
       throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
   }

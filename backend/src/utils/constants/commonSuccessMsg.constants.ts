@@ -6,6 +6,7 @@ export const SuccessMsg = {
   CACHE_CONNECTED: 'Cache service connected successfully',
   AUTH_SUCCESS: 'User authenticated successfully',
   OTP_SENT: 'OTP sent successfully',
+  OTP_VERIFIED: 'OTP verified successfully',
   PASSWORD_CHANGED: 'Password updated successfully',
   USER_REGISTERED: 'User registered successfully',
   USER_LOGGED_IN: 'User logged in successfully',
@@ -42,4 +43,6 @@ export const SuccessMsg = {
   LIKE_UPDATED: 'Like status updated successfully',
   LIKE_FETCHED: 'Like Fetched Successfully.',
   WEBHOOK_RECIEVED: 'Webhook received',
+  USER_LOGGED_OUT: 'Successfully logged out',
+  PASSWORD_UPDATED: 'Password updated successfully',
 };

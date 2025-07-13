@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
@@ -35,7 +35,7 @@ export class ShowManagementController implements IShowManagementController {
     @inject('ShowJobService') private showJobService: ShowJobService,
   ) {}
 
-  async createShow(req: Request, res: Response): Promise<void> {
+  async createShow(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
       if (!vendorId) {
@@ -48,7 +48,7 @@ export class ShowManagementController implements IShowManagementController {
       for (const show of shows) {
         try {
           await this.showJobService.scheduleShowJobs(show._id, show.startTime, show.endTime);
-        } catch (scheduleError: any) {
+        } catch (scheduleError) {
           console.error(
             '❌ ~ ShowManagementController ~ createShow ~ Failed to schedule jobs for show:',
             show._id,
@@ -57,13 +57,12 @@ export class ShowManagementController implements IShowManagementController {
         }
       }
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, shows);
-    } catch (error: any) {
-      console.error('❌ ~ ShowManagementController ~ createShow ~ Error:', error);
-      sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
+    } catch (error) {
+     next(error)
     }
   }
 
-  async updateShow(req: Request, res: Response): Promise<void> {
+  async updateShow(req: Request, res: Response, next:NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
@@ -78,26 +77,24 @@ export class ShowManagementController implements IShowManagementController {
         );
       }
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
-    } catch (error: any) {
-      console.error('❌ ~ ShowManagementController ~ updateShow ~ Error:', error);
-      sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
+    } catch (error) {
+      next(error)
     }
   }
 
-  async updateShowStatus(req: Request, res: Response): Promise<void> {
+  async updateShowStatus(req: Request, res: Response, next:NextFunction): Promise<void> {
     const { id } = req.params;
     const { status } = req.body;
 
     try {
       const show = await this.updateShowStatusUseCase.execute(id, status);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
-    } catch (error: any) {
+    } catch (error) {
       console.error('❌ ~ ShowManagementController ~ updateShowStatus ~ Error:', error);
-      sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
-    }
+next(error)    }
   }
 
-  async deleteShow(req: Request, res: Response): Promise<void> {
+  async deleteShow(req: Request, res: Response, next:NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
@@ -114,13 +111,12 @@ export class ShowManagementController implements IShowManagementController {
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
         message: 'Show deleted successfully',
       });
-    } catch (error: any) {
-      console.error('❌ ~ ShowManagementController ~ deleteShow ~ Error:', error);
-      sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
+    } catch (error) {
+   next(error)
     }
   }
 
-  async getShowById(req: Request, res: Response): Promise<void> {
+  async getShowById(req: Request, res: Response, next:NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
@@ -129,13 +125,12 @@ export class ShowManagementController implements IShowManagementController {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
-    } catch (error: any) {
-      console.error('❌ ~ ShowManagementController ~ getShowById ~ Error:', error);
-      sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
+    } catch (error) {
+   next(error)
     }
   }
 
-  async getAllShows(req: Request, res: Response): Promise<void> {
+  async getAllShows(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { page, limit, search, theaterId, movieId, screenId, status, sortBy, sortOrder } =
         req.query;
@@ -154,13 +149,12 @@ export class ShowManagementController implements IShowManagementController {
 
       const result = await this.findAllShowsUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
-    } catch (error: any) {
-      console.error('❌ ~ ShowManagementController ~ getAllShows ~ Error:', error);
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, error.message);
+    } catch (error) {
+next(error)
     }
   }
 
-  async getShowsOfVendor(req: Request, res: Response): Promise<void> {
+  async getShowsOfVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, sortBy, sortOrder } = req.query;
       const vendorId = req.decoded?.userId;
@@ -181,13 +175,12 @@ export class ShowManagementController implements IShowManagementController {
 
       const result = await this.findShowsByVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
-    } catch (error: any) {
-      console.error('❌ ~ ShowManagementController ~ getShowsOfVendor ~ Error:', error);
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, error.message);
+    } catch (error) {
+ next(error)
     }
   }
 
-  async getShowSelection(req: Request, res: Response): Promise<void> {
+  async getShowSelection(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { movieId } = req.params;
       const { date, priceRanges, timeSlots, facilities } = req.query;
@@ -233,17 +226,12 @@ export class ShowManagementController implements IShowManagementController {
 
       const result = await this.fetchShowSelectionUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
-    } catch (error: any) {
-      console.error('❌ ~ ShowManagementController ~ getShowSelection ~ Error:', error);
-      sendResponse(
-        res,
-        error instanceof CustomError ? error.statusCode : HttpResCode.INTERNAL_SERVER_ERROR,
-        error.message || 'Failed to fetch show selection',
-      );
+    } catch (error) {
+   next(error)
     }
   }
 
-  async createRecurringShow(req: Request, res: Response): Promise<void> {
+  async createRecurringShow(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { showId, startDate, endDate } = req.body;
       const vendorId = req.decoded?.userId;
@@ -274,9 +262,8 @@ export class ShowManagementController implements IShowManagementController {
       }
 
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, shows);
-    } catch (error: any) {
-      console.error('❌ ~ ShowManagementController ~ createRecurringShow ~ Error:', error);
-      sendResponse(res, HttpResCode.BAD_REQUEST, error.message);
+    } catch (error) {
+   next(error)
     }
   }
 }

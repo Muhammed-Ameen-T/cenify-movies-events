@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
@@ -22,7 +22,7 @@ export class SeatLayoutController implements ISeatLayoutController {
     private findSeatLayoutByIdUseCase: IFindSeatLayoutByIdUseCase,
   ) {}
 
-  async createSeatLayout(req: Request, res: Response): Promise<void> {
+  async createSeatLayout(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { uuid, vendorId, layoutName, seatPrice, rowCount, columnCount, seats, capacity } =
         req.body;
@@ -44,7 +44,7 @@ export class SeatLayoutController implements ISeatLayoutController {
     }
   }
 
-  async updateSeatLayout(req: Request, res: Response): Promise<void> {
+  async updateSeatLayout(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { uuid, layoutName, seatPrice, rowCount, columnCount, seats, capacity } = req.body;
       const layoutId = req.params.id;
@@ -66,7 +66,7 @@ export class SeatLayoutController implements ISeatLayoutController {
     }
   }
 
-  async findSeatLayoutsByVendor(req: Request, res: Response): Promise<void> {
+  async findSeatLayoutsByVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
       if (!vendorId) {
@@ -99,7 +99,7 @@ export class SeatLayoutController implements ISeatLayoutController {
     }
   }
 
-  async findSeatLayoutById(req: Request, res: Response): Promise<void> {
+  async findSeatLayoutById(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const layoutId = req.params.id;
       if (!layoutId) {

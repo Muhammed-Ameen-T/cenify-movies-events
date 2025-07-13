@@ -1,5 +1,5 @@
 // src/interfaces/controllers/dashboard.controller.ts
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
@@ -19,7 +19,7 @@ export class DashboardController implements IDashboardController {
     private fetchAdminDashboardUseCase: IFetchAdminDashboardUseCase,
   ) {}
 
-  async getDashboardData(req: Request, res: Response): Promise<void> {
+  async getDashboardData(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
       if (!vendorId) {
@@ -36,15 +36,11 @@ export class DashboardController implements IDashboardController {
       const result = await this.fetchDashboardUseCase.execute(vendorId, params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError
-          ? error.message
-          : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_DASHBOARD;
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+      next(error)
     }
   }
 
-  async getAdminDashboardData(req: Request, res: Response): Promise<void> {
+  async getAdminDashboardData(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const adminId = req.decoded?.userId;
       if (!adminId) {
@@ -61,11 +57,7 @@ export class DashboardController implements IDashboardController {
       const result = await this.fetchAdminDashboardUseCase.execute(adminId, params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      const errorMessage =
-        error instanceof CustomError
-          ? error.message
-          : ERROR_MESSAGES.GENERAL.FAILED_FETCHING_DASHBOARD;
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+      next(error)
     }
   }
 }
