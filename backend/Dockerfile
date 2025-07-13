@@ -8,20 +8,19 @@ COPY . .
 # Stage 2: Development
 FROM base AS development
 ENV NODE_ENV=development
-COPY .env ./
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
-# Stage 3: Production
+# Stage 3: Builder
 FROM base AS builder
 RUN npm run build
 
+# Stage 4: Production
 FROM node:22-alpine AS production
 WORKDIR /app
-COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
-COPY .env ./
+COPY package*.json ./
 RUN npm install --only=production
 ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]
