@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import Navbar from '../../components/Admin/Navbar';
-import Sidebar from '../../components/Admin/Sidebar';
+
 import {
   ChevronDown,
   ChevronUp,
@@ -299,11 +298,9 @@ const Movies: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900">
-      <Sidebar activePage="movies" />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <Navbar title="Movies" />
-        <main className="flex-1 overflow-y-auto p-6">
+    <div className="flex bg-gray-900">
+      <div className="flex flex-col flex-1">
+        <main className="flex-1 p-6">
           <motion.div
             initial="initial"
             animate="in"

@@ -2,9 +2,10 @@ import React from 'react';
 import { LayoutDashboard, Film, Ticket, Video,User, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Bell } from 'react-feather';
 
 interface SidebarProps {
-  activePage: 'dashboard' | 'theaters' | 'shows' | 'bookings' | 'movies' | 'users';
+  activePage: 'dashboard' | 'theaters' | 'shows' | 'bookings' | 'movies' | 'users' | 'notifications';
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
@@ -16,7 +17,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
     { name: 'Shows', icon: <Video className="w-5 h-5" />, route: '/admin/shows', id: 'shows' },
     { name: 'Bookings', icon: <Ticket className="w-5 h-5" />, route: '/admin/bookings', id: 'bookings' },
     { name: 'Movies', icon: <Film className="w-5 h-5" />, route: '/admin/movies', id: 'movies' },
-    { name: 'users', icon: <User className="w-5 h-5" />, route: '/admin/users', id: 'users' },
+    { name: 'Users', icon: <User className="w-5 h-5" />, route: '/admin/users', id: 'users' },
+    { name: 'Notifications', icon: <Bell className="w-5 h-5" />, route: '/admin/notifications', id: 'notifications' },
   ];
 
   // Sidebar animation variants
@@ -40,18 +42,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
 
   return (
     <motion.div 
-      className="flex flex-col w-64 min-h-screen bg-gray-900 border-r border-gray-800 shadow-xl"
+      className="flex flex-col w-64 min-h-screen bg-gray-900 border-r border-gray-800 shadow-xl sticky top-0 z-50"
       initial="hidden"
       animate="visible"
       variants={sidebarVariants}
     >
-      <div className="flex items-center justify-center h-16 px-4 border-b border-gray-800">
+      <div className="flex items-center justify-center h-15.5 px-4 border-b border-gray-800">
         <motion.h2 
           className="text-xl font-bold bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent"
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
         >
-          CenifyAdmin
+          Cenify Admin Panel
         </motion.h2>
       </div>
 

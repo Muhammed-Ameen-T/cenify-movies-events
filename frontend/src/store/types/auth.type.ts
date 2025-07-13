@@ -22,6 +22,6 @@ export interface AuthResponse {
       email: string;
       phone: number;
       profileImage: string | null;
-      role:string | null;
+      role: "user" | "admin" | "vendor";
     };
 }

@@ -4,8 +4,7 @@ import { Filter, ChevronDown, RotateCcw, Search, Calendar, Tag, Shield } from 'l
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Navbar from '../../components/Admin/Navbar';
-import Sidebar from '../../components/Admin/Sidebar';
+
 import UserModal from '../../components/Admin/UserModal';
 import ConfirmationModal from '../../components/Admin/ConfirmationModal';
 import { fetchUsers, updateUserStatus } from '../../services/Admin/userMngApi';
@@ -86,7 +85,7 @@ const UserManagement: React.FC = () => {
 
   // Options for filtering
   const statusOptions = ['active', 'blocked']; // Removed 'pending'
-  const roleOptions = ['user', 'admin', 'vendor'];
+  const roleOptions = ['user','vendor'];
 
   // Fetch users
   const { data, isLoading, error } = useQuery({
@@ -274,9 +273,6 @@ const UserManagement: React.FC = () => {
     let textColor = 'text-white';
 
     switch (role) {
-      case 'admin':
-        bgColor = 'bg-indigo-500';
-        break;
       case 'vendor':
         bgColor = 'bg-purple-500';
         break;
@@ -301,9 +297,7 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gray-900">
-      <Sidebar activePage="users" />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Navbar />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-white">User Management</h1>

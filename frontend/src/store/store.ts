@@ -6,8 +6,11 @@ import storage from 'redux-persist/lib/storage';
 
 import authReducer from './slices/authSlice';
 
+import locationReducer from './slices/locationSlice';
+
 import loadingReducer from './slices/loadingSlice';
 
+import popupNotificationReducer from './slices/notificationSlice';
 
 const authPersistConfig = {
 
@@ -30,6 +33,10 @@ export const store = configureStore({
         auth: persistedAuthReducer,
 
         loading: loadingReducer,
+
+        location: locationReducer,
+
+        popupNotification: popupNotificationReducer,
 
     },
 

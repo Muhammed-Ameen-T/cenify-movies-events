@@ -26,7 +26,7 @@ export class FetchMoviesUseCase implements IFetchMoviesUseCase {
     try {
       const page = params?.page || 1;
       const limit = params?.limit || 8;
-      
+
       const { movies, totalCount } = await this.movieRepository.findAll(params);
       const totalPages = Math.ceil(totalCount / limit);
 
@@ -36,10 +36,7 @@ export class FetchMoviesUseCase implements IFetchMoviesUseCase {
         totalPages,
       };
     } catch (error) {
-      throw new CustomError(
-        ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND,
-        HttpResCode.NOT_FOUND
-      );
+      throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
   }
 }

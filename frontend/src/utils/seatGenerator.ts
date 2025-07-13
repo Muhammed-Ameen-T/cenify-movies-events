@@ -1,90 +1,204 @@
-import { TEMPLATES } from '../constants/templates';
+// import { TEMPLATES, TemplateType } from '../constants/templates';
+// import { SEAT_TYPES } from '../constants/seatTypes';
+// import { Seat, SeatLayout } from '../types/theater';
+
+// export const generateSeats = (templateType: TemplateType): SeatLayout => {
+//   const template = TEMPLATES[templateType];
+  
+//   if (templateType === 'EMPTY' || !template) {
+//     return [];
+//   }
+
+//   const { rows, cols, curve } = template;
+//   const layout: SeatLayout = [];
+
+//   for (let i = 0; i < rows; i++) {
+//     const rowArray: (Seat | null)[] = [];
+//     const rowChar = String.fromCharCode(65 + i);
+    
+//     // Calculate how many seats to offset from each side for curved layout
+//     const curveOffset = curve ? Math.floor(Math.sin((i / rows) * Math.PI) * 3) : 0;
+    
+//     for (let j = 0; j < cols; j++) {
+//       // For curved layouts, add empty spaces at the beginning and end of rows
+//       if (curve && (j < curveOffset || j >= cols - curveOffset)) {
+//         rowArray.push(null);
+//         continue;
+//       }
+      
+//       // Determine seat type based on position
+//       let seatType: keyof typeof SEAT_TYPES = 'REGULAR';
+      
+//       // Premium seats in the middle section
+//       if (j >= Math.floor(cols * 0.3) && j < Math.floor(cols * 0.7) && 
+//           i >= Math.floor(rows * 0.3) && i < Math.floor(rows * 0.7)) {
+//         seatType = 'PREMIUM';
+//       }
+      
+//       // VIP seats in the center-back
+//       if (j >= Math.floor(cols * 0.4) && j < Math.floor(cols * 0.6) && 
+//           i >= Math.floor(rows * 0.6) && i < Math.floor(rows * 0.8)) {
+//         seatType = 'VIP';
+//       }
+      
+//       // Unavailable seats (e.g., for aisles or obstacles)
+//       if ((cols > 8 && j === Math.floor(cols / 2) - 1) || 
+//           (cols > 8 && j === Math.floor(cols / 2) + (cols % 2 === 0 ? 0 : 1))) {
+//         seatType = 'UNAVAILABLE';
+//       }
+      
+//       const seat: Seat = {
+//         id: `seat-${i}-${j}`,
+//         row: i,
+//         col: j,
+//         type: seatType,
+//         price: SEAT_TYPES[seatType].price,
+//         label: `${rowChar}${j + 1}`,
+//         occupied: false,
+//       };
+      
+//       rowArray.push(seat);
+//     }
+    
+//     layout.push(rowArray);
+//   }
+  
+//   return layout;
+// };
+
+// export const calculateTotalRevenue = (layout: SeatLayout): number => {
+//   let revenue = 0;
+//   layout.forEach(row => {
+//     if (row) {
+//       row.forEach(seat => {
+//         if (seat && !seat.occupied && seat.type !== 'UNAVAILABLE') {
+//           revenue += seat.price;
+//         }
+//       });
+//     }
+//   });
+//   return revenue;
+// };
+
+// export const calculateTotalCapacity = (layout: SeatLayout): number => {
+//   let capacity = 0;
+//   layout.forEach(row => {
+//     if (row) {
+//       row.forEach(seat => {
+//         if (seat && seat.type !== 'UNAVAILABLE') {
+//           capacity++;
+//         }
+//       });
+//     }
+//   });
+//   return capacity;
+// };
+
+import { TEMPLATES, TemplateType } from '../constants/templates';
 import { SEAT_TYPES } from '../constants/seatTypes';
-import { Seat } from '../types/theater';
-import { TemplateType } from '../constants/templates';
+import { Seat, SeatLayout } from '../types/theater';
 
-// Generate initial seat data based on a template
-export const generateSeats = (template: TemplateType): Seat[][] => {
-  const { rows, cols, pattern } = TEMPLATES[template];
-  const seats: Seat[][] = [];
-
-  if (pattern === 'empty') {
-    return seats; // Return empty array for empty layout
+export const generateSeats = (templateType: TemplateType): SeatLayout => {
+  const template = TEMPLATES[templateType];
+  
+  if (templateType === 'EMPTY' || !template) {
+    return [];
   }
 
-  for (let row = 0; row < rows; row++) {
-    const seatRow: Seat[] = [];
-    for (let col = 0; col < cols; col++) {
-      // Create different seat patterns based on the template
-      let seatType = 'REGULAR' as keyof typeof SEAT_TYPES;
-      
-      if (pattern === 'curved') {
-        // For IMAX: Premium seats in the middle
-        if (col >= cols * 0.25 && col < cols * 0.75 && row >= rows * 0.3 && row < rows * 0.7) {
-          seatType = 'PREMIUM';
-        }
-        // VIP seats in the back middle
-        if (col >= cols * 0.3 && col < cols * 0.7 && row >= rows * 0.7) {
-          seatType = 'VIP';
-        }
-        // Recliner seats in the back row
-        if (row === rows - 1 && col >= cols * 0.3 && col < cols * 0.7) {
-          seatType = 'RECLINER';
-        }
-        // Edge seats might be unavailable
-        if ((col < 2 || col >= cols - 2) && (row < 2 || row >= rows - 2)) {
-          seatType = 'UNAVAILABLE';
-        }
-      } else if (pattern === 'premium') {
-        // For Premium: Mostly premium with some VIP
-        seatType = 'PREMIUM';
-        if (row >= rows * 0.6) {
-          seatType = 'VIP';
-        }
-        // Add recliner seats in the back
-        if (row === rows - 1) {
-          seatType = 'RECLINER';
-        }
-        // Add accessible seats
-        if ((col === 2 || col === cols - 3) && row === rows - 2) {
-          seatType = 'DISABLED';
-        }
-      } else if (pattern === 'multiplex') {
-        // Center seats are premium
-        if (col >= cols * 0.3 && col < cols * 0.7) {
-          seatType = 'PREMIUM';
-        }
-        // Back rows are VIP
-        if (row >= rows * 0.7) {
-          seatType = 'VIP';
-        }
-        // Center back row is recliners
-        if (row === rows - 1 && col >= cols * 0.3 && col < cols * 0.7) {
-          seatType = 'RECLINER';
-        }
-        // Add accessible seats
-        if ((col === 3 || col === cols - 4) && row === 2) {
-          seatType = 'DISABLED';
-        }
-      }
-      
-      // Add some accessible seats in standard layout
-      if (pattern === 'regular' && row === rows - 1 && (col === 1 || col === cols - 2)) {
-        seatType = 'DISABLED';
-      }
+  const { rows, cols, curve } = template;
+  const layout: SeatLayout = [];
 
-      const seatId = `seat-${row}-${col}`;
-      seatRow.push({
-        id: seatId,
-        row,
-        col,
+  for (let i = 0; i < rows; i++) {
+    const rowArray: (Seat | null)[] = [];
+    const rowChar = String.fromCharCode(65 + i);
+    
+    // Calculate how many seats to offset from each side for curved layout
+    const curveOffset = curve ? Math.floor(Math.sin((i / rows) * Math.PI) * 3) : 0;
+    
+    for (let j = 0; j < cols; j++) {
+      // For curved layouts, add empty spaces at the beginning and end of rows
+      if (curve && (j < curveOffset || j >= cols - curveOffset)) {
+        rowArray.push(null);
+        continue;
+      }
+      
+      // Determine seat type based on position
+      let seatType: keyof typeof SEAT_TYPES = 'REGULAR';
+      
+      // Premium seats in the middle section
+      if (j >= Math.floor(cols * 0.3) && j < Math.floor(cols * 0.7) && 
+          i >= Math.floor(rows * 0.3) && i < Math.floor(rows * 0.7)) {
+        seatType = 'PREMIUM';
+      }
+      
+      // VIP seats in the center-back
+      if (j >= Math.floor(cols * 0.4) && j < Math.floor(cols * 0.6) && 
+          i >= Math.floor(rows * 0.6) && i < Math.floor(rows * 0.8)) {
+        seatType = 'VIP';
+      }
+      
+      // Unavailable seats (e.g., for aisles or obstacles)
+      if ((cols > 8 && j === Math.floor(cols / 2) - 1) || 
+          (cols > 8 && j === Math.floor(cols / 2) + (cols % 2 === 0 ? 0 : 1))) {
+        seatType = 'UNAVAILABLE';
+      }
+      
+      const seat: Seat = {
+        id: `seat-${i}-${j}`,
+        row: i,
+        col: j,
         type: seatType,
         price: SEAT_TYPES[seatType].price,
-        label: `${String.fromCharCode(65 + row)}${col + 1}`,
-        occupied: false
+        label: `${rowChar}${j + 1}`,
+        occupied: false,
+      };
+      
+      rowArray.push(seat);
+    }
+    
+    layout.push(rowArray);
+  }
+  
+  return layout;
+};
+
+export const calculateTotalRevenue = (layout: SeatLayout): number => {
+  let revenue = 0;
+  layout.forEach(row => {
+    if (row) {
+      row.forEach(seat => {
+        if (seat && !seat.occupied && seat.type !== 'UNAVAILABLE') {
+          revenue += seat.price;
+        }
       });
     }
-    seats.push(seatRow);
+  });
+  return revenue;
+};
+
+export const calculateTotalCapacity = (layout: SeatLayout): number => {
+  let capacity = 0;
+  layout.forEach(row => {
+    if (row) {
+      row.forEach(seat => {
+        if (seat && seat.type !== 'UNAVAILABLE') {
+          capacity++;
+        }
+      });
+    }
+  });
+  return capacity;
+};
+
+export const findSeatById = (layout: SeatLayout, id: string): { seat: Seat | null, rowIndex: number, colIndex: number } => {
+  for (let i = 0; i < layout.length; i++) {
+    const row = layout[i];
+    if (!row) continue;
+    for (let j = 0; j < row.length; j++) {
+      if (row[j]?.id === id) {
+        return { seat: row[j], rowIndex: i, colIndex: j };
+      }
+    }
   }
-  return seats;
+  return { seat: null, rowIndex: -1, colIndex: -1 };
 };

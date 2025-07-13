@@ -25,13 +25,12 @@ export class CreateMovieUseCase implements ICreateMovieUseCase {
       new Date(dto.releaseDate),
       'upcoming',
       0,
-      0,
+      [],
       dto.is3D,
-      dto.crew, 
+      dto.crew,
       dto.cast,
-      []
+      [],
     );
-    console.log("🚀 ~ CreateMovieUseCase ~ execute ~ newMovie:", newMovie)
 
     try {
       const savedMovie = await this.movieRepository.create(newMovie);
@@ -39,7 +38,7 @@ export class CreateMovieUseCase implements ICreateMovieUseCase {
     } catch (error) {
       throw new CustomError(
         ERROR_MESSAGES.DATABASE.RECORD_NOT_SAVED,
-        HttpResCode.INTERNAL_SERVER_ERROR
+        HttpResCode.INTERNAL_SERVER_ERROR,
       );
     }
   }

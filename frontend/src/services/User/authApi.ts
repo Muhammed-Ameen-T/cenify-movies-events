@@ -3,17 +3,6 @@ import { AUTH_MESSAGES } from "../../constants/auth.messages";
 import { USER_AUTH_ENDPOINTS } from "../../constants/apiEndPoint"
 import { AuthResponse } from "../../store/types/auth.type";
 import { handleAxiosError } from "../../utils/exios-error-handler";
-// export interface AuthResponse {
-//   accessToken: string;
-//   user: {
-//     id: string;
-//     name: string;
-//     email: string;
-//     phone: number;
-//     profileImage: string | null;
-//     role:string | null;
-//   };
-// }
 
 export const sendOtp = async (email: string): Promise<void> => {
   try {
@@ -23,6 +12,16 @@ export const sendOtp = async (email: string): Promise<void> => {
       throw new Error(response.data?.message || AUTH_MESSAGES.OTP_FAILED);
     }
   } catch (error) {
+    handleAxiosError(error, AUTH_MESSAGES.OTP_FAILED);
+  }
+};
+
+export const getCurrentUser = async (): Promise<any> => {
+  try {
+    const response = await api.get(USER_AUTH_ENDPOINTS.getUser);
+    return response.data.data;
+  } catch (error) {
+    console.log("Error fetching current user:", error);
     handleAxiosError(error, AUTH_MESSAGES.OTP_FAILED);
   }
 };
@@ -84,43 +83,7 @@ export const login = async (email: string,password: string): Promise<AuthRespons
 
     return response.data.data;
   } catch (error) {
+    console.log("🚀 ~ login ~ error:", error)
     handleAxiosError(error, AUTH_MESSAGES.LOGIN_FAILED);
   }
 };
-
-
-// Common error handler
-// function handleAxiosError(error: unknown, fallbackMessage: string): never {
-//   if (import.meta.env.DEV) {
-//     console.error("authApi error:", error);
-//   }
-
-//   if (
-//     typeof error === "object" &&
-//     error !== null &&
-//     "response" in error &&
-//     (error as AxiosError<{ message?: string }>).response?.data?.message
-//   ) {
-//     const axiosError = error as { response?: { data?: { message?: string } } };
-//     throw new Error(axiosError.response?.data?.message || fallbackMessage);
-//   }
-
-//   throw new Error(fallbackMessage);
-// }
-
-
-
-
-// export const register = async (idToken: string): Promise<AuthResponse> => {
-//   try {
-//     const response = await api.post(USER_AUTH_ENDPOINTS.googleLogin, { idToken });
-
-//     if (!response.data.success) {
-//       throw new Error(response.data.message || AUTH_MESSAGES.LOGIN_FAILED);
-//     }
-
-//     return response.data;
-//   } catch (error) {
-//     handleAxiosError(error, AUTH_MESSAGES.LOGIN_FAILED);
-//   }
-// };

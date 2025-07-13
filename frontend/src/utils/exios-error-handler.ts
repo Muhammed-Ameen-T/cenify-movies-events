@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 
-export function handleAxiosError(error: unknown, fallbackMessage: string): never {
+export function handleAxiosError(error: unknown,  fallbackMessage: string): never {
   if (import.meta.env.VITE_DEV) {
     console.error("authApi error:", error);
   }

@@ -1,6 +1,7 @@
 // src/components/LoginModal.tsx
 import React, { useState, useEffect } from 'react';
-import { X, Mail, Lock, User, ArrowLeft, Loader2 } from 'lucide-react';
+import { X, Mail, Lock, User, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useDispatch } from 'react-redux';
 import { setAuth } from '../../store/slices/authSlice';
@@ -138,7 +139,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         setAuth({
           user: { 
             ...response.user,
-            // phone: response.user.phone ? parseInt(response.user.phone, 10) : null,
           },
           accessToken: response.accessToken,
         })
@@ -147,6 +147,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       localStorage.setItem('user', JSON.stringify(response.user));
       onClose();
     } catch (error) {
+      console.log("🚀 ~ handleLogin ~ error:", error)
       showErrorToast(error instanceof Error ? error.message : 'Login failed. Please check your credentials.');
     } finally {
       setIsLoginLoading(false);
@@ -267,322 +268,374 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setAuthMode('register');
   };
 
-  if (!isOpen) return null;
+  const getModalTitle = () => {
+    switch (authMode) {
+      case 'login':
+        return 'Welcome Back';
+      case 'register':
+        return 'Create Account';
+      case 'otp-verification':
+        return 'Verify Email';
+      default:
+        return 'Authentication';
+    }
+  };
+
+  const getModalSubtitle = () => {
+    switch (authMode) {
+      case 'login':
+        return 'Sign in to your account';
+      case 'register':
+        return 'Join us today';
+      case 'otp-verification':
+        return 'Enter verification code';
+      default:
+        return '';
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md relative">
-        <div className="flex justify-between items-center mb-6">
-          {authMode === 'otp-verification' && (
-            <button
-              onClick={goBack}
-              className="text-gray-600 hover:text-gray-800 flex items-center"
-              disabled={isOtpLoading || isResendLoading}
-            >
-              <ArrowLeft size={20} className="mr-1" />
-              <span>Back</span>
-            </button>
-          )}
-          <h2 className="text-xl font-bold">
-            {authMode === 'login' ? 'Sign In' : authMode === 'register' ? 'Create Account' : 'Verify Email'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-600 hover:text-gray-800"
-            disabled={isLoginLoading || isRegisterLoading || isOtpLoading || isResendLoading || isGoogleLoading}
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <motion.div
+            className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
           >
-            <X size={24} />
-          </button>
-        </div>
-
-        {authMode === 'login' && (
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <div className="relative">
-                  <Mail size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2 border ${
-                      errors.email ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-2 ${
-                      errors.email ? 'focus:ring-red-400' : 'focus:ring-yellow-400'
-                    }`}
-                    placeholder="Enter your email"
-                    disabled={isLoginLoading || isGoogleLoading}
-                  />
-                </div>
-                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <div className="relative">
-                  <Lock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={`w-full pl-10 pr-14 py-2 border ${
-                      errors.password ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-2 ${
-                      errors.password ? 'focus:ring-red-400' : 'focus:ring-yellow-400'
-                    }`}
-                    placeholder="Enter your password"
-                    disabled={isLoginLoading || isGoogleLoading}
-                  />
+            {/* Header */}
+            <div className="p-6 bg-gradient-to-r from-white via-yellow-50 to-orange-50 border-b border-yellow-100">
+              <div className="flex justify-between items-center">
+                {authMode === 'otp-verification' && (
                   <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    disabled={isLoginLoading || isGoogleLoading}
+                    onClick={goBack}
+                    className="text-gray-600 hover:text-gray-800 flex items-center transition-colors duration-200"
+                    disabled={isOtpLoading || isResendLoading}
                   >
-                    {showPassword ? 'Hide' : 'Show'}
+                    <ArrowLeft size={18} className="mr-1" />
+                    <span className="text-sm font-medium">Back</span>
                   </button>
-                </div>
-                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
-              </div>
-            </div>
-
-            <button
-              onClick={handleLogin}
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 px-4 py-3 rounded-md focus:outline-none font-medium transition-colors flex items-center justify-center"
-              disabled={isLoginLoading || isGoogleLoading}
-            >
-              {isLoginLoading ? (
-                <>
-                  <Loader2 size={20} className="mr-2 animate-spin" />
-                  Signing In...
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-
-            <div className="flex items-center my-4">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="mx-4 text-gray-500 text-sm">OR</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-
-            <div className="flex justify-center">
-              <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  theme="outline"
-                  size="large"
-                  shape="pill"
-                  width="100%"
-                  disabled={isLoginLoading || isGoogleLoading}
-                />
-              </GoogleOAuthProvider>
-            </div>
-
-            <div className="text-center mt-4 text-sm">
-              Don't have an account?{' '}
-              <button
-                onClick={switchToRegister}
-                className="text-yellow-600 hover:underline font-medium"
-                disabled={isLoginLoading || isGoogleLoading}
-              >
-                Create Account
-              </button>
-            </div>
-          </div>
-        )}
-
-        {authMode === 'register' && (
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <div className="relative">
-                  <User size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2 border ${
-                      errors.name ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-2 ${
-                      errors.name ? 'focus:ring-red-400' : 'focus:ring-yellow-400'
-                    }`}
-                    placeholder="Enter your full name"
-                    disabled={isRegisterLoading || isGoogleLoading}
-                  />
-                </div>
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <div className="relative">
-                  <Mail size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2 border ${
-                      errors.email ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-2 ${
-                      errors.email ? 'focus:ring-red-400' : 'focus:ring-yellow-400'
-                    }`}
-                    placeholder="Enter your email"
-                    disabled={isRegisterLoading || isGoogleLoading}
-                  />
-                </div>
-                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <div className="relative">
-                  <Lock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={`w-full pl-10 pr-14 py-2 border ${
-                      errors.password ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                    } rounded-md focus:outline-none focus:ring-2 ${
-                      errors.password ? 'focus:ring-red-400' : 'focus:ring-yellow-400'
-                    }`}
-                    placeholder="Create a password (min. 8 characters)"
-                    disabled={isRegisterLoading || isGoogleLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    disabled={isRegisterLoading || isGoogleLoading}
-                  >
-                    {showPassword ? 'Hide' : 'Show'}
-                  </button>
-                </div>
-                {errors.password ? (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                ) : (
-                  <p className="text-xs text-gray-500 mt-1">Password must be at least 8 characters</p>
                 )}
+                <div className={`${authMode === 'otp-verification' ? '' : 'flex-1'}`}>
+                  <h2 className="text-xl font-bold text-gray-800">{getModalTitle()}</h2>
+                  <p className="text-sm text-gray-600 mt-1">{getModalSubtitle()}</p>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="text-gray-600 hover:text-gray-800 transition-colors duration-200 p-1 rounded-lg hover:bg-white/50"
+                  disabled={isLoginLoading || isRegisterLoading || isOtpLoading || isResendLoading || isGoogleLoading}
+                >
+                  <X size={20} />
+                </button>
               </div>
             </div>
 
-            <button
-              onClick={handleRegister}
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 px-4 py-3 rounded-md focus:outline-none font-medium transition-colors flex items-center justify-center"
-              disabled={isRegisterLoading || isGoogleLoading}
-            >
-              {isRegisterLoading ? (
-                <>
-                  <Loader2 size={20} className="mr-2 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                'Create Account & Verify Email'
+            {/* Body */}
+            <div className="p-6">
+              {authMode === 'login' && (
+                <div className="space-y-5">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                      <div className="relative">
+                        <Mail size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 ${
+                            errors.email 
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                              : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
+                          } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
+                          placeholder="Enter your email address"
+                          disabled={isLoginLoading || isGoogleLoading}
+                        />
+                      </div>
+                      {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email}</p>}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                      <div className="relative">
+                        <Lock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className={`w-full pl-10 pr-12 py-3 rounded-xl border-2 ${
+                            errors.password 
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                              : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
+                          } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
+                          placeholder="Enter your password"
+                          disabled={isLoginLoading || isGoogleLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                          disabled={isLoginLoading || isGoogleLoading}
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                      {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password}</p>}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleLogin}
+                    className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                    disabled={isLoginLoading || isGoogleLoading}
+                  >
+                    {isLoginLoading ? (
+                      <>
+                        <Loader2 size={20} className="mr-2 animate-spin" />
+                        Signing In...
+                      </>
+                    ) : (
+                      'Sign In'
+                    )}
+                  </button>
+
+                  <div className="flex items-center my-5">
+                    <div className="flex-grow border-t border-gray-300"></div>
+                    <span className="mx-4 text-gray-500 text-sm font-medium">OR</span>
+                    <div className="flex-grow border-t border-gray-300"></div>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+                      <div className="w-full">
+                        <GoogleLogin
+                          onSuccess={handleGoogleSuccess}
+                          onError={handleGoogleError}
+                          theme="outline"
+                          size="large"
+                          shape="pill"
+                          width="100%"
+                          disabled={isLoginLoading || isGoogleLoading}
+                        />
+                      </div>
+                    </GoogleOAuthProvider>
+                  </div>
+
+                  <div className="text-center mt-5 text-sm">
+                    <span className="text-gray-600">Don't have an account? </span>
+                    <button
+                      onClick={switchToRegister}
+                      className="text-yellow-600 hover:text-yellow-700 font-semibold transition-colors duration-200"
+                      disabled={isLoginLoading || isGoogleLoading}
+                    >
+                      Create Account
+                    </button>
+                  </div>
+                </div>
               )}
-            </button>
 
-            <div className="flex items-center my-4">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="mx-4 text-gray-500 text-sm">OR</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
+              {authMode === 'register' && (
+                <div className="space-y-5">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                      <div className="relative">
+                        <User size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 ${
+                            errors.name 
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                              : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
+                          } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
+                          placeholder="Enter your full name"
+                          disabled={isRegisterLoading || isGoogleLoading}
+                        />
+                      </div>
+                      {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name}</p>}
+                    </div>
 
-            <div className="flex justify-center">
-              <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  theme="outline"
-                  size="large"
-                  shape="pill"
-                  width="100%"
-                  disabled={isRegisterLoading || isGoogleLoading}
-                />
-              </GoogleOAuthProvider>
-            </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                      <div className="relative">
+                        <Mail size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 ${
+                            errors.email 
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                              : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
+                          } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
+                          placeholder="Enter your email address"
+                          disabled={isRegisterLoading || isGoogleLoading}
+                        />
+                      </div>
+                      {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email}</p>}
+                    </div>
 
-            <div className="text-center mt-4 text-sm">
-              Already have an account?{' '}
-              <button
-                onClick={switchToLogin}
-                className="text-yellow-600 hover:underline font-medium"
-                disabled={isRegisterLoading || isGoogleLoading}
-              >
-                Sign In
-              </button>
-            </div>
-          </div>
-        )}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                      <div className="relative">
+                        <Lock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className={`w-full pl-10 pr-12 py-3 rounded-xl border-2 ${
+                            errors.password 
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                              : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
+                          } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
+                          placeholder="Create a password (min. 8 characters)"
+                          disabled={isRegisterLoading || isGoogleLoading}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                          disabled={isRegisterLoading || isGoogleLoading}
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                      {errors.password ? (
+                        <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+                      ) : (
+                        <p className="text-xs text-gray-500 mt-2">Password must be at least 8 characters</p>
+                      )}
+                    </div>
+                  </div>
 
-        {authMode === 'otp-verification' && (
-          <div className="space-y-4">
-            <p className="text-gray-600 text-sm mb-4">
-              We've sent a verification code to <span className="font-medium">{email}</span>. Please enter the
-              6-digit code below to verify your email.
-            </p>
+                  <button
+                    onClick={handleRegister}
+                    className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                    disabled={isRegisterLoading || isGoogleLoading}
+                  >
+                    {isRegisterLoading ? (
+                      <>
+                        <Loader2 size={20} className="mr-2 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      'Create Account & Verify Email'
+                    )}
+                  </button>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Verification Code</label>
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                className={`w-full px-4 py-2 border ${
-                  errors.otp ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                } rounded-md focus:outline-none focus:ring-2 ${
-                  errors.otp ? 'focus:ring-red-400' : 'focus:ring-yellow-400'
-                } text-center text-lg tracking-wider`}
-                placeholder="Enter 6-digit code"
-                disabled={isOtpLoading || isResendLoading}
-                maxLength={6}
-              />
-              {errors.otp && <p className="mt-1 text-sm text-red-600">{errors.otp}</p>}
-            </div>
+                  <div className="flex items-center my-5">
+                    <div className="flex-grow border-t border-gray-300"></div>
+                    <span className="mx-4 text-gray-500 text-sm font-medium">OR</span>
+                    <div className="flex-grow border-t border-gray-300"></div>
+                  </div>
 
-            <button
-              onClick={handleVerifyOtp}
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 px-4 py-3 rounded-md focus:outline-none font-medium transition-colors flex items-center justify-center"
-              disabled={isOtpLoading || isResendLoading}
-            >
-              {isOtpLoading ? (
-                <>
-                  <Loader2 size={20} className="mr-2 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                'Verify & Complete Registration'
+                  <div className="flex justify-center">
+                    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+                      <div className="w-full">
+                        <GoogleLogin
+                          onSuccess={handleGoogleSuccess}
+                          onError={handleGoogleError}
+                          theme="outline"
+                          size="large"
+                          shape="pill"
+                          width="100%"
+                          disabled={isRegisterLoading || isGoogleLoading}
+                        />
+                      </div>
+                    </GoogleOAuthProvider>
+                  </div>
+
+                  <div className="text-center mt-5 text-sm">
+                    <span className="text-gray-600">Already have an account? </span>
+                    <button
+                      onClick={switchToLogin}
+                      className="text-yellow-600 hover:text-yellow-700 font-semibold transition-colors duration-200"
+                      disabled={isRegisterLoading || isGoogleLoading}
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                </div>
               )}
-            </button>
 
-            <div className="text-sm text-center text-gray-600">
-              {isResendDisabled ? (
-                <span>Resend code in {resendTimer} seconds</span>
-              ) : (
-                <button
-                  onClick={handleResendOtp}
-                  className="text-yellow-600 hover:underline flex items-center justify-center mx-auto"
-                  disabled={isOtpLoading || isResendLoading}
-                >
-                  {isResendLoading ? (
-                    <>
-                      <Loader2 size={16} className="mr-2 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    'Resend verification code'
-                  )}
-                </button>
+              {authMode === 'otp-verification' && (
+                <div className="space-y-5">
+                  <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4 mb-5">
+                    <p className="text-gray-700 text-sm">
+                      We've sent a verification code to{' '}
+                      <span className="font-semibold text-yellow-800">{email}</span>. Please enter the
+                      6-digit code below to verify your email.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Verification Code</label>
+                    <input
+                      type="text"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
+                      className={`w-full px-4 py-4 rounded-xl border-2 ${
+                        errors.otp 
+                          ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                          : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
+                      } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-bold text-lg tracking-widest text-center focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
+                      placeholder="000000"
+                      disabled={isOtpLoading || isResendLoading}
+                      maxLength={6}
+                    />
+                    {errors.otp && <p className="mt-2 text-sm text-red-600">{errors.otp}</p>}
+                  </div>
+
+                  <button
+                    onClick={handleVerifyOtp}
+                    className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                    disabled={isOtpLoading || isResendLoading}
+                  >
+                    {isOtpLoading ? (
+                      <>
+                        <Loader2 size={20} className="mr-2 animate-spin" />
+                        Verifying...
+                      </>
+                    ) : (
+                      'Verify & Complete Registration'
+                    )}
+                  </button>
+
+                  <div className="text-center">
+                    {isResendDisabled ? (
+                      <div className="bg-gray-100 rounded-lg py-2 px-4 inline-flex items-center">
+                        <span className="text-sm text-gray-600">
+                          Resend code in <span className="font-semibold text-yellow-600">{resendTimer}s</span>
+                        </span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleResendOtp}
+                        className="text-yellow-600 hover:text-yellow-700 font-semibold text-sm flex items-center justify-center mx-auto transition-colors duration-200 bg-yellow-50 hover:bg-yellow-100 rounded-lg py-2 px-4"
+                        disabled={isOtpLoading || isResendLoading}
+                      >
+                        {isResendLoading ? (
+                          <>
+                            <Loader2 size={16} className="mr-2 animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          'Resend verification code'
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
-          </div>
-        )}
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 

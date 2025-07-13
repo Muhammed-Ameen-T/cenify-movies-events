@@ -4,11 +4,11 @@ import Avatar from '../ui/Avatar';
 // import { currentUser } from '../../utils/mockData';
 import { RootState } from '../../store/store';
 import { useSelector,useDispatch } from 'react-redux';
-import axios from 'axios';
-import { clearAuth } from '../../store/slices/authSlice';
+  import { clearAuth } from '../../store/slices/authSlice';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import { API_BASE_URL } from '../../constants/apiEndPoint';
 import { useNavigate } from 'react-router-dom';
+import api from '../../config/axios.config';
 
 interface NavbarProps {
   sidebarOpen: boolean;
@@ -25,30 +25,10 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
   const navigate = useNavigate()
 
   const notifications = [
-    {
-      id: 1,
-      title: 'New Booking',
-      message: '3 new bookings for "The Phantom of the Opera"',
-      time: '10 min ago',
-      unread: true,
-    },
-    {
-      id: 2,
-      title: 'Show Update',
-      message: 'Schedule updated for "Hamlet"',
-      time: '1 hour ago',
-      unread: true,
-    },
-    {
-      id: 3,
-      title: 'System Notification',
-      message: 'Theater maintenance scheduled for next week',
-      time: '2 hours ago',
-      unread: false,
-    },
+    
   ];
   const handleLogout = () => {
-    axios.post(`${API_BASE_URL}/auth/logout`);
+    api.post('/auth/logout');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
     dispatch(clearAuth());
@@ -56,7 +36,6 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
     navigate('/vendor/login')
   };
 
-  console.log('Rendering Navbar, sidebarOpen:', sidebarOpen);
 
   return (
     <div
@@ -87,7 +66,7 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <button
+          {/* <button
             className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#333333] transition-colors"
             onClick={() => setDarkMode(!darkMode)}
           >
@@ -96,16 +75,16 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarOpen }) => {
 
           <button className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#333333] transition-colors">
             <MessageSquare size={18} />
-          </button>
+          </button> */}
 
           <div className="relative">
-            <button
+            {/* <button
               className="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#333333] transition-colors"
               onClick={() => setShowNotifications(!showNotifications)}
             >
               <Bell size={18} />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#f5005f]"></span>
-            </button>
+            </button> */}
 
             {showNotifications && (
               <div className="absolute right-0 mt-2 w-80 bg-[#18181f] border border-[#333333] rounded-lg shadow-lg overflow-hidden z-50">

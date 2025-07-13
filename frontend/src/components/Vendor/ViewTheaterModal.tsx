@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { ExternalLink, X } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import { Theater } from '../../types/theater';
 
@@ -69,6 +69,18 @@ const ViewTheaterModal: React.FC<ViewTheaterModalProps> = ({ theater, onClose })
               <p className="text-gray-400 text-xs mt-1">
                 Coordinates: {safeCoordinates}
               </p>
+              <button
+                onClick={() =>
+                  window.open(
+                    `https://www.google.com/maps/dir/?api=1&destination=${theater.location.coordinates[0]},${theater.location.coordinates[1]}`,
+                    '_blank'
+                  )
+                }
+                className="flex-1 bg-gradient-to-r text-white font-semibold py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Get Directions
+              </button>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
@@ -92,30 +104,8 @@ const ViewTheaterModal: React.FC<ViewTheaterModalProps> = ({ theater, onClose })
                   <p className="text-gray-400 text-xs">No facilities available</p>
                 )}
               </div>
-            </div>
-          </div>
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
-                Gallery
-              </h3>
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                {safeGallery.map((url, index) => (
-                  <img
-                    key={index}
-                    src={url}
-                    alt={`Gallery image ${index + 1} for ${theater.name || 'theater'}`}
-                    className="w-full h-32 object-cover rounded-lg shadow-md hover:scale-105 transition-transform duration-200"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.src = '/placeholder-image.jpg'; // Fallback image
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+              <div>
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide mt-5">
                 Contact
               </h3>
               <p className="text-gray-200 text-sm mt-2">
@@ -126,7 +116,7 @@ const ViewTheaterModal: React.FC<ViewTheaterModalProps> = ({ theater, onClose })
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide mt-5">
                 Vendor
               </h3>
               <p className="text-gray-200 text-sm mt-2">
@@ -139,6 +129,49 @@ const ViewTheaterModal: React.FC<ViewTheaterModalProps> = ({ theater, onClose })
                 Phone: {theater.vendorId?.phone || 'N/A'}
               </p>
             </div>
+            </div>
+          </div>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+                Certification
+              </h3>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+              {safeGallery[0] && (
+                <img
+                  src={safeGallery[0]}
+                  alt={`Gallery image 1 for ${theater.name || 'theater'}`}
+                  className="w-full h-32 object-cover rounded-lg shadow-md hover:scale-105 transition-transform duration-200"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder-image.jpg'; // Fallback image
+                  }}
+                />
+              )}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+                Gallery
+              </h3>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                {safeGallery
+                .filter((_, index) => index !== 0)
+                .map((url, index) => (
+                  <img
+                    key={index + 1} // +1 to avoid reusing index 0's key
+                    src={url}
+                    alt={`Gallery image ${index + 2} for ${theater.name || 'theater'}`} // +2 to reflect actual image position
+                    className="w-full h-32 object-cover rounded-lg shadow-md hover:scale-105 transition-transform duration-200"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder-image.jpg';
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            
           </div>
         </div>
         <div className="mt-6 pt-6 border-t border-gray-700/50">

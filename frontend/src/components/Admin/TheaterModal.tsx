@@ -85,7 +85,7 @@ const TheaterModal: React.FC<TheaterModalProps> = ({ isOpen, onClose, theater })
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              <div className="relative h-96">
+              <div className="relative h-140">
                 <img
                   src={
                     theater.images[activeImageIndex] ||
@@ -94,6 +94,13 @@ const TheaterModal: React.FC<TheaterModalProps> = ({ isOpen, onClose, theater })
                   alt={`${theater.name} - Image ${activeImageIndex + 1}`}
                   className="object-cover w-full h-full"
                 />
+
+                {/* Certification badge overlay for the 0th image */}
+                {activeImageIndex === 0 && (
+                  <div className="absolute top-4 left-4 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                    THEATER CERTIFICATION
+                  </div>
+                )}
 
                 <motion.button
                   onClick={prevImage}
@@ -128,6 +135,7 @@ const TheaterModal: React.FC<TheaterModalProps> = ({ isOpen, onClose, theater })
                 </div>
               </div>
 
+
               <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-3">
                 <div className="col-span-2 space-y-6">
                   <div>
@@ -152,7 +160,7 @@ const TheaterModal: React.FC<TheaterModalProps> = ({ isOpen, onClose, theater })
                     </div>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <h4 className="text-lg font-semibold text-white">Screens</h4>
                     <div className="grid grid-cols-1 gap-4 mt-3 sm:grid-cols-2">
                       {(theater.screens || []).map((screen, index) => (
@@ -181,7 +189,38 @@ const TheaterModal: React.FC<TheaterModalProps> = ({ isOpen, onClose, theater })
                         <p className="text-gray-400">No screen information available.</p>
                       )}
                     </div>
-                  </div>
+                  </div> */}
+                  <motion.div
+                    className="p-4 bg-gray-800 rounded-lg border border-gray-700 h-81"
+                    whileHover={{ y: -5 }}
+                  >
+                    <h4 className="text-lg font-semibold text-white mb-2">Location</h4>
+                    <div className="h-62 w-full rounded-lg overflow-hidden">
+                      {isLoaded ? (
+                        <GoogleMap
+                          mapContainerStyle={{ width: '100%', height: '100%' }}
+                          center={coordinates}
+                          zoom={15}
+                          options={{ disableDefaultUI: true, zoomControl: true }}
+                        >
+                          <Marker position={coordinates}>
+                            <InfoWindow position={coordinates}>
+                              <div className="text-gray-800 font-medium">
+                                <div>{theater.name}</div>
+                                <div className="text-gray-600 text-sm">
+                                  {theater.address || theater.location}
+                                </div>
+                              </div>
+                            </InfoWindow>
+                          </Marker>
+                        </GoogleMap>
+                      ) : (
+                        <div className="h-full bg-gray-700 border border-gray-600 rounded-lg flex items-center justify-center">
+                          <p className="text-gray-400">Loading map...</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
                 </div>
 
                 <div className="space-y-4">
@@ -254,42 +293,12 @@ const TheaterModal: React.FC<TheaterModalProps> = ({ isOpen, onClose, theater })
                         />
                       ))}
                       <span className="ml-2 text-gray-300">
-                        {theater.rating.toFixed(1)} ({theater.reviewCount || 0} reviews)
+                        {theater.rating.toFixed(1)} ({theater.ratingCount || 0} reviews)
                       </span>
                     </div>
                   </motion.div>
 
-                  <motion.div
-                    className="p-4 bg-gray-800 rounded-lg border border-gray-700 h-60"
-                    whileHover={{ y: -5 }}
-                  >
-                    <h4 className="text-lg font-semibold text-white mb-2">Location</h4>
-                    <div className="h-44 w-full rounded-lg overflow-hidden">
-                      {isLoaded ? (
-                        <GoogleMap
-                          mapContainerStyle={{ width: '100%', height: '100%' }}
-                          center={coordinates}
-                          zoom={15}
-                          options={{ disableDefaultUI: true, zoomControl: true }}
-                        >
-                          <Marker position={coordinates}>
-                            <InfoWindow position={coordinates}>
-                              <div className="text-gray-800 font-medium">
-                                <div>{theater.name}</div>
-                                <div className="text-gray-600 text-sm">
-                                  {theater.address || theater.location}
-                                </div>
-                              </div>
-                            </InfoWindow>
-                          </Marker>
-                        </GoogleMap>
-                      ) : (
-                        <div className="h-full bg-gray-700 border border-gray-600 rounded-lg flex items-center justify-center">
-                          <p className="text-gray-400">Loading map...</p>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
+                  
                 </div>
               </div>
             </div>

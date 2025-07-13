@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { inject, injectable } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
@@ -11,10 +11,9 @@ import { ILoginAdminUseCase } from '../../domain/interfaces/useCases/Admin/admin
 export class AdminAuthController implements IAdminAuthController {
   constructor(@inject('LoginAdminUseCase') private loginAdminUseCase: ILoginAdminUseCase) {}
 
-  async login(req: Request, res: Response): Promise<void> {
+  async login(req: Request, res: Response, next:NextFunction): Promise<void> {
     try {
       const { email, password } = req.body;
-      console.log('AdminAuthController.Login: Received request:', { email, password });
 
       const dto: LoginAdminDTO = { email, password };
       const result = await this.loginAdminUseCase.execute(dto);
@@ -25,7 +24,7 @@ export class AdminAuthController implements IAdminAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000,
       });
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.CREATED, {
@@ -33,9 +32,7 @@ export class AdminAuthController implements IAdminAuthController {
         user: result.user,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to verify OTP.';
-      console.error('AdminAuthController.verifyOtp error:', error);
-      sendResponse(res, HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
+      next(error)
     }
   }
 }

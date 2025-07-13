@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { DollarSign } from 'lucide-react';
 import { SEAT_TYPES } from '../../constants/seatTypes';
-import { SeatType } from '../../constants/seatTypes';
-import { PriceEditData } from '../../types/theater';
+import { SeatType, PriceEditData } from '../../types/theater';
 import Modal from './Modal';
 
 interface PriceEditorProps {

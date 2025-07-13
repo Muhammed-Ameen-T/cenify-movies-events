@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Upload, Info, CheckCircle2 } from 'lucide-react';
+import { Loader2, Upload, Info, CheckCircle2, Award, Camera } from 'lucide-react';
 import { theaterDetailsSchema } from '../../validation/schema';
 import { uploadToCloudinary} from '../../services/Vendor/theaterApi';
 import { createNewTheater } from '../../services/Vendor/theaterApi';
@@ -167,7 +167,10 @@ const TheaterDetailsForm: React.FC = () => {
     });
   };
 
-  const hasMinimumImages = watchedGallery && watchedGallery.length >= 3;
+  // Updated validation logic for 4 required images (1 certificate + 3 theater images)
+  const hasRequiredImages = watchedGallery && watchedGallery.length >= 4;
+  const hasCertificate = watchedGallery && watchedGallery.length >= 1;
+  const hasTheaterImages = watchedGallery && watchedGallery.length >= 4;
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -185,6 +188,17 @@ const TheaterDetailsForm: React.FC = () => {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
+  };
+
+  // Get current upload instruction based on uploaded images count
+  const getUploadInstruction = () => {
+    if (galleryUrls.length === 0) {
+      return "First, upload your Theater License Certificate";
+    } else if (galleryUrls.length === 1) {
+      return "Now upload theater images (3 required)";
+    } else {
+      return "Continue uploading theater images";
+    }
   };
 
   return (
@@ -320,13 +334,25 @@ const TheaterDetailsForm: React.FC = () => {
                 {errors.phone && <p className="text-red-400 text-sm">{errors.phone.message}</p>}
               </motion.div>
 
-              {/* Theater Images */}
+              {/* Theater Certificate & Images */}
               <motion.div className="space-y-3" variants={itemVariants}>
                 <div className="flex justify-between items-center">
-                  <label className="text-base font-medium text-gray-200">
-                    Theater Images
-                    <span className="ml-2 text-sm text-gray-400">(Minimum 3 photos required)</span>
-                  </label>
+                  <div>
+                    <label className="text-base font-medium text-gray-200">
+                      Theater Certificate & Images
+                    </label>
+                    <div className="mt-1 space-y-1">
+                      <p className="text-sm text-gray-400">
+                        • First image: Theater License Certificate (Required)
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        • Next 3 images: Theater photos (Required)
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        • 5th image: Additional theater photo (Optional)
+                      </p>
+                    </div>
+                  </div>
                   <span className="text-sm text-gray-400">{galleryUrls.length}/5 uploaded</span>
                 </div>
 
@@ -367,9 +393,17 @@ const TheaterDetailsForm: React.FC = () => {
                           </div>
                         ) : (
                           <>
-                            <Upload className="w-8 h-8 mb-3 text-gray-400" />
-                            <p className="mb-1 text-sm text-gray-300">
-                              <span className="font-semibold">Click to upload</span> or drag and drop
+                            {galleryUrls.length === 0 ? (
+                              <Award className="w-8 h-8 mb-3 text-blue-400" />
+                            ) : (
+                              <Camera className="w-8 h-8 mb-3 text-gray-400" />
+                            )}
+                            <p className="mb-1 text-sm text-gray-300 text-center">
+                              <span className="font-semibold">Click to upload</span>
+                              <br />
+                              <span className="text-xs text-blue-400">
+                                {getUploadInstruction()}
+                              </span>
                             </p>
                             <p className="text-xs text-gray-400">JPG, JPEG or PNG (MAX. 5MB)</p>
                           </>
@@ -549,19 +583,19 @@ const TheaterDetailsForm: React.FC = () => {
               <motion.div variants={itemVariants} className="pt-4">
                 <motion.button
                   type="submit"
-                  disabled={isSubmitting || !hasMinimumImages || createTheaterMutation.isPending}
+                  disabled={isSubmitting || !hasRequiredImages || createTheaterMutation.isPending}
                   className={`w-full py-4 px-4 rounded-lg font-semibold text-white transition duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 ${
-                    isSubmitting || !hasMinimumImages || createTheaterMutation.isPending
+                    isSubmitting || !hasRequiredImages || createTheaterMutation.isPending
                       ? 'bg-gray-600 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700'
                   }`}
                   whileHover={
-                    isSubmitting || !hasMinimumImages || createTheaterMutation.isPending
+                    isSubmitting || !hasRequiredImages || createTheaterMutation.isPending
                       ? {}
                       : { scale: 1.02, backgroundColor: '#2563EB' }
                   }
                   whileTap={
-                    isSubmitting || !hasMinimumImages || createTheaterMutation.isPending
+                    isSubmitting || !hasRequiredImages || createTheaterMutation.isPending
                       ? {}
                       : { scale: 0.98 }
                   }
@@ -576,7 +610,7 @@ const TheaterDetailsForm: React.FC = () => {
                   )}
                 </motion.button>
 
-                {!hasMinimumImages && (
+                {!hasRequiredImages && (
                   <motion.div
                     className="flex items-center justify-center mt-4 text-amber-400 text-sm"
                     initial={{ opacity: 0 }}
@@ -584,7 +618,12 @@ const TheaterDetailsForm: React.FC = () => {
                     transition={{ delay: 0.5 }}
                   >
                     <Info className="w-4 h-4 mr-2" />
-                    Please upload at least 3 theater images to continue
+                    {galleryUrls.length === 0 
+                      ? 'Please upload theater certificate and at least 3 theater images'
+                      : galleryUrls.length < 4 
+                        ? `Please upload ${4 - galleryUrls.length} more images (${galleryUrls.length >= 1 ? 'theater photos' : 'certificate and theater photos'})`
+                        : 'Upload complete! You can add 1 more optional image'
+                    }
                   </motion.div>
                 )}
               </motion.div>

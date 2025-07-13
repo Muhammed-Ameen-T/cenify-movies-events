@@ -23,7 +23,6 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
   ) {}
 
   async execute(dto: VerifyOtpVendorDTO): Promise<AuthResponseDTO> {
-    console.log('🚀 ~ VerifyOtpVendorUseCase ~ execute ~ dto:', dto);
 
     const storedOtp = await this.redisService.get(`otp:${dto.email}`);
     console.log('storedOtp:', storedOtp);
@@ -36,8 +35,8 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.USER_ALREADY_EXISTS, HttpResCode.BAD_REQUEST);
     }
 
-    const hashedPassword = await hashPassword(dto.password)
-    
+    const hashedPassword = await hashPassword(dto.password);
+
     let vendor = new User(
       null as any,
       dto.name,
@@ -58,13 +57,12 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
 
     try {
       const created = await this.authRepository.create(vendor);
-      console.log('🚀 ~ VerifyOtpVendorUseCase ~ execute ~ created:', created);
     } catch (error) {
-      console.log('🚀 ~ VerifyOtpVendorUseCase ~ execute ~ error:', error);
+      console.log(error);
     }
 
     const createdVendor = await this.authRepository.findByEmail(dto.email);
-    console.log('created Vendor:',createdVendor)
+    console.log('created Vendor:', createdVendor);
     if (!createdVendor) {
       throw new CustomError(
         ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND,

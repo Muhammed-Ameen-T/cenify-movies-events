@@ -6,7 +6,7 @@ import { JwtService } from '../../../infrastructure/services/jwt.service';
 import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 /**
  * Use case for handling admin login.
@@ -39,7 +39,7 @@ export class LoginAdminUseCase implements ILoginUserUseCase {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.UNAUTHORIZED);
     }
 
-    if (admin.role!=='admin') {
+    if (admin.role !== 'admin') {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.YOUR_NOT_ADMIN, HttpResCode.FORBIDDEN);
     }
 

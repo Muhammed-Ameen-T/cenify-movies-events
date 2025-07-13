@@ -37,4 +37,11 @@ export const EnvErrMsg = {
   AWS_REGION_UNDEFINED: 'Environment variable AWS_REGION is undefined.',
   AWS_S3_BUCKET_NAME_UNDEFINED: 'Environment variable AWS_S3_BUCKET_NAME is undefined.',
   SES_EMAIL_FROM_UNDEFINED: 'Environment variable SES_EMAIL_FROM is undefined.',
+  STRIPE_PUBLISH_UNDEFINED: 'Stripe Publish Key undefined.',
+  STRIPE_SECRET_UNDEFINES: 'Stripe Secret key undefined.',
+  STRIPE_WEBHOOK_SECRET_UNDEFINES: 'Stripe Webhook secret undefined.',
+  FAST2SMS_API_KEY_UNDEFINED: 'Fast 2 SMS Api key undefined.',
+  TWILIO_AUTH_TOKEN_UNDEFINED: 'Twilio Auth Token undefined.',
+  TWILIO_ACCOUNT_SID_UNDEFINED: 'Twilio Account SID undefined.',
+  TWILIO_PHONE_UNDEFINED: 'Twilio phone undefined.',
 };

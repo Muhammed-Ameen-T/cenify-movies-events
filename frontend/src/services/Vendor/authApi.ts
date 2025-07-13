@@ -1,11 +1,12 @@
 import axios from "axios";
-import {API_BASE_URL, VENDOR_ENDPOINTS,ADMIN_ENDPOINTS } from "../../constants/apiEndPoint";
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+import {VENDOR_ENDPOINTS,ADMIN_ENDPOINTS } from "../../constants/apiEndPoint";
+// const api = axios.create({
+//   baseURL: API_BASE_URL,
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+// });
+import api from "../../config/axios.config";
 
 export const registerVendor = async (data: {
   email: string;
@@ -24,7 +25,7 @@ export const verifyVendorOtp = async (data: {
 }): Promise<{
   accessToken: string;
   refreshToken: string;
-  user: { id: string; email: string; name: string; phone: number; profileImage: string; role: string };
+  user: { id: string; email: string; name: string; phone: number; profileImage: string; role: "user" | "admin" | "vendor"};
 }> => {
   const response = await api.post(VENDOR_ENDPOINTS.verifyOtp, data);
   return response.data.data;

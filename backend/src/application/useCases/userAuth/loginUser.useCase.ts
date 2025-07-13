@@ -6,7 +6,7 @@ import { JwtService } from '../../../infrastructure/services/jwt.service';
 import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 /**
  * Handles the user login process using dependency injection for authentication and database operations.
@@ -46,7 +46,6 @@ export class LoginUserUseCase implements ILoginUserUseCase {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.YOUR_NOT_USER, HttpResCode.UNAUTHORIZED);
     }
 
-    console.log(dto.password, user.password);
     const isMatch = await bcrypt.compare(dto.password, user.password!);
     if (!isMatch) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.PASSWORD_MISMATCH, HttpResCode.UNAUTHORIZED);
