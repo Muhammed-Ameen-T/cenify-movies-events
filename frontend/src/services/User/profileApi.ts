@@ -118,3 +118,26 @@ export const redeemPoints = async (amount:number): Promise<Wallet> => {
     handleAxiosError(error, ERROR_MESSAGES.FETCH_WALLET_TRANSACTIONS_FAILED);
   }
 };
+
+
+export const sendOtpPhone = async (phone: string): Promise<void> => {
+  try {
+    const response = await api.post(USER_ENDPOINTS.sendOtpPhone, { phone });
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || 'Failed to send OTP');
+    }
+  } catch (error) {
+    handleAxiosError(error, 'Failed to send OTP');
+  }
+};
+
+export const verifyOtpPhone = async (phone: string, otp: string): Promise<void> => {
+  try {
+    const response = await api.post(USER_ENDPOINTS.verifyOtpPhone, { phone, otp });
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || 'Invalid OTP');
+    }
+  } catch (error) {
+    handleAxiosError(error, 'Invalid OTP');
+  }
+};

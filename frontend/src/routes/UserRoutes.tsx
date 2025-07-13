@@ -21,8 +21,8 @@ const UserRoutes = () => {
     <Suspense fallback={<Loader />}>
       <ScrollToTop />
       <Routes>
+        <Route index element={<HomePage />} />
         <Route element={<UserLayout />}>
-          <Route index element={<HomePage />} />
           <Route element={<PrivateRoute allowedRoles={['user']} />}>
             <Route path="account">
               <Route index element={<Navigate to="account-tab" replace />} />

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Bell, Ticket, Gift, Star, Film, LogOut, X, Menu, Wallet } from 'lucide-react';
+import { User, Bell, Ticket, Wallet, Film, LogOut, X, Menu } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { TabType, UserProfile, PasswordChange } from '../../types/index';
-import { mockUser, mockBookings, mockNotifications } from '../../Data/MockData';
+import { TabType, UserProfile, PasswordChange } from '../../types';
+import { mockUser } from '../../Data/MockData';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCurrentUser, updateProfile, uploadToCloudinary } from '../../services/User/profileApi';
 import { toast } from 'react-hot-toast';
+import api from '../../config/axios.config';
+import { useDispatch } from 'react-redux';
+import { clearAuth } from '../../store/slices/authSlice';
+import { showSuccessToast } from '../../utils/toast';
 
 // Components
 import BookingsTab from '../../components/UserProfile/BookingTab';
@@ -17,17 +21,12 @@ import ProfileModal from '../../components/UserProfile/ProfileUpdateModal';
 import PasswordModal from '../../components/UserProfile/ChangePasswordModal';
 import ImageCropperModal from '../../components/UserProfile/ImageCroppperModal';
 import AccountTab from '../../components/UserProfile/AccountTab';
-import api from '../../config/axios.config';
-import { useDispatch } from 'react-redux';
-import { clearAuth } from '../../store/slices/authSlice';
-import { showSuccessToast } from '../../utils/toast';
 
 export default function TheaterProfilePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
-  
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['currentUser'],
@@ -48,23 +47,24 @@ export default function TheaterProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [editedProfile, setEditedProfile] = useState<UserProfile | null>(null);
   const [passwordChange, setPasswordChange] = useState<PasswordChange>({
     oldPassword: '',
     newPassword: '',
   });
-  const [errors, setErrors] = useState<Partial<Record<keyof UserProfile, string>>>({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isImageCropperOpen, setIsImageCropperOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [editedProfile, setEditedProfile] = useState<UserProfile | null>(null);
 
   // Initialize and update editedProfile
   useEffect(() => {
     if (data) {
+      console.log('TheaterProfilePage: Setting editedProfile with data:', data);
       setEditedProfile(data);
       setPreviewImage(null);
     } else {
+      console.log('TheaterProfilePage: Falling back to mockUser:', mockUser);
       setEditedProfile(mockUser);
     }
   }, [data]);
@@ -81,6 +81,7 @@ export default function TheaterProfilePage() {
   const updateProfileMutation = useMutation({
     mutationFn: updateProfile,
     onSuccess: async (updatedUser) => {
+      console.log('TheaterProfilePage: Profile update successful:', updatedUser);
       queryClient.setQueryData(['currentUser'], updatedUser);
       await refetch();
       setEditedProfile(updatedUser);
@@ -90,6 +91,7 @@ export default function TheaterProfilePage() {
       toast.success('Profile updated successfully!');
     },
     onError: (error: any) => {
+      console.error('TheaterProfilePage: Profile update error:', error);
       toast.error(error.message || 'Failed to update profile');
     },
   });
@@ -128,13 +130,14 @@ export default function TheaterProfilePage() {
   const handleImageSave = async (croppedFile: File) => {
     try {
       const url = await uploadToCloudinary(croppedFile);
+      console.log('TheaterProfilePage: Image uploaded, URL:', url);
       setPreviewImage(url);
       setEditedProfile((prev) => (prev ? { ...prev, profileImage: url } : prev));
       setIsImageCropperOpen(false);
       setImageSrc(null);
     } catch (error) {
+      console.error('TheaterProfilePage: Image upload error:', error);
       toast.error('Image upload failed');
-      console.error('Upload error:', error);
     }
   };
 
@@ -150,76 +153,30 @@ export default function TheaterProfilePage() {
   // Password form submission
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Password change submitted:', passwordChange);
+    console.log('TheaterProfilePage: Password change submitted:', passwordChange);
     setIsPasswordModalOpen(false);
     setPasswordChange({ oldPassword: '', newPassword: '' });
   };
 
-  // Form validation
-  const validateForm = (currentProfile: UserProfile, originalProfile: UserProfile | null): boolean => {
-    const newErrors: Partial<Record<keyof UserProfile, string>> = {};
-
-    if (currentProfile.name !== originalProfile?.name) {
-      if (!currentProfile.name?.trim()) {
-        newErrors.name = 'Name is required';
-      } else if (currentProfile.name.trim().length < 2) {
-        newErrors.name = 'Name must be at least 2 characters';
-      }
-    }
-
-    if (currentProfile.phone !== originalProfile?.phone) {
-      if (!currentProfile.phone?.trim()) {
-        newErrors.phone = 'Phone number is required';
-      } else if (!/^\d{10}$/.test(currentProfile.phone.trim())) {
-        newErrors.phone = 'Phone number must be exactly 10 digits';
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Check if any field has changed
-  const hasChanges = (currentProfile: UserProfile, originalProfile: UserProfile | null): boolean => {
-    if (!originalProfile) return true;
-    return (
-      currentProfile.name !== originalProfile.name ||
-      currentProfile.phone !== originalProfile.phone ||
-      currentProfile.profileImage !== originalProfile.profileImage ||
-      currentProfile.dateOfBirth !== originalProfile.dateOfBirth
-    );
-  };
-
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editedProfile && validateForm(editedProfile, data || mockUser) && hasChanges(editedProfile, data || mockUser)) {
-      updateProfileMutation.mutate({
-        name: editedProfile.name,
-        phone: editedProfile.phone,
-        profileImage: editedProfile.profileImage,
-        dob: editedProfile.dateOfBirth || null,
-      });
-    } else if (!hasChanges(editedProfile, data || mockUser)) {
-      toast.error('No changes to save');
+  // Handle profile save
+  const handleProfileSave = (updateData: Partial<UserProfile>) => {
+    console.log('TheaterProfilePage: handleProfileSave called with:', updateData);
+    if (editedProfile) {
+      updateProfileMutation.mutate(updateData);
+    } else {
+      console.error('TheaterProfilePage: editedProfile is null, cannot save');
+      toast.error('Failed to save profile: No user data available');
     }
   };
 
-  // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEditedProfile((prev) =>
-      prev ? { ...prev, [name]: value || null } : prev
-    );
-  };
-
-   const handleLogout = () => {
-      api.post(`/auth/logout`);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-      dispatch(clearAuth());
-      navigate('/');
-      showSuccessToast('User Logout successfully!');
+  // Handle logout
+  const handleLogout = () => {
+    api.post(`/auth/logout`);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    dispatch(clearAuth());
+    navigate('/');
+    showSuccessToast('User Logout successfully!');
   };
 
   // Tabs configuration
@@ -254,7 +211,7 @@ export default function TheaterProfilePage() {
   // Handle tab change
   const handleTabChange = (tabId: TabType) => {
     const tab = tabs.find((t) => t.id === tabId);
-    if (tab) {  
+    if (tab) {
       setActiveTab(tabId);
       navigate(`/account/${tab.route}`);
       setIsMobileMenuOpen(false);
@@ -280,7 +237,7 @@ export default function TheaterProfilePage() {
   }
 
   // Fallback to mockUser if data is undefined
-  const userData = data || mockUser
+  const userData = data || mockUser;
 
   // Dummy callback functions
   const handlePurchasePass = () => {
@@ -307,7 +264,7 @@ export default function TheaterProfilePage() {
       case 'bookings':
         return <BookingsTab />;
       case 'notifications':
-        return <NotificationsTab  />;
+        return <NotificationsTab />;
       case 'wallet':
         return <WalletTab user={userData} />;
       case 'moviepass':
@@ -410,6 +367,7 @@ export default function TheaterProfilePage() {
                         ))}
                       </div>
                       <motion.button
+                        onClick={handleLogout}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className="flex items-center space-x-4 px-6 py-4 text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-300 mt-4 border border-red-200"
@@ -503,17 +461,15 @@ export default function TheaterProfilePage() {
         <ProfileModal
           isOpen={isModalOpen}
           onClose={() => {
+            console.log('TheaterProfilePage: Closing ProfileModal');
             setIsModalOpen(false);
             setPreviewImage(null);
             setImageSrc(null);
           }}
           profile={editedProfile}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          errors={errors}
           onImageUpload={handleImageUpload}
           previewImage={previewImage}
-          isSubmitting={updateProfileMutation.isPending}
+          onSave={handleProfileSave}
         />
       )}
       <PasswordModal

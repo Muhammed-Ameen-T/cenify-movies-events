@@ -34,6 +34,8 @@ export const USER_ENDPOINTS = {
   fetchVendorBookings: '/booking/fetch-vendor',
   rateMovie:'/movie/rate',
   getUserWalletTransactions: '/profile/transactions',
+  verifyOtpPhone: '/profile/verify-otp-phone',
+  sendOtpPhone: '/profile/send-otp-phone',
   redeemPoints: '/profile/redeem-points',
   getMoviePassHistory: 'movie-pass/history'
 };

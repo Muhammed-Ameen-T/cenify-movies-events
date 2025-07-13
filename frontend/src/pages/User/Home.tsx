@@ -9,7 +9,7 @@ import SpecialOffersSection from '../../components/User/SpecialOffersSection';
 const HomePage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-white">
-
+      
       <Carousel />
 
       <div className="flex-grow">

@@ -15,9 +15,7 @@ const UserLayout: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-transparent">
-      <Navbar
-        onLoginClick={toggleLoginModal} 
-      />
+      <Navbar/>
 
       <AnimatePresence>
         {showLoginModal && (
