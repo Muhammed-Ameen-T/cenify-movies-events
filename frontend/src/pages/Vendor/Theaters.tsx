@@ -1,16 +1,15 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ToastContainer, toast } from 'react-toastify';
-import { Search, Filter, Edit, Eye, X } from 'lucide-react';
+import { Search, Filter, Edit, Eye} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import BackButton from '../../components/Buttons/BackButton';
 import { fetchTheatersByVendor, updateTheater } from '../../services/Vendor/theaterApi';
-import { Theater, theaterUpdateSchema, TheaterUpdateFormData } from '../../types/theater';
+import { ITheater, Theater, TheaterUpdateFormData } from '../../types/theater';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+
 import 'react-toastify/dist/ReactToastify.css';
 import { debounce } from 'lodash';
 
@@ -45,8 +44,15 @@ const TheaterManagement: React.FC = () => {
     []
   );
 
+  // Define the expected response type
+  type TheatersQueryResponse = {
+    theaters: ITheater[];
+    totalCount: number;
+    totalPages: number;
+  };
+
   // Fetch theaters
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<TheatersQueryResponse>({
     queryKey: ['theaters', currentPage, pageSize, filters],
     queryFn: () =>
       fetchTheatersByVendor({
@@ -91,15 +97,15 @@ const TheaterManagement: React.FC = () => {
     [debouncedSetSearch]
   );
 
-  const handleStatusChange = useCallback(
-    (status: string) => {
-      const newStatuses = filters.status.includes(status)
-        ? filters.status.filter((s) => s !== status)
-        : [...filters.status, status];
-      handleFilterChange({ name: 'status', value: newStatuses });
-    },
-    [filters.status, handleFilterChange]
-  );
+  // const handleStatusChange = useCallback(
+  //   (status: string) => {
+  //     const newStatuses = filters.status.includes(status)
+  //       ? filters.status.filter((s) => s !== status)
+  //       : [...filters.status, status];
+  //     handleFilterChange({ name: 'status', value: newStatuses });
+  //   },
+  //   [filters.status, handleFilterChange]
+  // );
 
   const handleSortChange = useCallback(
     (sortBy: string) => {
@@ -239,7 +245,7 @@ const TheaterManagement: React.FC = () => {
                 </thead>
                 <tbody>
                   <AnimatePresence>
-                    {theaters.map((theater, index) => (
+                    {theaters.map((theater:Theater, index:number) => (
                       <motion.tr
                         key={theater._id}
                         initial={{ opacity: 0, y: 10 }}
@@ -371,7 +377,7 @@ const TheaterManagement: React.FC = () => {
               onSubmit={(data) =>
                 updateTheaterMutation.mutate({ id: editingTheater._id, data })
               }
-              isLoading={updateTheaterMutation.isLoading}
+              isLoading={updateTheaterMutation.isPending}
             />
           )}
         </AnimatePresence>

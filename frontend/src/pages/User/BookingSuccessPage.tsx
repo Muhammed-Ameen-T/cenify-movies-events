@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { BookingService } from '../../services/User/bookingApi';
-import { CreateBookingResponse, BookingData } from '../../types/bookingResponse';
+import { CreateBookingResponse } from '../../types/bookingResponse';
 import Loader from '../../components/Shared/Loading';
 
 const BookingSuccessPage: React.FC = () => {
@@ -36,7 +36,7 @@ const BookingSuccessPage: React.FC = () => {
   const [showShareToast, setShowShareToast] = useState<string | null>(null);
 
   // Fetch booking data
-  const { data: bookingData, isLoading, error } = useQuery<BookingData>({
+  const { data: bookingData, isLoading, error } = useQuery<CreateBookingResponse>({
     queryKey: ['booking', id],
     queryFn: async () => {
       if (!id) throw new Error('Booking ID is missing');
@@ -73,7 +73,7 @@ const BookingSuccessPage: React.FC = () => {
           }),
           day: new Date(data.showId.showDate).toLocaleDateString('en-US', { weekday: 'long' }),
         },
-        seats: data.bookedSeatsId.map((seat) => ({
+        seats: data.bookedSeatsId.map((seat:Seat) => ({
           number: seat.number, // Extract the 'number' property from the seat object
         })),
         pricing: {

@@ -6,10 +6,8 @@ import {
   Calendar,
   MapPin,
   Star,
-  Award,
   Users,
   ExternalLink,
-  Heart,
   Share2,
   Trophy,
   Globe,
@@ -44,7 +42,6 @@ const ActorProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('about');
   const [showAllMovies, setShowAllMovies] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false);
   const [showFullBiography, setShowFullBiography] = useState(false);
 
   // Fetch person details
@@ -54,10 +51,7 @@ const ActorProfilePage: React.FC = () => {
     enabled: !!personId,
   });
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    // TODO: Implement follow/unfollow API
-  };
+
 
   const handleShare = () => {
     if (navigator.share) {

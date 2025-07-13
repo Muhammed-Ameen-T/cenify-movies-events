@@ -3,6 +3,7 @@ import api from '../../config/axios.config';
 import { VENDOR_ENDPOINTS } from '../../constants/apiEndPoint';
 import { ERROR_MESSAGES } from '../../constants/auth.messages';
 import { SeatLayoutResponse } from '../../types/seatLayout';
+import { handleAxiosError } from '../../utils/exios-error-handler';
 interface FetchScreensParams {
   page: number;
   limit: number;
@@ -30,9 +31,7 @@ export const createScreen = async (data: any): Promise<void> => {
     const response = await api.post(VENDOR_ENDPOINTS.createScreen, data);
     return response.data;
   } catch (error) {
-    console.error("Error creating screen:", error);
-    const errorMessage = error.response?.data?.message || ERROR_MESSAGES.CREATING_SCREEN_FAILED;
-    throw new Error(errorMessage);
+    handleAxiosError(error,'Error while creating screen')
   }
 };
 
@@ -40,10 +39,8 @@ export const updateScreen = async (id: string, data: any): Promise<void> => {
   try {
     const response = await api.put(`${VENDOR_ENDPOINTS.updateScreen}/${id}`, data);
     return response.data;
-  } catch (error: any) {
-    console.error("Error updating screen:", error);
-    const errorMessage = error.response?.data?.message || ERROR_MESSAGES.UPDATING_SCREEN_FAILED;
-    throw new Error(errorMessage);
+  } catch (error) {
+    handleAxiosError(error,'Error while update screen')
   }
 };
 

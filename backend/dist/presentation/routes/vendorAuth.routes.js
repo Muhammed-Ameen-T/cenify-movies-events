@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tsyringe_1 = require("tsyringe");
+const verifyToken_middleware_1 = require("../middleware/verifyToken.middleware");
+const validate_middleware_1 = require("../middleware/validate.middleware");
+const userAuth_validation_1 = require("../validation/userAuth.validation");
+const rbac_middleware_1 = require("../middleware/rbac.middleware");
+const VendorAuthController = tsyringe_1.container.resolve('VendorAuthController');
+const router = (0, express_1.Router)();
+router.post('/send-otp', (0, validate_middleware_1.validateRequest)(userAuth_validation_1.SendOtpSchema), VendorAuthController.sendOtp.bind(VendorAuthController));
+router.post('/login', VendorAuthController.login.bind(VendorAuthController));
+router.post('/verify-otp', VendorAuthController.verifyOtp.bind(VendorAuthController));
+router.post('/create-theater', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['vendor']), VendorAuthController.createNewTheater.bind(VendorAuthController));
+exports.default = router;

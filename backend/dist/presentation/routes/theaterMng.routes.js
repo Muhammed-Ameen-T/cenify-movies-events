@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tsyringe_1 = require("tsyringe");
+const verifyToken_middleware_1 = require("../middleware/verifyToken.middleware");
+const rbac_middleware_1 = require("../middleware/rbac.middleware");
+const TheaterMngController = tsyringe_1.container.resolve('TheaterMngController');
+const router = (0, express_1.Router)();
+router.get('/fetchAll', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user', 'admin', 'vendor']), TheaterMngController.getTheaters.bind(TheaterMngController));
+router.get('/fetch-vendor', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['vendor']), TheaterMngController.getTheatersOfVendor.bind(TheaterMngController));
+router.get('/fetch-admin', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['admin']), TheaterMngController.fetchTheatersByAdmin.bind(TheaterMngController));
+router.patch('/update-theater-status/:id', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['vendor', 'admin']), TheaterMngController.updateTheaterStatus.bind(TheaterMngController));
+router.patch('/update-theater/:id', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['vendor', 'admin']), TheaterMngController.updateTheater.bind(TheaterMngController));
+exports.default = router;

@@ -379,7 +379,7 @@ const ShowManagement: React.FC = () => {
                 </thead>
                 <tbody>
                   <AnimatePresence>
-                    {shows.map((show, index) => (
+                    {shows.map((show:Show, index:number) => (
                       <motion.tr
                         key={show._id}
                         initial={{ opacity: 0, y: 10 }}

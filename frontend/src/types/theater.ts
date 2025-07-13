@@ -54,7 +54,7 @@ export interface TheaterUpdatePayload {
 
 // src/types/theater.ts
 export interface  Theater {
-  id: string;
+  _id: string;
   name: string;
   status: string;
   location: string;
@@ -140,7 +140,7 @@ export interface ITheater {
     phone: number;
   };
   rating: number;
-  screens: any[]; // Adjust based on screen structure if needed
+  screens: Screen[]; // Adjust based on screen structure if needed
 }
 
 export const theaterUpdateSchema = z.object({
@@ -165,6 +165,7 @@ export type TheaterUpdateFormData = z.infer<typeof theaterUpdateSchema>;
 
 
 import { SeatType } from '../constants/seatTypes';
+import { Screen } from './screen';
 
 export interface Seat {
   id: string;

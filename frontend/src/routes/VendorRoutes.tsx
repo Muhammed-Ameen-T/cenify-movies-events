@@ -9,7 +9,6 @@ const LoginPage = lazy(() => import('../pages/Vendor/LoginPage.tsx'));
 const RegisterPage = lazy(() => import('../pages/Vendor/RegisterPage.tsx'));
 const VendorDashboard = lazy(() => import('../pages/Vendor/VendorDashboard.tsx'));
 const TheaterManagement = lazy(() => import('../pages/Vendor/Theaters.tsx'));
-const EventManagement = lazy(() => import('../pages/Vendor/Events.tsx'));
 import SeatLayoutMain from '../pages/SeatLayout/MainSeat.tsx';
 import ScreenManagement from '../pages/Vendor/ScreenManagement.tsx';
 import CreateScreenForm from '../components/Vendor/CreateScreenForm.tsx';
@@ -31,8 +30,6 @@ const VendorRoutes = () => {
             <Route path="dashboard" element={<VendorDashboard />} />
             <Route path="create-theater" element={<TheaterDetailsForm />} />
             <Route path="theaters" element={<TheaterManagement />} />
-            <Route path="events-create" element={<VendorDashboard />} />
-            <Route path="events" element={<EventManagement />} />
             <Route path="seats" element={<SeatLayoutManagement />} />
             <Route path="create-seats" element={<SeatLayoutMain />} />
             <Route path="screens" element={<ScreenManagement />} />

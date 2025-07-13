@@ -7,6 +7,7 @@ import {VENDOR_ENDPOINTS,ADMIN_ENDPOINTS } from "../../constants/apiEndPoint";
 //   },
 // });
 import api from "../../config/axios.config";
+import { AuthResponse } from "../../store/types/auth.type";
 
 export const registerVendor = async (data: {
   email: string;
@@ -50,10 +51,10 @@ export const resendVendorOtp = async (data: { email: string }): Promise<void> =>
 export const loginTheater = async (data: {
   email: string;
   password: string;
-}): Promise<{ id: string; email: string; accountType: 'theater' | 'event' }> => {
+}): Promise<AuthResponse> => {
   try {
     const response = await api.post(VENDOR_ENDPOINTS.login, data,{withCredentials:true});
-    return response.data;
+    return response.data.data;
   } catch (error) {
     // Handle Axios errors
     if (axios.isAxiosError(error) && error.response) {

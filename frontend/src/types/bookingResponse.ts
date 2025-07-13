@@ -1,3 +1,5 @@
+import { Seat } from "../pages/SeatLayout/theater.types";
+
 export interface BookingData {
   bookingId: string;
   transactionId: string;
@@ -8,7 +10,7 @@ export interface BookingData {
     genre: string[];
     rating: number;
     duration: {
-      hours: number;
+      hours: number;  
       minutes: number;
       seconds?: number;
     };
@@ -40,6 +42,7 @@ export interface BookingData {
   paymentMethod: string;
   bookingTime: string;
   qrCode: string;
+  bookedSeatsId:Seat[]
 }
 
 export interface PaymentOptions {

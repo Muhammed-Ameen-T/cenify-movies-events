@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
-import { Ticket, Calendar, Tag, XCircle, Eye } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, Tag, XCircle, Eye } from 'lucide-react';
+import {  AnimatePresence } from 'framer-motion';
 import AdvancedFilterWithHeader from '../../components/VendorCommon/Filter';
 import DataTableWithPagination from '../../components/VendorCommon/Table';
 import BookingDetailsModal from '../../components/Admin/BookingViewModal';
@@ -40,6 +40,8 @@ const VendorBookings: React.FC = () => {
     search: '',
   });
 
+  console.log(isCancelModalOpen)
+
   // Fetch bookings
   const { data, isLoading, error } = useQuery({
     queryKey: ['vendorBookings', currentPage, filters],
@@ -64,19 +66,20 @@ const VendorBookings: React.FC = () => {
   );
 
   // Mutation for cancelling a booking
-  const cancelMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
-      BookingService.cancelBooking(id, reason),
-    onSuccess: () => {
-      toast.success('Booking cancelled successfully!');
-      queryClient.invalidateQueries({ queryKey: ['vendorBookings'] });
-      setIsCancelModalOpen(false);
-      setBookingToCancel(null);
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to cancel booking');
-    },
-  });
+  // const cancelMutation = useMutation({
+  //   mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+  //     BookingService.cancelBooking(id, reason),
+  //   onSuccess: () => {
+  //     toast.success('Booking cancelled successfully!');
+  //     queryClient.invalidateQueries({ queryKey: ['vendorBookings'] });
+  //     setIsCancelModalOpen(false);
+  //     setBookingToCancel(null);
+  //   },
+  //   onError: (error: any) => {
+  //     toast.error(error.message || 'Failed to cancel booking');
+  //   },
+  // });
+  
 
   // Update URL with filters and pagination
   useEffect(() => {
@@ -133,6 +136,7 @@ const VendorBookings: React.FC = () => {
 
   const handleSortChange = useCallback(
     (sortBy: string) => {
+      console.log(sortBy)
       setFilters((prev) => ({
         ...prev,
         bookingDate: prev.bookingDate === 'newest' ? 'oldest' : 'newest',
@@ -140,6 +144,7 @@ const VendorBookings: React.FC = () => {
       setCurrentPage(1);
     },
     []
+    
   );
 
   const resetFilters = useCallback(() => {

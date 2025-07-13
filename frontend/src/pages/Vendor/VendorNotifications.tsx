@@ -235,9 +235,10 @@ const VendorNotifications: React.FC = () => {
       });
       return { previousData };
     },
-    onError: (err, _, context) => {
+    onError: (err:any, _, context:any) => {
       queryClient.setQueryData(['vendor-notifications', userId, currentLimit, currentFilter], context?.previousData);
       toast.error('Failed to mark notification as read');
+      console.log(err)
     },
     onSuccess: () => {
       toast.success('Notification marked as read');
@@ -267,9 +268,10 @@ const VendorNotifications: React.FC = () => {
       });
       return { previousData };
     },
-    onError: (err, _, context) => {
+    onError: (err:any, _, context:any) => { 
       queryClient.setQueryData(['vendor-notifications', userId, currentLimit, currentFilter], context?.previousData);
       toast.error('Failed to mark all notifications as read');
+      console.log(err)
     },
     onSuccess: () => {
       toast.success('All notifications marked as read');
@@ -698,11 +700,11 @@ const VendorNotifications: React.FC = () => {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => markAllAsReadMutation.mutate()}
-                  disabled={markAllAsReadMutation.isLoading}
+                  disabled={markAllAsReadMutation.isPending}
                   className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-2 rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50"
                   aria-label="Confirm mark all as read"
                 >
-                  {markAllAsReadMutation.isLoading ? (
+                  {markAllAsReadMutation.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <CheckCircle className="w-4 h-4" />

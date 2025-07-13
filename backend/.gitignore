@@ -3,5 +3,10 @@
 .env.production
 /logging
 /.vscode
+<<<<<<< HEAD
 /dist
+=======
+# /dist
+docker-compose.yml
+>>>>>>> 799a0ac (chore : fix build erros)
 docker-compose.dev.yml

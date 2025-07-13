@@ -5,7 +5,6 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import {
   ArrowLeft,
-  MapPin,
   Calendar,
   Clock,
   Ticket,
@@ -199,7 +198,7 @@ const CheckoutPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <style jsx>{`
+      <style>{`
         @keyframes shimmer {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }

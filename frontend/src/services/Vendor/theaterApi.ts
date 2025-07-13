@@ -78,8 +78,8 @@ export const fetchTheaters = async (): Promise<Theater[]> => {
       : ['DOLBY ATMOS', '4K'], 
     description: theater.description, 
     images: theater.gallery?.length ? theater.gallery : ['/api/placeholder/600/400'],
-    rating: theater.rating, 
-    ratingCount: theater.ratingCount, 
+    rating: theater.rating ?? 0, 
+    ratingCount: theater.ratingCount ?? 0, 
     vendorId: theater.vendorId ? {
       id: theater.vendorId.id,
       name: theater.vendorId.name,

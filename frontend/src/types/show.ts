@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { IMovie } from './movie';
-import { ITheater } from './theater';
+import { Movie } from './booking';
+import { Theater } from '.';
 import { Screen } from './screen';
+
 
 
 export const showFormSchema = z.object({
@@ -31,11 +32,11 @@ export type ShowFormData = z.infer<typeof showFormSchema>;
 
 
 export interface Show {
-  id: Key | null | undefined;
+  id: string | null | undefined;
   _id: string;
-  movieId: string;
-  theaterId: string;
-  screenId: string;
+  movieId:  Movie;
+  theaterId: Theater;
+  screenId: Screen;
   startTime: string;
   endTime: string;
   status: 'Scheduled' | 'Running' | 'Completed' | 'Cancelled';
@@ -50,6 +51,7 @@ export interface Show {
   }>;
   createdAt: string;
   updatedAt: string;
+  showDate:Date;
 }
 
 export interface ShowTime {

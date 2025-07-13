@@ -1015,8 +1015,8 @@ const MovieListCard: React.FC<{
                   <User2 className="w-4 h-4" />
                   <span>
                     {movie.crew
-                      .filter((member) => member.role === "Director")
-                      .map((director) => director.name)
+                      .filter((member:any) => member.role === "Director")
+                      .map((director:any) => director.name)
                       .join(", ")}
                   </span>
                 </div>
@@ -1041,7 +1041,7 @@ const MovieListCard: React.FC<{
               <Users className="w-4 h-4 text-gray-400" />
               <span className="text-sm text-gray-600">
                 Cast:&nbsp;
-                {movie.cast.slice(0, 2).map((actor, index) => (
+                {movie.cast.slice(0, 2).map((actor:any, index:number) => (
                   <span key={actor._id}>
                     {index > 0 && ", "}
                     {actor.name}

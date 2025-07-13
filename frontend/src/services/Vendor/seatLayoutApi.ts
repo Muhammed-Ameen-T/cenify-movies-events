@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { VENDOR_ENDPOINTS } from '../../constants/apiEndPoint';
 import api from '../../config/axios.config';
-import { CreateSeatLayoutRequest, SeatLayoutResponse, ApiResponse } from '../../types/seatLayout';
+import {  SeatLayoutResponse, ApiResponse } from '../../types/seatLayout';
 import { ERROR_MESSAGES } from '../../constants/auth.messages';
 
 class ApiError extends Error {

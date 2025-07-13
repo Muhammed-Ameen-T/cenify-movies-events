@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Filter, Ticket, Film, BarChart2, Plus, DollarSign } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '../../components/ui/Card';
-import EventManagement from '../../pages/Vendor/Events';
 import TheaterManagement from '../../pages/Vendor/Theaters';
 import StatCard from '../../components/dashboard/StatCard';
 import RevenueChart from '../../components/dashboard/RevenueChart';
@@ -225,7 +224,6 @@ const VendorDashboard: React.FC = () => {
             </motion.div>
           }
         />
-        <Route path="/events/create" element={<EventManagement />} />
         <Route path="/theaters/create" element={<TheaterManagement />} />
         <Route path="/analytics" element={<Insights />} />
       </Routes>

@@ -51,9 +51,6 @@ const TheaterSeatSelection: React.FC = () => {
     queryKey: ['seatSelection', showId],
     queryFn: () => fetchSeatSelection(showId!),
     enabled: !!showId,
-    onSuccess: (data) => {
-      console.log('Fetched seat IDs:', data.seats.map((s) => s.id));
-    },
   });
   const currentUser = useSelector((state: RootState) => state.auth.user);
 
@@ -112,7 +109,7 @@ const TheaterSeatSelection: React.FC = () => {
         console.log('Updated seats:', updatedSeats.filter((s) => seatIds.includes(s.id)));
         return { ...oldData, seats: updatedSeats };
       });
-      queryClient.invalidateQueries(['seatSelection', showId]);
+      queryClient.invalidateQueries({ queryKey: ['seatSelection', showId] });
     });
 
     socket.on('error', ({ message }: { message: string }) => {
@@ -154,7 +151,7 @@ const TheaterSeatSelection: React.FC = () => {
   }, []);
 
   // Convert seats to row-based structure, sorted A-Z
-  const seatsByRow = data?.seats.reduce((acc, seat) => {
+  const seatsByRow = data?.seats.reduce((acc:any, seat:any) => {
     const row = String.fromCharCode(65 + seat.position.row); // A, B, C, ...
     acc[row] = acc[row] || { Regular: [], Premium: [], VIP: [] };
     acc[row][seat.type].push(seat);
@@ -163,9 +160,9 @@ const TheaterSeatSelection: React.FC = () => {
 
   // Sort seats within each type by column
   Object.values(seatsByRow).forEach((row) => {
-    row.Regular.sort((a, b) => a.position.col - b.position.col);
-    row.Premium.sort((a, b) => a.position.col - b.position.col);
-    row.VIP.sort((a, b) => a.position.col - b.position.col);
+    row.Regular.sort((a:any, b:any) => a.position.col - b.position.col);
+    row.Premium.sort((a:any, b:any) => a.position.col - b.position.col);
+    row.VIP.sort((a:any, b:any) => a.position.col - b.position.col);
   });
 
   // Determine dominant seat type per row
@@ -238,16 +235,16 @@ const TheaterSeatSelection: React.FC = () => {
         (s) => s.position.row === clickedRow && s.status === 'available' && s.id !== clickedSeatId
       )
       .sort(
-        (a, b) =>
+        (a:any, b:any) =>
           Math.abs(a.position.col - clickedSeat.position.col) -
           Math.abs(b.position.col - clickedSeat.position.col)
       );
 
     if (sameRowSeats.length >= neededCount - 1) {
-      return sameRowSeats.slice(0, neededCount - 1).map((s) => s.id);
+      return sameRowSeats.slice(0, neededCount - 1).map((s:any) => s.id);
     }
 
-    const result = sameRowSeats.map((s) => s.id);
+    const result = sameRowSeats.map((s:any) => s.id);
     let remainingCount = neededCount - 1 - sameRowSeats.length;
 
     const rowIndices = Array.from({ length: data?.seatLayout.rowCount || 0 }, (_, i) => i)
@@ -259,12 +256,12 @@ const TheaterSeatSelection: React.FC = () => {
       const availableSeats = allSeats
         .filter((s) => s.position.row === rowIndex && s.status === 'available')
         .sort(
-          (a, b) =>
+          (a:any, b:any) =>
             Math.abs(a.position.col - clickedSeat.position.col) -
             Math.abs(b.position.col - clickedSeat.position.col)
         );
       const seatsToTake = availableSeats.slice(0, remainingCount);
-      result.push(...seatsToTake.map((s) => s.id));
+      result.push(...seatsToTake.map((s:any) => s.id));
       remainingCount -= seatsToTake.length;
     }
 
@@ -272,7 +269,7 @@ const TheaterSeatSelection: React.FC = () => {
   };
 
   const getSeatById = (seatId: string): SeatDTO | undefined => {
-    return data?.seats.find((s) => s.id === seatId);
+    return data?.seats.find((s:any) => s.id === seatId);
   };
 
   const getSeatStatusColor = (seat: SeatDTO): string => {
@@ -290,16 +287,16 @@ const TheaterSeatSelection: React.FC = () => {
     }
   };
 
-  const getSeatTypeColor = (seat: SeatDTO): string => {
-    switch (seat.type) {
-      case 'Premium':
-        return 'border-blue-300 text-blue-600';
-      case 'VIP':
-        return 'border-purple-300 text-purple-600';
-      default:
-        return 'border-gray-300 text-gray-600';
-    }
-  };
+  // const getSeatTypeColor = (seat: SeatDTO): string => {
+  //   switch (seat.type) {
+  //     case 'Premium':
+  //       return 'border-blue-300 text-blue-600';
+  //     case 'VIP':
+  //       return 'border-purple-300 text-purple-600';
+  //     default:
+  //       return 'border-gray-300 text-gray-600';
+  //   }
+  // };
 
   const handleSeatClick = (seat: SeatDTO) => {
     if (seat.status === 'booked' || seat.status === 'unavailable' || seat.status === 'pending') return;

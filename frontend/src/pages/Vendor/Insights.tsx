@@ -12,7 +12,6 @@ import {
   Legend,
 } from 'chart.js';
 import Card from '../../components/ui/Card';
-import { statistics } from '../utils/mockData';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 

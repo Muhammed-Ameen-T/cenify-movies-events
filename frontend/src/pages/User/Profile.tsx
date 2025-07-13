@@ -189,10 +189,10 @@ export default function TheaterProfilePage() {
   ];
 
   // Animation variants
-  const fadeIn = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.5 } },
-  };
+  // const fadeIn = {
+  //   hidden: { opacity: 0 },
+  //   visible: { opacity: 1, transition: { duration: 0.5 } },
+  // };
 
   const slideIn = {
     hidden: { x: -300, opacity: 0 },
@@ -240,9 +240,9 @@ export default function TheaterProfilePage() {
   const userData = data || mockUser;
 
   // Dummy callback functions
-  const handlePurchasePass = () => {
-    console.log('Movie Pass purchased!');
-  };
+  // const handlePurchasePass = () => {
+  //   console.log('Movie Pass purchased!');
+  // };
 
   const handleViewHistory = () => {
     console.log('Viewing pass history...');
@@ -475,9 +475,6 @@ export default function TheaterProfilePage() {
       <PasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
-        passwordChange={passwordChange}
-        onChange={handlePasswordChange}
-        onSubmit={handlePasswordSubmit}
       />
       <ImageCropperModal
         isOpen={isImageCropperOpen}

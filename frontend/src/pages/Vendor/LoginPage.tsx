@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { ToastContainer, toast } from 'react-toastify';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useMutation } from '@tanstack/react-query';
 import { loginSchema } from '../../validation/schema';
 import { loginTheater } from '../../services/Vendor/authApi';
@@ -44,13 +44,13 @@ const LoginPage: React.FC = () => {
       dispatch(
         setAuth({
           user: {
-            ...data.data.user, 
+            ...data.user, 
           },
-          accessToken: data.data.accessToken,
+          accessToken: data.accessToken,
         })
       );
-      localStorage.setItem('accessToken', data.data.accessToken);
-      localStorage.setItem('user', JSON.stringify(data.data.user));
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
       navigate('/vendor/dashboard');
     },
     onError: (error: any) => {
