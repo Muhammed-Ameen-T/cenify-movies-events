@@ -145,25 +145,6 @@ export const initializeSocket = (
 
   socket.on('connect_error', (error) => {
     console.error('Socket connect_error:', error.message);
-    toast.error('Failed to connect to notifications server. Retrying...', {
-      duration: 5000,
-      position: 'bottom-right',
-      style: {
-        background: 'linear-gradient(135deg, #ffffff, #f1f5f9)',
-        color: '#1f2937',
-        border: '1px solid #ef4444',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-        padding: '16px',
-        maxWidth: '360px',
-        fontWeight: '500',
-        fontFamily: "'Inter', sans-serif",
-      },
-      iconTheme: {
-        primary: '#ef4444',
-        secondary: '#ffffff',
-      },
-    });
   });
 
   socket.on('disconnect', (reason) => {
