@@ -52,8 +52,8 @@ let MoviePassController = class MoviePassController {
                     },
                 ],
                 mode: 'payment',
-                success_url: `http://localhost:5173/account/moviepass-tab?payment=success`,
-                cancel_url: `http://localhost:5173/account/moviepass-tab?payment=canceled`,
+                success_url: `${env_config_1.env.VITE_API_URL}/account/moviepass-tab?payment=success`,
+                cancel_url: `${env_config_1.env.VITE_API_URL}/account/moviepass-tab?payment=canceled`,
                 metadata: { userId },
             });
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.SUCCESS, { sessionId: session.id });

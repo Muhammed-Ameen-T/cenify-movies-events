@@ -4,6 +4,5 @@
 /logging
 /.vscode
 /dist
-docker-compose.yml
->>>>>>> 799a0ac (chore : fix build erros)
-docker-compose.dev.yml.env.production
+docker-compose.dev.yml
+.env.production
