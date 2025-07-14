@@ -9,4 +9,4 @@
 # /dist
 docker-compose.yml
 >>>>>>> 799a0ac (chore : fix build erros)
-docker-compose.dev.yml
+docker-compose.dev.yml.env.production
