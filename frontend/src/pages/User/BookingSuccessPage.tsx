@@ -85,7 +85,7 @@ const BookingSuccessPage: React.FC = () => {
         user: {
           name: data.userId.name,
           email: data.userId.email,
-          phone: data.userId.phone.toString(),
+          phone: data.userId.phone?.toString(),
         },
         paymentMethod: data.payment.method.charAt(0).toUpperCase() + data.payment.method.slice(1),
         bookingTime: data.createdAt,

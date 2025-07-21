@@ -69,6 +69,7 @@ let ShowJobService = class ShowJobService {
                 }
                 if (show.status === 'Running') {
                     await this.showRepository.updateStatus(showId, 'Completed');
+                    await this.showRepository.creditRevenueToWallet(showId);
                     console.log(`✅ Show ${showId} status updated to Completed`);
                 }
             }

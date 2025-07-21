@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import {
   Calendar,
   MapPin,
@@ -149,6 +149,7 @@ const BookingsTab: React.FC<BookingsTabProps> = ({ initialBookings = [] }) => {
       createdAt: booking.createdAt,
       language: booking.showId.movieId.language,
       theaterId: booking.showId.theaterId._id,
+      coordinates: booking.showId.theaterId.location.coordinates,
       movieId: booking.showId.movieId._id,
       showStatus: booking.showId.status,
       reason:booking.reason

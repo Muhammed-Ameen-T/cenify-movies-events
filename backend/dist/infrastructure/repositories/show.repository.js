@@ -5,6 +5,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -21,7 +27,13 @@ const screen_model_1 = __importDefault(require("../database/screen.model"));
 const movie_model_1 = __importDefault(require("../database/movie.model"));
 const theater_model_1 = require("../database/theater.model");
 const seatLayout_model_1 = __importDefault(require("../database/seatLayout.model"));
+const booking_model_1 = __importDefault(require("../database/booking.model"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 let ShowRepository = class ShowRepository {
+    constructor(walletRepository) {
+        this.walletRepository = walletRepository;
+    }
     async create(show) {
         try {
             const showData = {
@@ -705,8 +717,62 @@ let ShowRepository = class ShowRepository {
             throw new Error('Failed to update booked seats');
         }
     }
+    async creditRevenueToWallet(showId) {
+        try {
+            const show = await show_model_1.default.findById(showId).lean();
+            if (!show) {
+                console.warn(`⚠️ Show with ID ${showId} not found`);
+                return 0;
+            }
+            const completedBookings = await booking_model_1.default.find({
+                showId: new mongoose_1.default.Types.ObjectId(showId),
+                status: 'confirmed',
+                'payment.status': 'completed',
+            }).lean();
+            if (!completedBookings.length) {
+                console.log(`🟡 No completed bookings for show ${showId}`);
+                return 0;
+            }
+            const totalRevenue = completedBookings.reduce((sum, booking) => sum + booking.payment.amount, 0);
+            if (totalRevenue <= 0) {
+                console.log(`🟡 Total revenue is 0 for show ${showId}`);
+                return 0;
+            }
+            const ADMIN_COMMISSION_RATE = 0.15;
+            const adminCommission = parseFloat((totalRevenue * ADMIN_COMMISSION_RATE).toFixed(2));
+            const vendorShare = parseFloat((totalRevenue - adminCommission).toFixed(2));
+            const targetUserId = process.env.ADMIN_USER_ID || '681a66250869b998bbad2545';
+            const adminTransaction = {
+                amount: adminCommission,
+                type: 'credit',
+                source: 'booking',
+                createdAt: new Date(),
+                remark: `Admin commission of ₹${adminCommission} from show ${showId}`,
+            };
+            const vendorTransaction = {
+                amount: vendorShare,
+                type: 'credit',
+                source: 'booking',
+                createdAt: new Date(),
+                remark: `Vendor payout of ₹${vendorShare} from show ${showId} after admin commission 15%`,
+            };
+            const updatedAdminWallet = await this.walletRepository.pushTransactionAndUpdateBalance(targetUserId, adminTransaction);
+            const updatedVendorWallet = await this.walletRepository.pushTransactionAndUpdateBalance(show.vendorId.toString(), vendorTransaction);
+            if (!updatedAdminWallet || !updatedVendorWallet) {
+                throw new Error(`Wallet update failed (Admin: ${targetUserId}, Vendor: ${show.vendorId})`);
+            }
+            console.log(`✅ ₹${adminCommission} credited to Admin and ₹${vendorShare} credited to Vendor for show ${showId}`);
+            return totalRevenue;
+        }
+        catch (error) {
+            console.error(`❌ Error in creditRevenueToWallet for show ${showId}:`, error);
+            throw error;
+        }
+    }
 };
 exports.ShowRepository = ShowRepository;
 exports.ShowRepository = ShowRepository = __decorate([
-    (0, tsyringe_1.injectable)()
+    (0, tsyringe_1.injectable)(),
+    __param(0, (0, tsyringe_1.inject)('WalletRepository')),
+    __metadata("design:paramtypes", [Object])
 ], ShowRepository);

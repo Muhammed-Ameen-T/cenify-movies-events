@@ -73,7 +73,9 @@ let UserProfileController = class UserProfileController {
             return;
         }
         try {
-            const updateData = new user_dto_1.UpdateProfileRequestDTO(req.body.name, req.body.phone !== undefined ? Number(req.body.phone) : undefined, req.body.profileImage, req.body.dob == 'N/A' ? null : new Date(req.body.dob));
+            const updateData = new user_dto_1.UpdateProfileRequestDTO(req.body.name, req.body.phone !== undefined && req.body.phone !== 'N/A' && !isNaN(Number(req.body.phone))
+                ? Number(req.body.phone)
+                : null, req.body.profileImage, req.body.dob == 'N/A' ? null : new Date(req.body.dob));
             const userResponse = await this.updateUserDetailsUseCase.execute(userId, updateData);
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.SUCCESS, { userResponse });
         }

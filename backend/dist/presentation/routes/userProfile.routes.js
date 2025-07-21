@@ -10,8 +10,8 @@ const userAuthController = tsyringe_1.container.resolve('UserProfileController')
 const router = (0, express_1.Router)();
 router.get('/me', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), userAuthController.getCurrentUser.bind(userAuthController));
 router.patch('/update', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), userAuthController.updateUserProfile.bind(userAuthController));
-router.get('/wallet', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), userAuthController.findUserWallet.bind(userAuthController));
-router.get('/transactions', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), userAuthController.findUserWalletTransactions.bind(userAuthController));
+router.get('/wallet', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user', 'admin', 'vendor']), userAuthController.findUserWallet.bind(userAuthController));
+router.get('/transactions', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user', 'admin', 'vendor']), userAuthController.findUserWalletTransactions.bind(userAuthController));
 router.get('/content', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), userAuthController.findProfileContents.bind(userAuthController));
 router.put('/changePassword', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), userAuthController.changePassword.bind(userAuthController));
 router.put('/redeem-points', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), userAuthController.redeemLoyaltyPoints.bind(userAuthController));

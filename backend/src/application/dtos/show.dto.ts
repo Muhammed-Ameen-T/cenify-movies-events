@@ -14,7 +14,7 @@ export interface UpdateShowDTO {
   theaterId?: string;
   screenId?: string;
   movieId?: string;
-  date?: string;
+  showDate?: string;
   startTime?: string;
   endTime?: string;
 }

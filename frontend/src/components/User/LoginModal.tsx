@@ -1,14 +1,14 @@
-// src/components/LoginModal.tsx
 import React, { useState, useEffect } from 'react';
 import { X, Mail, Lock, User, ArrowLeft, Loader2, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux'; // Added useNavigate
 import { setAuth } from '../../store/slices/authSlice';
 import { startLoading, stopLoading } from '../../store/slices/loadingSlice';
 import { sendOtp, verifyOtp, googleLogin, login } from '../../services/User/authApi';
 import { z } from 'zod';
-import { showSuccessToast, showErrorToast } from '../../utils/toast'; 
+import { showSuccessToast, showErrorToast } from '../../utils/toast';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -42,7 +42,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
-  const [resendTimer, setResendTimer] = useState(60); 
+  const [resendTimer, setResendTimer] = useState(60);
   const [isResendDisabled, setIsResendDisabled] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -53,6 +53,22 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setAuthMode('login');
+      setEmail('');
+      setPassword('');
+      setName('');
+      setOtp('');
+      setErrors({});
+      setShowPassword(false);
+      setResendTimer(60);
+      setIsResendDisabled(false);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -98,7 +114,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         const formattedErrors: ValidationErrors = {};
         error.errors.forEach((err) => {
           const path = err.path.join('.');
-          formattedErrors[path] = err.message;  
+          formattedErrors[path] = err.message;
         });
         setErrors(formattedErrors);
       }
@@ -134,12 +150,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
     try {
       const response = await login(email, password);
-
       dispatch(
         setAuth({
-          user: { 
-            ...response.user,
-          },
+          user: { ...response.user },
           accessToken: response.accessToken,
         })
       );
@@ -147,7 +160,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       localStorage.setItem('user', JSON.stringify(response.user));
       onClose();
     } catch (error) {
-      console.log("🚀 ~ handleLogin ~ error:", error)
+      console.log('🚀 ~ handleLogin ~ error:', error);
       showErrorToast(error instanceof Error ? error.message : 'Login failed. Please check your credentials.');
     } finally {
       setIsLoginLoading(false);
@@ -187,9 +200,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       const response = await verifyOtp(name, email, otp, password);
       dispatch(
         setAuth({
-          user: {
-            ...response.user,
-          },
+          user: { ...response.user },
           accessToken: response.accessToken,
         })
       );
@@ -231,9 +242,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       const response = await googleLogin(idToken);
       dispatch(
         setAuth({
-          user: {
-            ...response.user,
-          },
+          user: { ...response.user },
           accessToken: response.accessToken,
         })
       );
@@ -266,6 +275,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const goBack = () => {
     setErrors({});
     setAuthMode('register');
+  };
+
+  const handleForgotPassword = () => {
+    navigate('/forgot-password');
+    onClose();
   };
 
   const getModalTitle = () => {
@@ -346,8 +360,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 ${
-                            errors.email 
-                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                            errors.email
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25'
                               : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
                           } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
                           placeholder="Enter your email address"
@@ -366,8 +380,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className={`w-full pl-10 pr-12 py-3 rounded-xl border-2 ${
-                            errors.password 
-                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                            errors.password
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25'
                               : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
                           } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
                           placeholder="Enter your password"
@@ -423,21 +437,30 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     </GoogleOAuthProvider>
                   </div>
 
-                  <div className="text-center mt-5 text-sm">
-                    <span className="text-gray-600">Don't have an account? </span>
+                  <div className="text-center mt-5 text-sm flex flex-col space-y-2">
                     <button
-                      onClick={switchToRegister}
-                      className="text-yellow-600 hover:text-yellow-700 font-semibold transition-colors duration-200"
+                      onClick={handleForgotPassword}
+                      className="text-yellow-600 hover:text-yellow-700 font-semibold transition-colors duration-200 bg-yellow-50 hover:bg-yellow-100 rounded-lg py-2 px-4"
                       disabled={isLoginLoading || isGoogleLoading}
                     >
-                      Create Account
+                      Forgot Password?
                     </button>
+                    <div>
+                      <span className="text-gray-600">Don't have an account? </span>
+                      <button
+                        onClick={switchToRegister}
+                        className="text-yellow-600 hover:text-yellow-700 font-semibold transition-colors duration-200"
+                        disabled={isLoginLoading || isGoogleLoading}
+                      >
+                        Create Account
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
 
               {authMode === 'register' && (
-                <div className="space-y-5">
+                <div className="space Sunderland  y-5">
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
@@ -448,8 +471,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 ${
-                            errors.name 
-                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                            errors.name
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25'
                               : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
                           } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
                           placeholder="Enter your full name"
@@ -468,8 +491,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 ${
-                            errors.email 
-                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                            errors.email
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25'
                               : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
                           } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
                           placeholder="Enter your email address"
@@ -488,8 +511,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className={`w-full pl-10 pr-12 py-3 rounded-xl border-2 ${
-                            errors.password 
-                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                            errors.password
+                              ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25'
                               : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
                           } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-medium text-sm focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
                           placeholder="Create a password (min. 8 characters)"
@@ -504,17 +527,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                       </div>
-                      {errors.password ? (
+                      {errors.password && 
                         <p className="mt-2 text-sm text-red-600">{errors.password}</p>
-                      ) : (
-                        <p className="text-xs text-gray-500 mt-2">Password must be at least 8 characters</p>
-                      )}
+                      }
                     </div>
                   </div>
 
                   <button
                     onClick={handleRegister}
-                    className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                    className="w-full bg-gradient-to-r mt-3 from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
                     disabled={isRegisterLoading || isGoogleLoading}
                   >
                     {isRegisterLoading ? (
@@ -579,8 +600,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
                       className={`w-full px-4 py-4 rounded-xl border-2 ${
-                        errors.otp 
-                          ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25' 
+                        errors.otp
+                          ? 'border-red-300 bg-red-50/50 focus:border-red-400 focus:ring-red-400/25'
                           : 'border-gray-200 bg-white/80 focus:border-yellow-400 focus:ring-yellow-400/25'
                       } backdrop-blur-sm text-gray-800 placeholder-gray-500 font-bold text-lg tracking-widest text-center focus:outline-none focus:ring-2 transition-all duration-300 hover:shadow-md`}
                       placeholder="000000"

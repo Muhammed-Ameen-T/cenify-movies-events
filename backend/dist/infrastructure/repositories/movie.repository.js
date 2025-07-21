@@ -187,6 +187,7 @@ let MovieRepository = class MovieRepository {
                 return { movies: [], totalCount: 0 };
             }
             const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
             const shows = await show_model_1.default.find({
                 theaterId: { $in: theaterIds },
                 status: { $in: ['Scheduled', 'Running'] },

@@ -34,7 +34,7 @@ const MoviePassSection: React.FC = () => {
           </div>
           
           <a
-            href="/movie-pass"
+            href="/account/moviepass-tab"
             className="group hidden md:flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/25"
           >
             <span>Learn More</span>
@@ -58,7 +58,7 @@ const MoviePassSection: React.FC = () => {
               
               <div className="mt-8">
                 <a 
-                  href="#pricing"
+                  href="/account/moviepass-tab"
                   className="block w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold py-3 px-6 rounded-xl text-center transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/25"
                 >
                   Get Movie Pass Now

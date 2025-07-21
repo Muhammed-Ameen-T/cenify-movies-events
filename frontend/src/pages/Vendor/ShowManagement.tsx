@@ -13,10 +13,10 @@ import { Show } from '../../types/show';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { debounce } from 'lodash';
 import 'react-toastify/dist/ReactToastify.css';
-import qs from 'query-string';
+import qs from 'query-string';  
 
 // Lazy-loaded modal
-const ViewShowModal = React.lazy(() => import('../../components/Vendor/ViewShowModal'));
+const ViewShowModal = React.lazy(() => import('../../components/Admin/ShowViewModal'));
 
 const ShowManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -49,6 +49,7 @@ const ShowManagement: React.FC = () => {
   const [showToReschedule, setShowToReschedule] = useState<Show | null>(null);
   const [showToRecur, setShowToRecur] = useState<Show | null>(null); // State for recurring show
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Update URL with filters and pagination
   useEffect(() => {
@@ -185,8 +186,11 @@ const ShowManagement: React.FC = () => {
   );
 
   const handleView = useCallback((show: Show) => {
-    setSelectedShow(show);
-    setDropdownOpen(null);
+    if(show){
+      setIsModalOpen(true);
+      setSelectedShow(show);
+      // setDropdownOpen(null);
+    }
   }, []);
 
   const handleEdit = useCallback(
@@ -569,7 +573,7 @@ const ShowManagement: React.FC = () => {
       <React.Suspense fallback={<div className="text-center text-gray-400">Loading...</div>}>
         <AnimatePresence>
           {selectedShow && (
-            <ViewShowModal show={selectedShow} onClose={() => setSelectedShow(null)} />
+            <ViewShowModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} show={selectedShow} />
           )}
         </AnimatePresence>
       </React.Suspense>

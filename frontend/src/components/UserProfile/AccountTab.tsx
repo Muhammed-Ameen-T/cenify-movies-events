@@ -10,7 +10,6 @@ import {
   Mail,
   Camera,
   Shield,
-  Trash2,
   Crown,
   Award,
   Clock,
@@ -66,7 +65,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
     id: user.id || '',
     name: user.name || 'N/A',
     email: user.email || 'N/A',
-    phone: user.phone || 'N/A',
+    phone : user.phone === 'N/A' ? null : user.phone,
     dateOfBirth: user.dateOfBirth || 'N/A',
     joinedDate: user.joinedDate || new Date().toISOString(),
     loyalityPoints: user.loyalityPoints ?? 0,
@@ -92,7 +91,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
       console.error('Failed to fetch user content:', err);
       toast.error('Failed to load user data');
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       console.log('🚀 ~ userContent:', data);
     },
   });
@@ -262,7 +261,6 @@ const AccountTab: React.FC<AccountTabProps> = ({
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       className="absolute -bottom-2 -right-2 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full p-3 shadow-xl cursor-pointer z-20 border-2 border-white"
-                      onClick={() => document.getElementById('profile-image-input')?.click()}
                     >
                       <Camera className="w-5 h-5 text-white" />
                     </motion.div>
@@ -304,7 +302,7 @@ const AccountTab: React.FC<AccountTabProps> = ({
                       </div>
                       <div>
                         <p className="text-sm text-gray-500 font-medium">Phone</p>
-                        <p className="font-semibold text-gray-900">{safeUser.phone}</p>
+                        <p className="font-semibold text-gray-900">{safeUser.phone ? safeUser.phone : 'N/A'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">

@@ -1,7 +1,7 @@
 // src/components/User/BookingDetailModal.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, Calendar, MapPin, Users, CreditCard, Sparkles, Award, Ticket, Share2, Star } from 'lucide-react';
+import { X, Calendar, MapPin, Users, CreditCard, Sparkles, Award, Ticket, Share2, Star, ExternalLink, MapPinHouseIcon } from 'lucide-react';
 import { Booking } from '../../types/bookingResponse';
 
 const modalVariants = {
@@ -97,9 +97,22 @@ const BookingDetailModal: React.FC<BookingDetailModalProps> = ({ booking, onClos
                 <div className="flex items-center gap-2 mb-3">
                   <MapPin className="w-5 h-5 text-purple-600" />
                   <span className="font-bold text-purple-800">Location</span>
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `https://www.google.com/maps/dir/?api=1&destination=${booking.coordinates[0]},${booking.coordinates[1]}`,
+                        '_blank'
+                      )
+                    }
+                    className="flex items-center justify-center gap-2 px-2 py-1 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow transition duration-200"
+                  >
+                    <MapPinHouseIcon className="w-4 h-4" />
+                    <span>Directions</span>
+                  </button>
                 </div>
                 <p className="text-gray-900 font-semibold">{booking.theater}</p>
                 <p className="text-purple-600 font-medium">{booking.screen}</p>
+                
               </div>
               <div className="bg-green-50 p-6 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">

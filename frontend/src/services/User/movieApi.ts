@@ -51,6 +51,7 @@ export const getMoviesWithFilters = async (filters: MovieFilters = { page: 1, li
     
     const response = await api.get(USER_AUTH_ENDPOINTS.userMovies, { params: cleanParams });
     
+    console.log("🚀 ~ getMoviesWithFilters ~ response:", response)
     return {
       movies: response.data.data.movies || [],
       totalCount: response.data.data.totalCount || 0,

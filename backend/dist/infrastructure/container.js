@@ -107,6 +107,8 @@ const redeemPointsToWallet_useCase_1 = require("../application/useCases/userProf
 const sms_service_1 = require("./services/sms.service");
 const sendOtpPhone_useCase_1 = require("../application/useCases/userProfile/sendOtpPhone.useCase");
 const verifyOtpPhone_useCase_1 = require("../application/useCases/userProfile/verifyOtpPhone.useCase");
+const ProcessVendorPayout_1 = require("../application/useCases/bookingMng/ProcessVendorPayout");
+// import { VendorPayoutJobService } from './services/scheduleVendorPayouts.service';
 //Controller Registration
 tsyringe_1.container.register('UserAuthController', { useClass: userAuth_controller_1.UserAuthController });
 tsyringe_1.container.register('VendorAuthController', {
@@ -282,6 +284,7 @@ tsyringe_1.container.register('StripeWebhookController', {
     useClass: stripeWebhook_controller_1.StripeWebhookController,
 });
 tsyringe_1.container.register('MoviePassJobService', { useClass: moviePass_service_1.MoviePassJobService });
+// container.register('VendorPayoutJobService', { useClass: VendorPayoutJobService });
 // Seat Selevtion Service, Repository, Controller and useCase Registration
 tsyringe_1.container.register('SeatSelectionController', {
     useClass: seatSelection_controller_1.SeatSelectionController,
@@ -333,6 +336,7 @@ tsyringe_1.container.register('BookingMngController', {
 tsyringe_1.container.register('PaymentService', { useClass: checkoutPayment_service_1.PaymentService });
 tsyringe_1.container.register('CloudinaryService', { useClass: cloudinary_service_1.CloudinaryService });
 tsyringe_1.container.register('BookingStripeWebhookController', { useClass: bookingStripeWebhook_controller_1.BookingStripeWebhookController });
+tsyringe_1.container.register('IProcessVendorPayout', { useClass: ProcessVendorPayout_1.ProcessVendorPayoutUseCase });
 // Notification Service Registration
 tsyringe_1.container.register('NotificationService', { useClass: notification_service_1.NotificationService });
 tsyringe_1.container.register('NotificationMngController', {

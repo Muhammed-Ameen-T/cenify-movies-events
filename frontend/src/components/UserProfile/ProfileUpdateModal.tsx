@@ -126,8 +126,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       newErrors.name = 'Name must be at least 2 characters';
     }
 
-    if (editedProfile.phone && !/^\d{10}$/.test(String(editedProfile.phone).trim())) {
-      newErrors.phone = 'Phone number must be exactly 10 digits';
+    if (
+      editedProfile.phone !== 'N/A' &&
+      String(editedProfile.phone).trim().length >= 1 &&
+      !/^\d{10}$/.test(String(editedProfile.phone).trim())
+    ) {
+      newErrors.phone = `Phone number must be exactly 10 digits ${editedProfile.phone?.trim()}`;
     }
 
     setErrors(newErrors);
@@ -476,7 +480,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       type="tel"
                       id="phone"
                       name="phone"
-                      value={editedProfile.phone || ''}
+                      value={
+                        !editedProfile || editedProfile.phone === 'N/A'
+                          ? ''
+                          : editedProfile.phone
+                      }
                       onChange={handleChange}
                       className={`w-full px-3 py-3 rounded-lg border-2 ${
                         errors.phone ? 'border-red-500 bg-red-50/50' : 'border-gray-200 bg-white/80'

@@ -233,6 +233,7 @@ export class MovieRepository implements IMovieRepository {
       }
 
       const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
       const shows = await ShowModel.find({
         theaterId: { $in: theaterIds },
         status: { $in: ['Scheduled', 'Running'] },

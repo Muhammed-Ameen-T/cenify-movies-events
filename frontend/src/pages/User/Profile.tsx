@@ -142,21 +142,21 @@ export default function TheaterProfilePage() {
   };
 
   // Password change handler
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswordChange((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+  //   setPasswordChange((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+  // };
 
-  // Password form submission
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('TheaterProfilePage: Password change submitted:', passwordChange);
-    setIsPasswordModalOpen(false);
-    setPasswordChange({ oldPassword: '', newPassword: '' });
-  };
+  // // Password form submission
+  // const handlePasswordSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   console.log('TheaterProfilePage: Password change submitted:', passwordChange);
+  //   setIsPasswordModalOpen(false);
+  //   setPasswordChange({ oldPassword: '', newPassword: '' });
+  // };
 
   // Handle profile save
   const handleProfileSave = (updateData: Partial<UserProfile>) => {

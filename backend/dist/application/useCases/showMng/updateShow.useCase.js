@@ -30,22 +30,15 @@ let UpdateShowUseCase = class UpdateShowUseCase {
         this.theaterRepository = theaterRepository;
     }
     async execute(dto) {
+        console.log('🚀 ~ UpdateShowUseCase ~ execute ~ dto:', dto);
         try {
-            // Validate Show Existence
             const existingShow = await this.showRepository.findById(dto.id);
             if (!existingShow) {
                 throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.SHOW_NOT_FOUND, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
             }
-            if (existingShow.status === 'Running') {
-                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.SHOW_RUNNING, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
+            if (['Running', 'Completed', 'Cancelled'].includes(existingShow.status)) {
+                throw new custom_error_1.CustomError(`Cannot update a ${existingShow.status.toLowerCase()} show`, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
             }
-            if (existingShow.status === 'Completed') {
-                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.SHOW_COMPLETED, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
-            }
-            if (existingShow.status === 'Cancelled') {
-                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.SHOW_CANCELLED, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
-            }
-            // Fetch Movie Duration
             const movieId = dto.movieId || existingShow.movieId;
             const movie = await this.movieRepository.findById(movieId);
             if (!movie || !movie.duration) {
@@ -53,44 +46,19 @@ let UpdateShowUseCase = class UpdateShowUseCase {
             }
             const { hours, minutes, seconds } = movie.duration;
             const movieDurationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
-            // Fetch Theater Interval Gap
             const theaterId = dto.theaterId || existingShow.theaterId;
             const theater = await this.theaterRepository.findById(theaterId);
             if (!theater || typeof theater.intervalTime !== 'number') {
                 throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.THEATER_NOT_FOUND, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
             }
             const intervalGapMs = theater.intervalTime * 60000;
-            // Validate and Parse Start Time
-            let startTime;
-            if (dto.startTime) {
-                startTime = new Date(dto.startTime);
-                if (isNaN(startTime.getTime())) {
-                    throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.INVALID_START_TIME, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
-                }
+            let startTime = dto.startTime ? new Date(dto.startTime) : existingShow.startTime;
+            if (isNaN(startTime.getTime())) {
+                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.INVALID_START_TIME, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
             }
-            else {
-                startTime = existingShow.startTime;
-            }
-            // Calculate or Validate End Time
-            let endTime;
-            if (dto.endTime) {
-                endTime = new Date(dto.endTime);
-                if (isNaN(endTime.getTime())) {
-                    throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.INVALID_END_TIME, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
-                }
-                // Verify endTime matches expected duration
-                const expectedEndTime = new Date(startTime.getTime() + movieDurationMs + intervalGapMs);
-                if (Math.abs(endTime.getTime() - expectedEndTime.getTime()) > 1000) {
-                    throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.INVALID_END_TIME, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
-                }
-            }
-            else {
-                endTime = new Date(startTime.getTime() + movieDurationMs + intervalGapMs);
-            }
-            // Validate Show Date
             let showDate;
-            if (dto.date) {
-                showDate = new Date(dto.date);
+            if (dto.showDate) {
+                showDate = new Date(dto.showDate);
                 if (isNaN(showDate.getTime())) {
                     throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.INVALID_DATE, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
                 }
@@ -99,24 +67,26 @@ let UpdateShowUseCase = class UpdateShowUseCase {
                 showDate = existingShow.showDate ?? new Date();
             }
             // Ensure startTime aligns with showDate
-            const startTimeDate = new Date(startTime);
-            startTimeDate.setFullYear(showDate.getFullYear(), showDate.getMonth(), showDate.getDate());
-            const adjustedStartTime = startTimeDate;
+            const adjustedStartTime = new Date(startTime);
+            adjustedStartTime.setFullYear(showDate.getFullYear(), showDate.getMonth(), showDate.getDate());
             const adjustedEndTime = new Date(adjustedStartTime.getTime() + movieDurationMs + intervalGapMs);
-            // Check if Time Slot is Available
+            if (dto.endTime) {
+                const providedEndTime = new Date(dto.endTime);
+                if (Math.abs(providedEndTime.getTime() - adjustedEndTime.getTime()) > 1000) {
+                    throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.INVALID_END_TIME, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
+                }
+            }
             const isSlotAvailable = await this.screenRepository.checkSlot(dto.screenId || existingShow.screenId, adjustedStartTime, adjustedEndTime, dto.id);
             if (!isSlotAvailable) {
                 throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.SHOW_TIME_CONFLICT, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
             }
-            // Update Show
             const updatedShow = new show_entity_1.Show(dto.id, adjustedStartTime, new mongoose_1.default.Types.ObjectId(movieId), new mongoose_1.default.Types.ObjectId(theaterId), new mongoose_1.default.Types.ObjectId(dto.screenId || existingShow.screenId), new mongoose_1.default.Types.ObjectId(existingShow.vendorId), existingShow.status, existingShow.bookedSeats, adjustedEndTime, showDate);
             return await this.showRepository.update(updatedShow, existingShow.startTime);
         }
         catch (error) {
             console.error('❌ Error updating show:', error);
-            if (error instanceof custom_error_1.CustomError) {
+            if (error instanceof custom_error_1.CustomError)
                 throw error;
-            }
             throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.DATABASE.RECORD_NOT_SAVED, httpResponseCode_utils_1.HttpResCode.INTERNAL_SERVER_ERROR);
         }
     }

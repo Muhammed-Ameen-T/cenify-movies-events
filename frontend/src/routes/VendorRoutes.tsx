@@ -18,6 +18,7 @@ import UpdateShowForm from '../components/Vendor/updateShowForm.tsx';
 import SeatLayoutManagement from '../pages/Vendor/SeatLayoutManagement.tsx';
 import VendorBookings from '../pages/Vendor/BookingsManagement.tsx';
 import VendorNotifications from '../pages/Vendor/VendorNotifications.tsx';
+import VendorWalletTab from '../pages/Vendor/VendorWallet.tsx';
 
 const VendorRoutes = () => {
   return (
@@ -38,6 +39,7 @@ const VendorRoutes = () => {
             <Route path="shows" element={<ShowManagement />} />
             <Route path="bookings" element={<VendorBookings />} />
             <Route path="notifications" element={<VendorNotifications />} />
+            <Route path="wallet" element={<VendorWalletTab />} />
             <Route path="update-show/:id" element={<UpdateShowForm />} />
           </Route>
         </Route>

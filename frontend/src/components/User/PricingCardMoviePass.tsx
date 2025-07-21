@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Film, Check, } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const PricingCard: React.FC = () => {
   const [showFAQ, setShowFAQ] = useState(false);
@@ -7,6 +8,7 @@ const PricingCard: React.FC = () => {
   const toggleFAQ = () => {
     setShowFAQ(!showFAQ);
   };
+  const navigate = useNavigate()
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden shadow-xl transform transition-all duration-300 hover:scale-105 hover:shadow-2xl border border-gray-100 hover:border-yellow-200 relative">
@@ -23,8 +25,8 @@ const PricingCard: React.FC = () => {
           </div>
           
           <div className="flex items-baseline mb-2">
-            <span className="text-4xl font-black text-white">₹999</span>
-            <span className="text-yellow-100 ml-2">/year</span>
+            <span className="text-4xl font-black text-white">₹199</span>
+            <span className="text-yellow-100 ml-2">/month</span>
           </div>
           
           <p className="text-yellow-100 text-sm">Unlock premium movie experiences</p>
@@ -56,7 +58,7 @@ const PricingCard: React.FC = () => {
         </div>
         
         {/* Purchase Button */}
-        <button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/25 mb-4">
+        <button onClick={()=>navigate('/account/moviepass-tab')} className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/25 mb-4">
           <span>Purchase Now</span>
         </button>
         
