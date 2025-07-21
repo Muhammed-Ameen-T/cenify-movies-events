@@ -152,9 +152,9 @@ const CitySelectionModal: React.FC<CitySelectionModalProps> = ({
       }
 
       // Store city, latitude, and longitude in cookies
-      Cookies.set('selectedLocation', city, { expires: 7, secure: true, sameSite: 'Strict' });
-      Cookies.set('latitude', lat.toString(), { expires: 7, secure: true, sameSite: 'Strict' });
-      Cookies.set('longitude', lng.toString(), { expires: 7, secure: true, sameSite: 'Strict' });
+      Cookies.set('selectedLocation', city, { expires: 7, secure: true, sameSite: 'Lax' });
+      Cookies.set('latitude', lat.toString(), { expires: 7, secure: true, sameSite: 'Lax' });
+      Cookies.set('longitude', lng.toString(), { expires: 7, secure: true, sameSite: 'Lax' });
 
       dispatch(setSelectedLocation(city)); // Dispatch Redux action
       setIsCityModalOpen(false);
@@ -232,9 +232,9 @@ const CitySelectionModal: React.FC<CitySelectionModalProps> = ({
           }
 
           // Store address, latitude, and longitude in cookies
-          Cookies.set('selectedLocation', address, { expires: 7, secure: true, sameSite: 'Strict' });
-          Cookies.set('latitude', latitude.toString(), { expires: 7, secure: true, sameSite: 'Strict' });
-          Cookies.set('longitude', longitude.toString(), { expires: 7, secure: true, sameSite: 'Strict' });
+          Cookies.set('selectedLocation', address, { expires: 7, secure: true, sameSite: 'Lax' });
+          Cookies.set('latitude', latitude.toString(), { expires: 7, secure: true, sameSite: 'Lax' });
+          Cookies.set('longitude', longitude.toString(), { expires: 7, secure: true, sameSite: 'Lax' });
 
           dispatch(setSelectedLocation(address)); // Dispatch Redux action
           setIsCityModalOpen(false);
