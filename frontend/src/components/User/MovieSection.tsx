@@ -1,12 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react'; // Import useEffect
 import { useQuery } from '@tanstack/react-query';
 import { Star, Ticket, ArrowRight, Clock, ChevronLeft, ChevronRight, Calendar, Heart } from 'lucide-react';
 import { getUserMovies } from '../../services/User/homePageApi';
-import type { IMovie } from '../../types/movie';
+import type { IMovie } from '../../types/movie'; // Assuming IMovie is correct
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
 
 interface MovieCardProps {
   movie: IMovie;
@@ -48,17 +47,12 @@ const MovieCardShimmer: React.FC = () => {
   );
 };
 
+
 const MovieSection: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-
-  // Directly use the selectedLocation from Redux
-  const selectedLocationFromRedux = useSelector((state: RootState) => state.location.selectedLocation);
-
-  // Determine the location to use for the API call and display
-  // Prioritize Redux state, then cookie, then default 'Calicut'
-  const finalLocation = selectedLocationFromRedux || Cookies.get('selectedLocation') || 'Calicut';
+  const currentLocation = useSelector((state: RootState) => state.location.selectedLocation);
 
   // Helper functions defined before useQuery
   const formatDuration = (duration: { hours: number; minutes: number }) => {
@@ -74,10 +68,8 @@ const MovieSection: React.FC = () => {
 
   // Fetch movies with useQuery
   const { data, isLoading, isError, error, refetch } = useQuery({
-    // queryKey will react whenever finalLocation changes
-    queryKey: ['userMovies', finalLocation],
-    // Pass finalLocation to API call
-    queryFn: () => getUserMovies({ page: 1, limit: 8, location: finalLocation }),
+    queryKey: ['userMovies', currentLocation], // Include currentLocation in queryKey
+    queryFn: () => getUserMovies({ page: 1, limit: 8, location: currentLocation }), // Pass location to API call
     select: (data) => {
       if (!data?.movies) return { movies: [], totalCount: 0 };
       return {
@@ -95,7 +87,7 @@ const MovieSection: React.FC = () => {
           }),
           isNew: isNewRelease(movie.releaseDate),
           description: movie.description,
-          likes: movie.likes,
+          likes: movie.likes
         })),
         totalCount: data.totalCount,
       };
@@ -106,9 +98,6 @@ const MovieSection: React.FC = () => {
       // Small delay to ensure DOM updates before calculating scroll
       setTimeout(() => handleScroll(), 0);
     },
-    // Keep staleTime 0 or a very low value if you want immediate refetch on location change
-    // Otherwise, TanStack Query might serve cached data until staleTime expires.
-    staleTime: 0,
   });
 
   const movies = data?.movies || [];
@@ -155,7 +144,7 @@ const MovieSection: React.FC = () => {
             <div className="flex items-center gap-3 mb-2">
               <div className="w-1 h-8 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full"></div>
               <span className="text-yellow-400 font-semibold text-sm uppercase tracking-wider">
-                Now Playing in {finalLocation ? finalLocation : 'Your Location'}
+                Now Playing in {currentLocation ? currentLocation : 'Your Location'}
               </span>
             </div>
             <h2 className="text-5xl font-black text-gray-900 tracking-tight">
@@ -194,7 +183,7 @@ const MovieSection: React.FC = () => {
             </div>
           ) : totalCount === 0 ? (
             <div className="text-center text-gray-600 py-8">
-              <p>No movies available in {finalLocation}.</p>
+              <p>No movies available in your location.</p>
             </div>
           ) : (
             <>
