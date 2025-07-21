@@ -254,10 +254,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                       )}
                       <div className="flex-1 text-left">
                         <h4 className="font-medium text-gray-900">{suggestion.title}</h4>
-                        {suggestion.subtitle && (
-                          <p className="text-sm text-gray-500">{suggestion.subtitle}</p>
+                        {suggestion?.subtitle && (
+                          <p className="text-sm text-gray-500">{suggestion?.subtitle}</p>
                         )}
-                        {suggestion.location && (
+                        {suggestion?.location && (
                           <p className="text-xs text-gray-400 flex items-center mt-1">
                             <MapPin size={12} className="mr-1" />
                             {suggestion.location}
@@ -300,8 +300,8 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                         </div>
                         <div className="flex-1 text-left">
                           <h4 className="font-medium text-gray-900">{search.title}</h4>
-                          {suggestion.subtitle && (
-                            <p className="text-sm text-gray-500">{suggestion.subtitle}</p>
+                          {search?.subtitle && (
+                            <p className="text-sm text-gray-500">{search.subtitle}</p>
                           )}
                         </div>
                       </button>
