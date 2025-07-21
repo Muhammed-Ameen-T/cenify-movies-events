@@ -1,12 +1,12 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useDrop } from 'react-dnd';
 import { useTheater } from './TheaterContext';
-import { SeatType, Seat, Position } from './theater.types';
+import { Position } from './theater.types';
 import PlacedSeat from './PlacedSeats';
 import { 
   ArrowUp, ArrowDown, ArrowLeft, ArrowRight, 
   Trash2, Save, RotateCcw, RotateCw,
-  Copy, ChevronsUp, ChevronsDown, ZoomIn, ZoomOut,
+ ChevronsUp, ChevronsDown, ZoomIn, ZoomOut,
   Key
 } from 'lucide-react';
 
@@ -38,7 +38,7 @@ const TheaterCanvas: React.FC = () => {
   const [viewportOffset, setViewportOffset] = useState({ x: 0, y: 0 });
   const [zoomLevel, setZoomLevel] = useState(1);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [isContextMenuOpen] = useState(false);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -488,7 +488,9 @@ const TheaterCanvas: React.FC = () => {
       
 
       <div 
-        ref={drop} 
+        ref={node => {
+          drop(node);
+        }} 
         className={`flex-1 overflow-auto relative bg-gray-900 transition-colors duration-200 ${
           isOver && canDrop ? 'bg-gray-800 bg-opacity-80' : ''
         }`}

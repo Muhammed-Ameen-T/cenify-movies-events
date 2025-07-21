@@ -1,3 +1,5 @@
+import { ITheater } from "./theater";
+
 export interface Seat {
   seatId: string;
   seatNumber: string;
@@ -22,10 +24,16 @@ export interface ShowDetails {
 }
 
 export interface BookingData {
-  movie: Movie;
-  theater: Theater;
-  showDetails: ShowDetails;
-  seats: Seat[];
+  _id: string;
+  movieId: Movie;
+  theaterId: Theater;
+  screenId: Screen;
+  showDate: string; // ISO date string
+  startTime: string; // ISO date string
+  endTime: string; // ISO date string
+  status: 'Running' | 'Scheduled' | 'Completed'; // Extend as needed
+  vendorId: string;
+  bookedSeats: Seat[];
 }
 
 export interface PaymentOptions {

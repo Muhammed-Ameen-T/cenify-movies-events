@@ -196,7 +196,6 @@ const ShowSelectionPage: React.FC = () => {
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   const [showPriceDropdown, setShowPriceDropdown] = useState<boolean>(false);
-  const [showTimeDropdown, setShowTimeDropdown] = useState<boolean>(false);
   const [showFacilitiesDropdown, setShowFacilitiesDropdown] = useState<boolean>(false);
   const [urlParamsInitialized, setUrlParamsInitialized] = useState<boolean>(false);
   const { movieId } = useParams<{ movieId: string }>();
@@ -216,10 +215,10 @@ const ShowSelectionPage: React.FC = () => {
   }, []);
 
   // Helper to compare arrays for equality
-  const areArraysEqual = (a: string[], b: string[]): boolean => {
-    if (a.length !== b.length) return false;
-    return a.every((val, idx) => val === b[idx]);
-  };
+  // const areArraysEqual = (a: string[], b: string[]): boolean => {
+  //   if (a.length !== b.length) return false;
+  //   return a.every((val, idx) => val === b[idx]);
+  // };
 
   // Initialize filters from URL query params ONCE on component mount
   useEffect(() => {
@@ -347,13 +346,13 @@ const ShowSelectionPage: React.FC = () => {
     );
   };
 
-  const toggleTimeSlot = (slotId: string) => {
-    setSelectedTimeSlots((prev) =>
-      prev.includes(slotId)
-        ? prev.filter((id) => id !== slotId)
-        : [...prev, slotId]
-    );
-  };
+  // const toggleTimeSlot = (slotId: string) => {
+  //   setSelectedTimeSlots((prev) =>
+  //     prev.includes(slotId)
+  //       ? prev.filter((id) => id !== slotId)
+  //       : [...prev, slotId]
+  //   );
+  // };
 
   const toggleFacility = (facilityId: string) => {
     setSelectedFacilities((prev) =>
@@ -366,15 +365,15 @@ const ShowSelectionPage: React.FC = () => {
   const visibleImages:string[] = selectedTheater? selectedTheater?.images.slice(1) : [];
 
 
-  const handleImageNavigation = (direction: 'prev' | 'next') => {
-    setCurrentImageIndex((prevIndex) => {
-      const totalImages = selectedTheater?.images.length || 1;
-      if (direction === 'prev') {
-        return (prevIndex - 1 + totalImages) % totalImages;
-      }
-      return (prevIndex + 1) % totalImages;
-    });
-  };
+  // const handleImageNavigation = (direction: 'prev' | 'next') => {
+  //   setCurrentImageIndex((prevIndex) => {
+  //     const totalImages = selectedTheater?.images.length || 1;
+  //     if (direction === 'prev') {
+  //       return (prevIndex - 1 + totalImages) % totalImages;
+  //     }
+  //     return (prevIndex + 1) % totalImages;
+  //   });
+  // };
 
   // Shimmer UI Components
   const ShimmerMovieHeader = () => (
@@ -781,7 +780,7 @@ const ShowSelectionPage: React.FC = () => {
                           <span className="font-semibold text-gray-900 text-sm">Show Times</span>
                         </div>
                         <div className="flex flex-wrap gap-3">
-                          {theater.shows.map((show, index) => (
+                          {theater.shows.map((show:Show, index:number) => (
                             <div className="relative group">
                               {/* Button */}
                               <button

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import { Show } from '../../domain/entities/show.entity';
 import { IShowRepository } from '../../domain/interfaces/repositories/show.repository';
 import ShowModel from '../database/show.model';
@@ -15,9 +15,18 @@ import {
 import MovieModel from '../database/movie.model';
 import { TheaterModel } from '../database/theater.model';
 import seatLayoutModel from '../database/seatLayout.model';
+import { IWalletRepository } from '../../domain/interfaces/repositories/wallet.repository';
+import BookingModel from '../database/booking.model';
+import { IBooking } from '../../domain/interfaces/model/booking.interface';
+import dotenv from 'dotenv';
+dotenv.config();
 
 @injectable()
 export class ShowRepository implements IShowRepository {
+  constructor(
+    @inject('WalletRepository') private walletRepository: IWalletRepository,
+  ) {}
+
   async create(show: Show): Promise<Show> {
     try {
       const showData = {
@@ -867,4 +876,78 @@ export class ShowRepository implements IShowRepository {
       throw new Error('Failed to update booked seats');
     }
   }
+
+  async creditRevenueToWallet(showId: string): Promise<number> {
+    try {
+      const show = await ShowModel.findById(showId).lean();
+      if (!show) {
+        console.warn(`⚠️ Show with ID ${showId} not found`);
+        return 0;
+      }
+
+      const completedBookings = await BookingModel.find({
+        showId: new mongoose.Types.ObjectId(showId),
+        status: 'confirmed',
+        'payment.status': 'completed',
+      }).lean();
+
+      if (!completedBookings.length) {
+        console.log(`🟡 No completed bookings for show ${showId}`);
+        return 0;
+      }
+
+      const totalRevenue = completedBookings.reduce(
+        (sum: number, booking: IBooking) => sum + booking.payment.amount,
+        0
+      );
+
+      if (totalRevenue <= 0) {
+        console.log(`🟡 Total revenue is 0 for show ${showId}`);
+        return 0;
+      }
+
+      const ADMIN_COMMISSION_RATE = 0.15;
+      const adminCommission = parseFloat((totalRevenue * ADMIN_COMMISSION_RATE).toFixed(2));
+      const vendorShare = parseFloat((totalRevenue - adminCommission).toFixed(2));
+
+      const targetUserId = process.env.ADMIN_USER_ID || '681a66250869b998bbad2545';
+
+      const adminTransaction = {
+        amount: adminCommission,
+        type: 'credit' as const,
+        source: 'booking' as const,
+        createdAt: new Date(),
+        remark: `Admin commission of ₹${adminCommission} from show ${showId}`,
+      };
+
+      const vendorTransaction = {
+        amount: vendorShare,
+        type: 'credit' as const,
+        source: 'booking' as const,
+        createdAt: new Date(),
+        remark: `Vendor payout of ₹${vendorShare} from show ${showId} after admin commission 15%`,
+      };
+
+      const updatedAdminWallet = await this.walletRepository.pushTransactionAndUpdateBalance(
+        targetUserId,
+        adminTransaction
+      );
+
+      const updatedVendorWallet = await this.walletRepository.pushTransactionAndUpdateBalance(
+        show.vendorId.toString(),
+        vendorTransaction
+      );
+
+      if (!updatedAdminWallet || !updatedVendorWallet) {
+        throw new Error(`Wallet update failed (Admin: ${targetUserId}, Vendor: ${show.vendorId})`);
+      }
+
+      console.log(`✅ ₹${adminCommission} credited to Admin and ₹${vendorShare} credited to Vendor for show ${showId}`);
+      return totalRevenue;
+    } catch (error) {
+      console.error(`❌ Error in creditRevenueToWallet for show ${showId}:`, error);
+      throw error;
+    }
+  }
+
 }

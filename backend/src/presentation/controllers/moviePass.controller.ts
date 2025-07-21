@@ -49,8 +49,8 @@ export class MoviePassController implements IMoviePassController {
           },
         ],
         mode: 'payment',
-        success_url: `http://localhost:5173/account/moviepass-tab?payment=success`,
-        cancel_url: `http://localhost:5173/account/moviepass-tab?payment=canceled`,
+        success_url: `${env.VITE_API_URL}/account/moviepass-tab?payment=success`,
+        cancel_url: `${env.VITE_API_URL}/account/moviepass-tab?payment=canceled`,
         metadata: { userId },
       });
 

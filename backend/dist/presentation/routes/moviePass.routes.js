@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tsyringe_1 = require("tsyringe");
+const moviePass_controller_1 = require("../controllers/moviePass.controller");
+const stripeWebhook_controller_1 = require("../controllers/stripeWebhook.controller");
+const verifyToken_middleware_1 = require("../middleware/verifyToken.middleware");
+const rbac_middleware_1 = require("../middleware/rbac.middleware");
+const router = (0, express_1.Router)();
+const moviePassController = tsyringe_1.container.resolve(moviePass_controller_1.MoviePassController);
+const stripeWebhookController = tsyringe_1.container.resolve(stripeWebhook_controller_1.StripeWebhookController);
+router.post('/checkout-session', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), (req, res, next) => moviePassController.createCheckoutSession(req, res, next));
+router.get('/movie-pass', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), (req, res, next) => moviePassController.getMoviePass(req, res, next));
+router.get('/history', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), (req, res, next) => moviePassController.findMoviePassHistory(req, res, next));
+router.post('/webhook', (req, res, next) => stripeWebhookController.handleWebhook(req, res, next));
+exports.default = router;

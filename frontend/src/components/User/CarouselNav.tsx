@@ -11,6 +11,7 @@ import {
   Bell,
   HomeIcon,
   Film,
+  LogIn,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector, useDispatch } from 'react-redux';
@@ -22,7 +23,7 @@ import { clearAuth } from '../../store/slices/authSlice';
 import { showSuccessToast } from '../../utils/toast';
 import NotificationDropdown from '../userNav/NotificationModak';
 import CitySelectionModal from '../userNav/CitySelectionModal';
-import SearchModal from '../userNav/SearchModal'; // Import the new SearchModal component
+import SearchModal from '../userNav/SearchModal';
 import api from '../../config/axios.config';
 import LoginModal from './LoginModal';
 
@@ -36,7 +37,7 @@ interface Notification {
 const Navbar: React.FC = () => {
   const newUser = useSelector((state: RootState) => state.auth.user);
   const user = newUser?.role === 'user' ? newUser : null;
-  const selectedLocation = useSelector((state: RootState) => state.location.selectedLocation); // Use Redux state
+  const selectedLocation = useSelector((state: RootState) => state.location.selectedLocation);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -44,13 +45,12 @@ const Navbar: React.FC = () => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); // New state for search modal
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const cityModalRef = useRef<HTMLDivElement>(null);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
@@ -123,15 +123,8 @@ const Navbar: React.FC = () => {
     });
   }
 
-  const handleClick = (e) => {
-    if (!user) {
-      e.preventDefault();
-      setShowTooltip(true);
-      setTimeout(() => setShowTooltip(false), 2000); // Hide after 2 seconds
-    } else {
-      // Replace this with your navigation logic
-      navigate('/account/notifications-tab');
-    }
+  const handleClick = () => {
+    navigate('/account/notifications-tab');
   };
 
   const toHome = () => {
@@ -139,14 +132,14 @@ const Navbar: React.FC = () => {
     setIsProfileMenuOpen(false);
   };
 
-  // Function to handle search click
   const handleSearchClick = () => {
     setIsSearchModalOpen(true);
   };
 
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full h-16 backdrop-blur-xs bg-transparent bg-clip-padding shadow-xs z-100">        {/* Background Pattern */}
+      <nav className="fixed top-0 left-0 w-full h-16 backdrop-blur-xs bg-transparent bg-clip-padding shadow-xs z-50">
+        {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full blur-2xl transform -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
@@ -164,7 +157,7 @@ const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Enhanced Search Bar - Now clickable */}
+          {/* Enhanced Search Bar - Desktop */}
           <div className="hidden md:flex flex-1 max-w-2xl mx-6">
             <div className={`relative w-full transition-all duration-300 ${isSearchFocused ? 'scale-105' : ''}`}>
               <div className="relative">
@@ -192,10 +185,36 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center space-x-4">
-            {/* City Selector */}
+          <div className="flex items-center space-x-2 md:space-x-4">
+            {/* Mobile Search Icon */}
+            <button
+              onClick={handleSearchClick}
+              className="md:hidden p-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200 hover:border-yellow-300 hover:bg-white transition-all duration-300 hover:shadow-md hover:scale-105"
+            >
+              <Search className="text-gray-600 hover:text-yellow-600" size={16} />
+            </button>
+
+            {/* Mobile Location Selector */}
+            <button
+              onClick={() => setIsCityModalOpen(true)}
+              className="md:hidden p-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200 hover:border-yellow-300 hover:bg-white transition-all duration-300 hover:shadow-md hover:scale-105"
+            >
+              <MapPin className="text-gray-600 hover:text-yellow-600" size={16} />
+            </button>
+
+            {/* Mobile Login Button / User Name */}
+            {!user && (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="md:hidden bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white px-2 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-md hover:shadow-yellow-400/25 border border-yellow-300 text-xs font-medium"
+              >
+                <LogIn size={16} />
+              </button>
+            )}
+
+            {/* City Selector - Desktop */}
             <div
-              className="hidden md:flex items-center cursor-pointer group bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-gray-200 hover:border-yellow-300 hover:bg-white transition-all duration-300 hover:shadow-md"
+              className="hidden md:flex items-center cursor-pointer group bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-200 hover:border-yellow-300 hover:bg-white transition-all duration-300 hover:shadow-md"
               onClick={() => setIsCityModalOpen(true)}
             >
               <MapPin className="text-gray-600 group-hover:text-yellow-600 mr-1.5 transition-colors" size={16} />
@@ -207,17 +226,14 @@ const Navbar: React.FC = () => {
 
             {/* Enhanced Notification Bell */}
             <div className="relative" ref={notificationRef}>
-              <button
-                    onClick={handleClick}
-                    className="relative p-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200 hover:border-yellow-300 hover:bg-white transition-all duration-300 hover:shadow-md hover:scale-105"
+              {user && (
+                <button
+                  onClick={handleClick}
+                  className="relative p-2 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200 hover:border-yellow-300 hover:bg-white transition-all duration-300 hover:shadow-md hover:scale-105"
                 >
-                    <Bell className="text-gray-600 group-hover:text-yellow-600 transition-colors" size={18} />
+                  <Bell className="text-gray-600 group-hover:text-yellow-600 transition-colors" size={18} />
                 </button>
-                {showTooltip && (
-                    <span className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 px-2 py-1 text-xs text-white bg-black rounded shadow-md z-10">
-                    Please login first
-                    </span>
-                )}
+              )}
 
               <NotificationDropdown
                 notifications={notifications}
@@ -230,7 +246,7 @@ const Navbar: React.FC = () => {
               />
             </div>
 
-            {/* Login Button or User Name */}
+            {/* Desktop Login Button / User Name */}
             {user ? (
               <div className="hidden md:flex items-center bg-gradient-to-r from-yellow-100 to-orange-100 px-3 py-1.5 rounded-lg border border-yellow-200">
                 <span className="font-bold text-gray-800 text-sm">Welcome, {user.name.split(' ')[0]}</span>
@@ -238,7 +254,7 @@ const Navbar: React.FC = () => {
             ) : (
               <button
                 onClick={() => setShowLoginModal(true)}
-                className="hidden md:block bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-bold text-white px-4 py-2 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-md hover:shadow-yellow-400/25 border border-yellow-300"
+                className="hidden md:block bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 font-bold text-white px-4 py-1.5 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-md hover:shadow-yellow-400/25 border border-yellow-300"
               >
                 Sign In
               </button>
@@ -337,8 +353,8 @@ const Navbar: React.FC = () => {
       <CitySelectionModal
         isCityModalOpen={isCityModalOpen}
         setIsCityModalOpen={setIsCityModalOpen}
-        selectedLocation={selectedLocation} // Use Redux state
-        setSelectedLocation={(location: string) => dispatch(setSelectedLocation(location))} // Dispatch Redux action
+        selectedLocation={selectedLocation}
+        setSelectedLocation={(location: string) => dispatch(setSelectedLocation(location))}
         cityModalRef={cityModalRef}
       />
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />

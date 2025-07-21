@@ -300,8 +300,11 @@ const UserManagement: React.FC = () => {
       type: 'multiSelect',
       icon: <Shield className="w-5 h-5" />,
       value: filters.role,
-      onChange: (value: string[]) => {
-        setFilters((prev) => ({ ...prev, role: value }));
+      onChange: (value: (string | number | boolean)[]) => {
+        setFilters((prev) => ({
+          ...prev,
+          role: value.map(String),
+        }));
         setCurrentPage(1);
       },
       options: [
@@ -314,11 +317,11 @@ const UserManagement: React.FC = () => {
       label: 'Join Date',
       type: 'dateSort',
       icon: <Calendar className="w-5 h-5" />,
-      value: filters.joinDate,
+      value: filters.joinDate === 'newest' ? 'desc' : filters.joinDate === 'oldest' ? 'asc' : null,
       onChange: (value: 'asc' | 'desc' | null) => {
         setFilters((prev) => ({
           ...prev,
-          joinDate: value as 'newest' | 'oldest' | null,
+          joinDate: value === 'desc' ? 'newest' : value === 'asc' ? 'oldest' : null,
         }));
         setCurrentPage(1);
       },
@@ -331,12 +334,12 @@ const UserManagement: React.FC = () => {
   ];
 
   // Calculate active filter count
-  const activeFilterCount = [
-    filters.isBlocked !== undefined,
-    filters.role.length > 0,
-    filters.joinDate !== null,
-    filters.search !== '',
-  ].filter(Boolean).length;
+  // const activeFilterCount = [
+  //   filters.isBlocked !== undefined,
+  //   filters.role.length > 0,
+  //   filters.joinDate !== null,
+  //   filters.search !== '',
+  // ].filter(Boolean).length;
 
   return (
     <div className="flex h-screen bg-gray-900">

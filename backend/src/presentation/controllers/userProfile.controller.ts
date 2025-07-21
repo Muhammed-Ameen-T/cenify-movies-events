@@ -6,8 +6,6 @@ import { container } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
-import { CustomError } from '../../utils/errors/custom.error';
-import { JwtService } from '../../infrastructure/services/jwt.service';
 import { IgetUserDetailsUseCase } from '../../domain/interfaces/useCases/User/getUserDetails.interface';
 import { IupdateUserProfileUseCase } from '../../domain/interfaces/useCases/User/updateUserProfile.interface';
 import { ChangePasswordRequestDTO, UpdateProfileRequestDTO } from '../../application/dtos/user.dto';
@@ -79,7 +77,9 @@ export class UserProfileController implements IUserProfileController {
     try {
       const updateData = new UpdateProfileRequestDTO(
         req.body.name,
-        req.body.phone !== undefined ? Number(req.body.phone) : undefined,
+        req.body.phone !== undefined && req.body.phone !== 'N/A' && !isNaN(Number(req.body.phone))
+            ? Number(req.body.phone)
+            : null,
         req.body.profileImage,
         req.body.dob == 'N/A' ? null : new Date(req.body.dob),
       );

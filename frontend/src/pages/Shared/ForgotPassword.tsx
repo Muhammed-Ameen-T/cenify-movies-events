@@ -56,6 +56,7 @@ const PasswordResetPage: React.FC = () => {
     resolver: zodResolver(otpSchema),
     defaultValues: { otp: '' },
   });
+    console.log("🚀 ~ otpRegister:", otpRegister)
 
   // Password Form
   const {
@@ -244,7 +245,7 @@ const PasswordResetPage: React.FC = () => {
                   {Array.from({ length: 6 }).map((_, index) => (
                     <input
                       key={index}
-                      ref={(el) => (otpRefs.current[index] = el)}
+                      ref={(el) => { otpRefs.current[index] = el; }}
                       type="text"
                       maxLength={1}
                       className="w-12 h-12 text-center text-xl font-semibold rounded-lg bg-white border-2 border-gray-500 text-gray-900 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none shadow-md ring-1 ring-gray-300"

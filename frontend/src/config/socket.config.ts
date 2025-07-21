@@ -31,14 +31,3 @@ socket.onAny((event, ...args) => {
 });
 
 export { socket };
-// const api = axios.create({
-//   baseURL: `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api`,
-//   withCredentials: true,
-// });
-
-// api.interceptors.request.use((config) => {
-//   if (socket.id) {
-//     config.headers['x-socket-id'] = socket.id;
-//   }
-//   return config;
-// });

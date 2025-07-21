@@ -274,7 +274,7 @@ const ModernCarousel = () => {
         </div>
 
         {/* Modern Dot Indicators */}
-        <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30">
+        <div className="hidden md:block absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30">
           <div className="flex items-center gap-3 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
             {slides.map((_, index) => (
               <button
@@ -292,13 +292,6 @@ const ModernCarousel = () => {
                 )}
               </button>
             ))}
-
-            {/* Slide Counter */}
-            {/* <div className="ml-2 pl-2 border-l border-white/20">
-              <span className="text-white/80 text-sm font-medium">
-                {String(currentSlide + 1).padStart(2, '0')}/{String(slides.length).padStart(2, '0')}
-              </span>
-            </div> */}
           </div>
         </div>
 

@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tsyringe_1 = require("tsyringe");
+const verifyToken_middleware_1 = require("../middleware/verifyToken.middleware");
+const rbac_middleware_1 = require("../middleware/rbac.middleware");
+const DashboardController = tsyringe_1.container.resolve('DashboardController');
+const router = (0, express_1.Router)();
+router.get('/vendor', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['vendor']), DashboardController.getDashboardData.bind(DashboardController));
+router.get('/admin', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['admin']), DashboardController.getAdminDashboardData.bind(DashboardController));
+exports.default = router;

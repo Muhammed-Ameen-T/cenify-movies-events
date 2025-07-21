@@ -133,11 +133,11 @@ export type TabType = "account" | "bookings" | "notifications" | "rewards" | "wa
 export interface UserProfile {
   name: string;
   email: string;
-  phone: string;
-  dateOfBirth: string;
-  joinedDate: string;
+  phone: string | null;
+  dateOfBirth: string | null;
+  joinedDate: string | null;
   loyalityPoints: number;
-  profileImage: string;
+  profileImage: string | null;
 }
 
 export interface UserResponseDTO {

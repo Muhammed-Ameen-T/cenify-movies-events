@@ -93,7 +93,7 @@ export const historyReducer = (state: HistoryState, action: HistoryAction): Hist
       return {
         ...state,
         currentIndex: newIndex,
-        present: state.history[newIndex],
+        present: state.history[newIndex] ?? null,
       };
     }
 

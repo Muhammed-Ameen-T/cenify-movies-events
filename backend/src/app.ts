@@ -23,6 +23,8 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
+      'https://www.muhammedameen.site',
+      'https://muhammedameen.site',
       'https://your-image-server.com',
       'https://lh3.googleusercontent.com',
       'https://res.cloudinary.com',

@@ -51,6 +51,7 @@ export const getMoviesWithFilters = async (filters: MovieFilters = { page: 1, li
     
     const response = await api.get(USER_AUTH_ENDPOINTS.userMovies, { params: cleanParams });
     
+    console.log("🚀 ~ getMoviesWithFilters ~ response:", response)
     return {
       movies: response.data.data.movies || [],
       totalCount: response.data.data.totalCount || 0,
@@ -157,27 +158,6 @@ export const toggleMovieBookmark = async (movieId: string): Promise<BookmarkResp
   }
 };
 
-/**
- * Get user's bookmarked movies
- * @param params - Pagination parameters
- * @returns Promise<MovieResponse | null>
- */
-export const getUserBookmarkedMovies = async (params = { page: 1, limit: 12 }): Promise<MovieResponse | null> => {
-  try {
-    const response = await api.get(USER_AUTH_ENDPOINTS.userBookmarks, { params });
-    
-    return {
-      movies: response.data.data.movies || [],
-      totalCount: response.data.data.totalCount || 0,
-      totalPages: response.data.data.totalPages || 0,
-      currentPage: response.data.data.currentPage || 1,
-    };
-  } catch (error) {
-    handleAxiosError(error, 'Failed to fetch bookmarked movies');
-    return null;
-  }
-};
-
 
 /**
  * Get available genres for filtering
@@ -241,37 +221,16 @@ export const getTrendingMovies = async (params = { page: 1, limit: 12 }): Promis
   }
 };
 
-/**
- * Get new releases
- * @param params - Pagination parameters
- * @returns Promise<MovieResponse | null>
- */
-export const getNewReleases = async (params = { page: 1, limit: 12 }): Promise<MovieResponse | null> => {
-  try {
-    const response = await api.get(USER_AUTH_ENDPOINTS.newReleases, { params });
-    
-    return {
-      movies: response.data.data.movies || [],
-      totalCount: response.data.data.totalCount || 0,
-      totalPages: response.data.data.totalPages || 0,
-      currentPage: response.data.data.currentPage || 1,
-    };
-  } catch (error) {
-    handleAxiosError(error, 'Failed to fetch new releases');
-    return null;
-  }
-};
+
 
 // Export all functions as default object for easier importing
 export default {
   getMoviesWithFilters,
   getUserMovies,
   toggleMovieBookmark,
-  getUserBookmarkedMovies,
   getMovieDetails,
   isLikedMovie,
   likeMovie,
   searchMovieSuggestions,
   getTrendingMovies,
-  getNewReleases,
 };

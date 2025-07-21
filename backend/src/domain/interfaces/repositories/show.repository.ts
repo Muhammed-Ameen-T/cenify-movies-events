@@ -64,4 +64,5 @@ export interface IShowRepository {
     bookedSeats: any[],
     session?: mongoose.ClientSession,
   ): Promise<void>;
+  creditRevenueToWallet(showId: string): Promise<number>;
 }
