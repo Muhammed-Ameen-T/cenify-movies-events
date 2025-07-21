@@ -200,6 +200,9 @@ import { SendOtpPhoneUseCase } from '../application/useCases/userProfile/sendOtp
 import { VerifyOtpPhoneUseCase } from '../application/useCases/userProfile/verifyOtpPhone.useCase';
 import { ISendOtpPhoneUseCase } from '../domain/interfaces/useCases/User/sendOtpPhone.interface';
 import { IVerifyOtpPhoneUseCase } from '../domain/interfaces/useCases/User/verifyOtpPhone.interface';
+import { IProcessVendorPayout } from '../domain/interfaces/useCases/User/ProcessVendorPayoutUseCase.interface';
+import { ProcessVendorPayoutUseCase } from '../application/useCases/bookingMng/ProcessVendorPayout';
+// import { VendorPayoutJobService } from './services/scheduleVendorPayouts.service';
 
 //Controller Registration
 container.register<IUserAuthController>('UserAuthController', { useClass: UserAuthController });
@@ -391,6 +394,7 @@ container.register<IStripeWebhookController>('StripeWebhookController', {
   useClass: StripeWebhookController,
 });
 container.register('MoviePassJobService', { useClass: MoviePassJobService });
+// container.register('VendorPayoutJobService', { useClass: VendorPayoutJobService });
 
 // Seat Selevtion Service, Repository, Controller and useCase Registration
 container.register<ISeatSelectionController>('SeatSelectionController', {
@@ -444,6 +448,10 @@ container.register<IBookingMngController>('BookingMngController', {
 container.register('PaymentService', { useClass: PaymentService });
 container.register('CloudinaryService', { useClass: CloudinaryService });
 container.register('BookingStripeWebhookController', { useClass: BookingStripeWebhookController });
+container.register<IProcessVendorPayout>(
+  'IProcessVendorPayout',
+  { useClass: ProcessVendorPayoutUseCase }
+);
 
 // Notification Service Registration
 container.register('NotificationService', { useClass: NotificationService });

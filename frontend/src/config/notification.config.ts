@@ -144,7 +144,7 @@ export const initializeSocket = (
   });
 
   socket.on('connect_error', (error) => {
-    console.error('Socket connect_error:', error.message);
+    console.error('Socket connect_error:', error.message);  
   });
 
   socket.on('disconnect', (reason) => {

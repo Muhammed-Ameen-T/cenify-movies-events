@@ -3,8 +3,9 @@ import api from '../../config/axios.config';
 import { USER_ENDPOINTS } from '../../constants/apiEndPoint';
 import { ERROR_MESSAGES } from '../../constants/auth.messages';
 import { Booking } from '../../types';
-import { BookingData, PaymentOptions, CreateBookingPayload, CreateBookingResponse } from '../../types/booking';
+import { BookingData, PaymentOptions, CreateBookingPayload } from '../../types/booking';
 import { handleAxiosError } from '../../utils/exios-error-handler';
+import { CreateBookingResponse } from '../../types/bookingResponse';
 
 interface FindUserBookingsParams {
   page: number;

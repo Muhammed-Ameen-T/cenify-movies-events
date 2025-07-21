@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tsyringe_1 = require("tsyringe");
+const validate_middleware_1 = require("../middleware/validate.middleware");
+const userAuth_validation_1 = require("../validation/userAuth.validation");
+const userAuthController = tsyringe_1.container.resolve('UserAuthController');
+const router = (0, express_1.Router)();
+router.post('/google/callback', userAuthController.googleCallback.bind(userAuthController));
+router.post('/refresh-token', userAuthController.refreshToken.bind(userAuthController));
+router.post('/send-otp', (0, validate_middleware_1.validateRequest)(userAuth_validation_1.SendOtpSchema), userAuthController.sendOtp.bind(userAuthController));
+router.post('/verify-otp', (0, validate_middleware_1.validateRequest)(userAuth_validation_1.VerifyOtpSchema), userAuthController.verifyOtp.bind(userAuthController));
+router.post('/login', (req, res, next) => userAuthController.login(req, res, next));
+router.post('/logout', (req, res, next) => userAuthController.logout(req, res, next));
+router.post('/fg-verify-otp', (req, res, next) => userAuthController.forgotPassVerifyOtp(req, res, next));
+router.post('/fg-send-otp', (req, res, next) => userAuthController.forgotPassSendOtp(req, res, next));
+router.post('/fg-update-pass', (req, res, next) => userAuthController.forgotPassUpdatePassword(req, res, next));
+exports.default = router;

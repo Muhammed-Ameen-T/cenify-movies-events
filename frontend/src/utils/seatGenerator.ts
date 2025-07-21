@@ -105,7 +105,7 @@ export const generateSeats = (templateType: TemplateType): SeatLayout => {
     return [];
   }
 
-  const { rows, cols, curve } = template;
+  const { rows, cols,  } = template;
   const layout: SeatLayout = [];
 
   for (let i = 0; i < rows; i++) {
@@ -113,14 +113,14 @@ export const generateSeats = (templateType: TemplateType): SeatLayout => {
     const rowChar = String.fromCharCode(65 + i);
     
     // Calculate how many seats to offset from each side for curved layout
-    const curveOffset = curve ? Math.floor(Math.sin((i / rows) * Math.PI) * 3) : 0;
+    // const curveOffset = curve ? Math.floor(Math.sin((i / rows) * Math.PI) * 3) : 0;
     
     for (let j = 0; j < cols; j++) {
-      // For curved layouts, add empty spaces at the beginning and end of rows
-      if (curve && (j < curveOffset || j >= cols - curveOffset)) {
-        rowArray.push(null);
-        continue;
-      }
+      // // For curved layouts, add empty spaces at the beginning and end of rows
+      // if (curve && (j < curveOffset || j >= cols - curveOffset)) {
+      //   rowArray.push(null);
+      //   continue;
+      // }
       
       // Determine seat type based on position
       let seatType: keyof typeof SEAT_TYPES = 'REGULAR';

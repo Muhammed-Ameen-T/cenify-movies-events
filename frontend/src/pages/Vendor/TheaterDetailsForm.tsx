@@ -1,13 +1,13 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+// import { useSearchParams } from 'react-router-dom';
 import TheaterDetailsForm from '../../components/Vendor/TheaterDetailsForm';
 import { motion } from 'framer-motion';
 import { ToastContainer} from "react-toastify";
-import BackButton from '../../components/Buttons/BackButton';
+// import BackButton from '../../components/Buttons/BackButton';
 
 const TheaterDetailsPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const vendorId = searchParams.get('vendorId') || 'default-vendor-id';
+  // const [searchParams] = useSearchParams();
+  // const vendorId = searchParams.get('vendorId') || 'default-vendor-id';
 
   return (
     <motion.div 

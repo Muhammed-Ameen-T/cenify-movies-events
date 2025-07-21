@@ -6,7 +6,7 @@ import Sidebar from '../components/Admin/Sidebar';
 import { AnimatePresence, motion } from 'framer-motion';
 
 interface AdminLayoutProps {
-  activePage?: 'dashboard' | 'theaters' | 'shows' | 'bookings' | 'movies' | 'users' | 'notifications';
+  activePage?: 'dashboard' | 'theaters' | 'shows' | 'bookings' | 'movies' | 'users' | 'notifications' | 'wallet';
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ activePage = 'dashboard' }) => {

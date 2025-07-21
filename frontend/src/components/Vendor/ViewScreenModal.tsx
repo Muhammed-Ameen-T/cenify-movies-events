@@ -94,7 +94,7 @@ const ViewScreenModal: React.FC<ViewScreenModalProps> = ({ screen, onClose }) =>
                 Theater Image
               </h3>
               <img
-                src={screen.theaterId?.gallery?.[0] || '/placeholder-image.jpg'}
+                src={screen.theaterId?.gallery?.[1] || '/placeholder-image.jpg'}
                 alt={`Theater image for ${screen.theaterId?.name || 'theater'}`}
                 className="w-full h-48 object-cover rounded-lg shadow-md mt-2"
                 loading="lazy"

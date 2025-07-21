@@ -7,13 +7,12 @@ import { SuccessMsg } from './utils/constants/commonSuccessMsg.constants';
 import { initializeAgenda } from './infrastructure/agenda';
 import ERROR_MESSAGES from './utils/constants/commonErrorMsg.constants';
 import { socketService } from './infrastructure/services/socket.service';
-import { container } from './infrastructure/container'; // Keep for other DI services
+import { container } from './infrastructure/container'; 
 
 const PORT = env.PORT;
 
 const startServer = async () => {
   try {
-
 
     await connectDB();
 

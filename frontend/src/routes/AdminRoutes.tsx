@@ -8,6 +8,7 @@ import MovieCreationForm from '../pages/Admin/MovieCreation';
 import EditMovieForm from '../pages/Admin/EditMoviePage';
 import UserManagementExample from '../pages/Admin/UserManagement';
 import VendorNotifications from '../pages/Admin/AdminNotifications';
+import AdminWalletTab from '../pages/Admin/AdminWallet';
 
 const AdminLogin = lazy(() => import('../pages/Admin/LoginPage'));
 const Dashboard = lazy(() => import('../pages/Admin/AdminDashboard'));
@@ -45,6 +46,9 @@ const AdminRoutes = () => {
           </Route>
           <Route element={<AdminLayout activePage="notifications" />}>
             <Route path="notifications" element={<VendorNotifications />} />
+          </Route>
+          <Route element={<AdminLayout activePage="wallet" />}>
+            <Route path="wallet" element={<AdminWalletTab />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/pagenotfound" replace />} />

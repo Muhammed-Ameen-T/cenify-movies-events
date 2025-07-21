@@ -26,13 +26,13 @@ router.patch(
 router.get(
   '/wallet',
   verifyAccessToken,
-  authorizeRoles(['user']),
+  authorizeRoles(['user','admin','vendor']),
   userAuthController.findUserWallet.bind(userAuthController),
 );
 router.get(
   '/transactions',
   verifyAccessToken,
-  authorizeRoles(['user']),
+  authorizeRoles(['user', 'admin', 'vendor']),
   userAuthController.findUserWalletTransactions.bind(userAuthController),
 );
 router.get(

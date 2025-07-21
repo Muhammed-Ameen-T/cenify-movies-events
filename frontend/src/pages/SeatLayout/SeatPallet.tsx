@@ -53,7 +53,7 @@ const SeatPaletteItem: React.FC<SeatPaletteItemProps> = ({ seatType }) => {
 };
 
 const SeatPalette: React.FC = () => {
-  const { selectedSeats, deleteSelectedSeats, changeSelectedSeatsType, currentLayout } = useTheater();
+  const { selectedSeats, deleteSelectedSeats, changeSelectedSeatsType } = useTheater();
   const [showInfo, setShowInfo] = React.useState(true);
   
   const selectedCount = Object.keys(selectedSeats).filter(id => selectedSeats[id]).length;

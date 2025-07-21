@@ -18,7 +18,8 @@ import {
   Layout,
   BoxIcon,
   Ticket,
-  X
+  X,
+  Wallet
 } from 'lucide-react';
 import { RootState } from '../../store/store';
 import { useDispatch, useSelector } from 'react-redux';
@@ -237,6 +238,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
                   path="/vendor/notifications"
                   label="Notifications"
                   icon={<Bell size={20} />}
+                  isCollapsed={!isOpen}
+                />
+
+                <NavItem
+                  path="/vendor/wallet"
+                  label="Wallet"
+                  icon={<Wallet size={20} />}
                   isCollapsed={!isOpen}
                 />
 

@@ -1,11 +1,9 @@
-// src/pages/Vendor/VendorDashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Filter, Ticket, Film, BarChart2, Plus, DollarSign } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '../../components/ui/Card';
-import EventManagement from '../../pages/Vendor/Events';
 import TheaterManagement from '../../pages/Vendor/Theaters';
 import StatCard from '../../components/dashboard/StatCard';
 import RevenueChart from '../../components/dashboard/RevenueChart';
@@ -17,6 +15,7 @@ import Insights from '../../components/Vendor/Insights';
 import { fetchDashboardData } from '../../services/Vendor/dashboardApi';
 import { VendorDashboardData, DashboardQueryParams } from '../../types/vendorDashboard';
 import Loader from '../../components/Shared/Loading';
+import Calendar from '../../components/ui/Calendar';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -50,8 +49,32 @@ const VendorDashboard: React.FC = () => {
     navigate(`?${params.toString()}`, { replace: true });
   }, [filters, navigate]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
+  // Format date as YYYY-MM-DD in local timezone
+  const formatLocalDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (name: string, date: Date | undefined) => {
+    setFilters({
+      ...filters,
+      [name]: date ? formatLocalDate(date) : '',
+    });
+  };
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters({ ...filters, location: e.target.value });
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      startDate: '',
+      endDate: '',
+      status: '',
+      location: '',
+    });
   };
 
   // Fetch dashboard data
@@ -60,9 +83,6 @@ const VendorDashboard: React.FC = () => {
     queryFn: () => fetchDashboardData(filters),
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
-  console.log("🚀 ~ data:", data)
-
-  // const isOverview = location.pathname === '/dashboard';
 
   return (
     <motion.div
@@ -72,57 +92,56 @@ const VendorDashboard: React.FC = () => {
       animate="visible"
     >
       {/* Filters */}
-      <Card className="mb-6 p-6 bg-[#18181f] border border-[#333333]">
+      <Card className="mb-6 p-6 bg-[#18181f] border border-[#333333] overflow-visible">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-white flex items-center">
             <Filter className="mr-2 text-[#0066F5]" size={20} />
             Filters
           </h3>
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="text-sm text-red-400 hover:text-red-300 transition-colors"
+            aria-label="Clear all filters"
+          >
+            Clear Filters
+          </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
+          <div className="relative">
             <label className="text-sm font-medium text-gray-400">Start Date</label>
-            <input
-              type="date"
-              name="startDate"
-              value={filters.startDate}
-              onChange={handleFilterChange}
-              className="w-full mt-1 pl-4 pr-4 py-2 rounded-lg bg-[#121218] border border-[#333333] text-white text-sm focus:ring-1 focus:ring-[#0066F5] focus:border-[#0066F5]"
-            />
+            <div className="mt-1">
+              <Calendar
+                value={filters.startDate ? new Date(filters.startDate) : undefined}
+                onChange={(date) => handleDateChange('startDate', date)}
+                theme="dark"
+                maxDate={new Date()}
+                placeholder="Select start date"
+                className="w-full"
+              />
+            </div>
           </div>
-          <div>
+          <div className="relative">
             <label className="text-sm font-medium text-gray-400">End Date</label>
-            <input
-              type="date"
-              name="endDate"
-              value={filters.endDate}
-              onChange={handleFilterChange}
-              className="w-full mt-1 pl-4 pr-4 py-2 rounded-lg bg-[#121218] border border-[#333333] text-white text-sm focus:ring-1 focus:ring-[#0066F5] focus:border-[#0066F5]"
-            />
+            <div className="mt-1">
+              <Calendar
+                value={filters.endDate ? new Date(filters.endDate) : undefined}
+                onChange={(date) => handleDateChange('endDate', date)}
+                theme="dark"
+                maxDate={new Date()}
+                placeholder="Select end date"
+                className="w-full"
+              />
+            </div>
           </div>
-          {/* <div>
-            <label className="text-sm font-medium text-gray-400">Status</label>
-            <select
-              name="status"
-              value={filters.status}
-              onChange={handleFilterChange}
-              className="w-full mt-1 pl-4 pr-4 py-2 rounded-lg bg-[#121218] border border-[#333333] text-white text-sm focus:ring-1 focus:ring-[#0066F5] focus:border-[#0066F5]"
-            >
-              <option value="" className="text-gray-400">All</option>
-              <option value="verified" className="text-white">Verified</option>
-              <option value="verifying" className="text-white">Verifying</option>
-              <option value="pending" className="text-white">Pending</option>
-              <option value="blocked" className="text-white">Blocked</option>
-            </select>
-          </div> */}
           <div>
             <label className="text-sm font-medium text-gray-400">Location</label>
             <input
               type="text"
               name="location"
               value={filters.location}
-              onChange={handleFilterChange}
-              className="w-full mt-1 pl-4 pr-4 py-2 rounded-lg bg-[#121218] border border-[#333333] text-white text-sm focus:ring-1 focus:ring-[#0066F5] focus:border-[#0066F5]"
+              onChange={handleLocationChange}
+              className="w-full mt-1 pl-4 pr-4 py-2 rounded-lg bg-[#1E1E2D] border border-gray-600 text-white text-sm focus:ring-1 focus:ring-[#0066F5] focus:border-[#0066F5]"
               placeholder="Enter city"
             />
           </div>
@@ -148,9 +167,7 @@ const VendorDashboard: React.FC = () => {
               </div>
 
               {/* Loading State */}
-              {isLoading && (
-                <Loader/>
-              )}
+              {isLoading && <Loader />}
 
               {/* Error State */}
               {error && (
@@ -225,7 +242,6 @@ const VendorDashboard: React.FC = () => {
             </motion.div>
           }
         />
-        <Route path="/events/create" element={<EventManagement />} />
         <Route path="/theaters/create" element={<TheaterManagement />} />
         <Route path="/analytics" element={<Insights />} />
       </Routes>

@@ -1,11 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, Film, Ticket, Video,User, LogOut } from 'lucide-react';
+import { LayoutDashboard, Film, Ticket, Video,User, LogOut, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Bell } from 'react-feather';
 
 interface SidebarProps {
-  activePage: 'dashboard' | 'theaters' | 'shows' | 'bookings' | 'movies' | 'users' | 'notifications';
+  activePage: 'dashboard' | 'theaters' | 'shows' | 'bookings' | 'movies' | 'users' | 'notifications' | 'wallet';
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
@@ -19,6 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
     { name: 'Movies', icon: <Film className="w-5 h-5" />, route: '/admin/movies', id: 'movies' },
     { name: 'Users', icon: <User className="w-5 h-5" />, route: '/admin/users', id: 'users' },
     { name: 'Notifications', icon: <Bell className="w-5 h-5" />, route: '/admin/notifications', id: 'notifications' },
+    { name: 'Wallet', icon: <Wallet className="w-5 h-5" />, route: '/admin/wallet', id: 'wallet' },
   ];
 
   // Sidebar animation variants
@@ -79,14 +80,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
         </nav>
 
         <div className="px-3 mt-auto">
-          <motion.button
+          {/* <motion.button
             className="flex items-center w-full px-4 py-3 mt-6 text-sm font-medium text-red-400 rounded-lg transition-all duration-200 hover:bg-red-900/20 hover:text-red-300"
             whileHover={{ x: 5 }}
             whileTap={{ scale: 0.95 }}
           >
             <LogOut className="w-5 h-5" />  
             <span className="ml-3">Logout</span>
-          </motion.button>
+          </motion.button> */}
         </div>
       </div>
     </motion.div>

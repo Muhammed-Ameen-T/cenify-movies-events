@@ -1,35 +1,27 @@
+version: "3.9"
+
 services:
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-      target: development
+      target: production
+    environment:
+      - NODE_OPTIONS=--max_old_space_size=512
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - ./.env:/app/.env
+    env_file:
+      - .env
     networks:
       - mern-network
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://backend:3000/api
-    networks:
-      - mern-network
-    depends_on:
-      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
 
 networks:
   mern-network:
     driver: bridge
+  

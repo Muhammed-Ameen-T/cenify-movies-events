@@ -27,7 +27,7 @@ const THEATER_TEMPLATES = [
     rows: 8,
     columns: 12,
     seats: Array.from({ length: 96 }, (_, i) => ({
-      type: (Math.floor(i / 12) < 2 ? 'premium' : 'regular') as const,
+      type: (Math.floor(i / 12) < 2 ? 'premium' : 'regular') ,
       row: Math.floor(i / 12),
       column: i % 12
     }))
@@ -41,7 +41,7 @@ const THEATER_TEMPLATES = [
     seats: Array.from({ length: 192 }, (_, i) => {
       const row = Math.floor(i / 16);
       return {
-        type: (row < 2 ? 'vip' : row < 4 ? 'premium' : 'regular') as const,
+        type: row < 2 ? 'vip' : row < 4 ? 'premium' : 'regular',
         row,
         column: i % 16
       };
