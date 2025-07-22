@@ -29,7 +29,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   setNotificationCount,
   notificationRef,
 }) => {
-  console.log("🚀 ~ notificationCount:", notificationCount)
   const navigate = useNavigate();
 
   const handleMarkAllAsRead = () => {

@@ -82,7 +82,6 @@ export const fetchAllShows = async ( params: any ): Promise<{
     const response = await api.get(VENDOR_ENDPOINTS.fetchAllShows, {
       params,
     });
-    console.log("🚀 ~ fetchAllShows ~ response:", response)
     return response.data.data;
   } catch (error: any) {
     throw new Error(
@@ -205,7 +204,6 @@ export const getShowSelectionService = async (
         facilities: params.facilities,
       },
     });
-    console.log("🚀 ~ response:", response)
     return response.data.data;
   } catch (error: any) {
     console.error('Error fetching show selection:', error);

@@ -69,7 +69,6 @@ const MovieDetailPage: React.FC = () => {
     queryFn: () => isLikedMovie(movieId!),
     enabled: !!movieId,
     onSuccess: (data) => {  
-      console.log("🚀 ~ data:", data)
       setIsLiked(data);
     },
     onError: () => {

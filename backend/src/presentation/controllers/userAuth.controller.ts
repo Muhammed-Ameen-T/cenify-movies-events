@@ -200,7 +200,6 @@ export class UserAuthController implements IUserAuthController {
         user: response.user,
       });
     } catch (error) {
-      console.log("🚀 ~ UserAuthController ~ login ~ error:", error)
       next(error)
     }
   }

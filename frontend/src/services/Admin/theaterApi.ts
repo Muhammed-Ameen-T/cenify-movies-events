@@ -34,7 +34,6 @@ export const fetchAdminTheaters = async (params: FetchTheatersParams = {}): Prom
 
     const response = await api.get(`${ADMIN_ENDPOINTS.fetchTheaters}?${queryParams.toString()}`);
     const { theaters, totalCount } = response.data.data;
-    console.log("🚀 ~ fetchAdminTheaters ~ response:", response)
 
     // Map backend response to Theater type
     return {

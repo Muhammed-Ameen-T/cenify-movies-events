@@ -360,7 +360,6 @@ const EditMovieForm: React.FC = () => {
   });
 
   const onSubmit = (data: MovieFormData) => {
-    console.log("🚀 ~ onSubmit ~ data:", data);
     updateMovieMutation.mutate({
       name: data.name,
       genre: data.genre,

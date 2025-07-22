@@ -92,7 +92,6 @@ const SeatLayoutManagement: React.FC = () => {
       toast.error(err.message || 'Failed to load seat layouts');
     },
   });
-  console.log('🚀 ~ data:', data);
 
   const layouts = useMemo(() => data?.seatLayouts || [], [data]);
   const totalCount = useMemo(() => data?.totalCount || 0, [data]);

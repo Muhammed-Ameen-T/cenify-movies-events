@@ -24,7 +24,6 @@ const rowVariants = {
 };  
 
 const TopTheatersTable: React.FC<TopTheatersTableProps> = ({ theaters }) => {
-  console.log("🚀 ~ theaters:", theaters)
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown className="w-5 h-5 text-yellow-400" />;
     return <span className="text-lg font-bold text-gray-400">#{rank}</span>;

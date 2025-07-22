@@ -102,16 +102,9 @@ const ShowManagement: React.FC = () => {
         search: filters.search || undefined,
       }),
   });
-
-  // Log raw data for debugging
-  console.log('🚀 ~ Raw data from useQuery:', data);
-
   const shows = data?.shows || [];
   const totalShows = data?.totalCount || 0;
   const totalPages = Math.ceil(totalShows / ITEMS_PER_PAGE) || 1;
-
-  // Log shows for debugging
-  console.log('🚀 ~ Shows from API:', shows);
 
   // Normalize shows to ensure id
   const normalizedShows = shows.map((show: Show) => ({

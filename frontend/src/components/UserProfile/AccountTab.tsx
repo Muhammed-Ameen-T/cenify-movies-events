@@ -92,7 +92,6 @@ const AccountTab: React.FC<AccountTabProps> = ({
       toast.error('Failed to load user data');
     },
     onSuccess: (data: any) => {
-      console.log('🚀 ~ userContent:', data);
     },
   });
 

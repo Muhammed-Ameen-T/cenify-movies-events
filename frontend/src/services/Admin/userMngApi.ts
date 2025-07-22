@@ -19,7 +19,6 @@ const USER_ENDPOINTS = {
 
 export const fetchUsers = async (params: FetchUsersParams): Promise<{ users: User[]; totalCount: number; totalPages: number }> => {
   const response = await api.get(USER_ENDPOINTS.fetchUsers, { params });
-  console.log("🚀 ~ fetchUsers ~ response:", response.data.data.data.data)
   const { data, totalCount, totalPages } = response.data.data.data;
   const users = data.map((user: any) => ({
     ...user,
