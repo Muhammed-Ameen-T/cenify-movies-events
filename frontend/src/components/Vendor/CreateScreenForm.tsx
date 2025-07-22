@@ -122,7 +122,6 @@ const CreateScreenForm: React.FC = () => {
     queryKey: ['fetchSeatLayoutsVendorCreateScreen'],
     queryFn: fetchSeatLayoutsVendorCreateScreen,
   });
-  console.log("🚀 ~ seatLayouts:", seatLayouts)
   // Flatten theater data
   const theaters = theaterData?.pages.flatMap((page) => page.theaters) || [];
 

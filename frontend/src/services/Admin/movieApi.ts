@@ -28,9 +28,7 @@ export const movieService = {
   getMovies: async (params: FetchMoviesParams): Promise<FetchMoviesResponse['data']> => {
     const response = await api.get<FetchMoviesResponse>(ADMIN_ENDPOINTS.fetchMovies, {
       params,
-    });
-    console.log("🚀 ~ getMovies: ~ response:", response)
-    
+    });    
     return response.data.data;
   },
 

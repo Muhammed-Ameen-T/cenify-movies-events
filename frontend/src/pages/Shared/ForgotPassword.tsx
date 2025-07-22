@@ -56,7 +56,6 @@ const PasswordResetPage: React.FC = () => {
     resolver: zodResolver(otpSchema),
     defaultValues: { otp: '' },
   });
-    console.log("🚀 ~ otpRegister:", otpRegister)
 
   // Password Form
   const {

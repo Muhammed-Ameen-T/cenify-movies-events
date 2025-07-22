@@ -8,6 +8,7 @@ import errorHandler from './presentation/middleware/errorHandler.middleware';
 import './infrastructure/container';
 import 'tsconfig-paths/register';
 import { container } from './infrastructure/container';
+import { env } from './config/env.config';
 
 // 🔹 Load environment variables
 dotenv.config();
@@ -25,9 +26,11 @@ app.use(
       'http://localhost:5173',
       'https://www.muhammedameen.site',
       'https://muhammedameen.site',
+      'https://cenify.muhammedameen.site',
       'https://your-image-server.com',
       'https://lh3.googleusercontent.com',
       'https://res.cloudinary.com',
+      env.CLIENT_ORIGIN
     ],
     credentials: true,
   }),

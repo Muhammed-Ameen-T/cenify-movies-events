@@ -9,7 +9,6 @@ interface TopSellingShowsProps {
 }
 
 const TopSellingShows: React.FC<TopSellingShowsProps> = ({ shows }) => {
-  console.log("🚀 ~ shows:", shows)
   const totalTickets = shows.reduce((sum, show) => sum + show.tickets, 0) || 1526; // Fallback to avoid division by zero
 
   return (

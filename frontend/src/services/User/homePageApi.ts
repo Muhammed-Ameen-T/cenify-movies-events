@@ -4,7 +4,6 @@ import { handleAxiosError } from "../../utils/exios-error-handler";
 import { ERROR_MESSAGES } from "../../constants/auth.messages";
 
 export const getUserMovies = async (params: { page?: number; limit?: number; location: string | null } = { page: 1, limit: 8, location: '' }): Promise<any> => {
-  console.log("🚀 ~ getUserMovies ~ params:", params)
   try {
     const response = await api.get(USER_AUTH_ENDPOINTS.userMovies, { params });
     return response.data.data;

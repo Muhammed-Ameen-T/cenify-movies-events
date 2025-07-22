@@ -98,9 +98,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         selectedLocation: 'Chelambra',
         date: '2025-06-27',
       });
-
-      console.log('🚀 ~ queryFn: ~ showResponse:', showResponse);
-
       const mappedSuggestions: SearchSuggestion[] = [];
 
       // Map movies, theaters, and shows

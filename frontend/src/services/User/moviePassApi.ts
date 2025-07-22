@@ -24,7 +24,6 @@ export interface CheckoutSessionResponse {
 export const getMoviePass = async (): Promise<MoviePassData | null> => {
   try {
     const response = await api.get(USER_ENDPOINTS.getMoviePass);
-    console.log("🚀 ~ getMoviePass ~ response:", response)
     if (!response.data?.success) {
       throw new Error(response.data?.message || ERROR_MESSAGES.FETCH_MOVIE_PASS_FAILED);
     }
@@ -63,7 +62,6 @@ export const getMoviePassHistory = async ({
     const response = await api.get(USER_ENDPOINTS.getMoviePassHistory, {
       params: { page, limit },
     });
-    console.log('🚀 ~ getMoviePassHistory ~ response:', response);
     if (!response.data?.success) {
       throw new Error(response.data?.message || ERROR_MESSAGES.FETCH_MOVIE_PASS_HISTORY_FAILED);
     }

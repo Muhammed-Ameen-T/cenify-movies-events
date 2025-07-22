@@ -345,7 +345,6 @@ const MovieCreationForm: React.FC = () => {
   });
 
   const onSubmit = (data: MovieFormData) => {
-    console.log("🚀 ~ onSubmit ~ data:", data);
     createMovieMutation.mutate({
       name: data.name,
       genre: data.genre,

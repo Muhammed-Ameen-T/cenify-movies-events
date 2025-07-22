@@ -52,10 +52,8 @@ export async function findUserBookings(params: FindUserBookingsParams): Promise<
     const response = await api.get(USER_ENDPOINTS.findUserBookings, {
       params: queryParams,
     });
-    console.log("🚀 ~ findUserBookings ~ response:", response)
 
     if (!response.data.success) {
-      console.error('🚀 ~ findUserBookings ~ response:', response);
       throw new Error(response.data.message || ERROR_MESSAGES.FETCH_BOOKING_FAILED);
     }
 
@@ -101,7 +99,6 @@ export const BookingService = {
     try {
       const response = await api.get(`${USER_ENDPOINTS.findBookingById}${bookingId}`);
       if (!response.data.success) {
-        console.log("🚀 ~ findBookingById ~ response:", response)
         throw new Error(response.data.message || ERROR_MESSAGES.FETCH_BOOKING_FAILED);
       }
       return response.data.data;
