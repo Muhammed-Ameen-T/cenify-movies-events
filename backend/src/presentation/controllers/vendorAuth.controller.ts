@@ -36,7 +36,7 @@ export class VendorAuthController implements IVendorAuthController {
     @inject('TheaterRepository') private vendorRepository: ITheaterRepository,
   ) {}
 
-  async sendOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async sendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email } = req.body;
       const dto = new SendOtpVendorDTO(email);
@@ -44,11 +44,11 @@ export class VendorAuthController implements IVendorAuthController {
       await this.sendOtpUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, 'OTP sent successfully.');
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async verifyOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { name, email, password, phone, accountType, otp } = req.body;
       const dto = new VerifyOtpVendorDTO(name, email, password, phone, otp);
@@ -59,11 +59,11 @@ export class VendorAuthController implements IVendorAuthController {
         user: result.user,
       });
     } catch (error) {
-     next(error)
+      next(error);
     }
   }
 
-  async login(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password } = req.body;
       const dto = new LoginVendorDTO(email, password);
@@ -79,11 +79,11 @@ export class VendorAuthController implements IVendorAuthController {
         user: result.user,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async createNewTheater(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async createNewTheater(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
       const { name, location, facilities, intervalTime, gallery, email, phone, description } =
@@ -102,11 +102,11 @@ export class VendorAuthController implements IVendorAuthController {
       const theater = await this.createTheaterUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, 'Theater details updated successfully.', theater);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async getCurrentUser(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
       sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
@@ -128,7 +128,7 @@ export class VendorAuthController implements IVendorAuthController {
         profileImage: theater.gallery?.[0] || '',
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

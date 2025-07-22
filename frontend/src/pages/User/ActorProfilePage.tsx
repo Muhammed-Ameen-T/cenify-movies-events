@@ -144,10 +144,10 @@ const ActorProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-50">
-      {/* Hero Section */}
+{/* Hero Section */}
       <div className="relative overflow-hidden">
         {/* Static Background Image */}
-        <div className="absolute inset-0 h-[60vh]">
+        <div className="absolute inset-0 h-[50vh] xs:h-[55vh] sm:h-[60vh] md:h-[65vh]">
           <img
             src={backgroundImage}
             alt={person.name || 'Profile'}
@@ -157,21 +157,95 @@ const ActorProfilePage: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-8 py-16">
-          <div className="flex flex-col lg:flex-row gap-12 items-end">
+        <div className="relative z-10 max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 md:px-8 py-4 xs:py-6 sm:py-8 md:py-16">
+          {/* Mobile Layout (< sm) */}
+          <div className="block sm:hidden">
+            <div className="flex items-end gap-3 mb-4">
+              {/* Mobile Profile Image */}
+              <div className="flex-shrink-0">
+                <img
+                  src={profileImage}
+                  alt={person.name || 'Profile'}
+                  className="w-40 xs:w-24 h-54 xs:h-28 object-cover rounded-2xl shadow-xl border-2 border-white/20"
+                />
+              </div>
+              
+              {/* Mobile Profile Info */}
+              <div className="flex-1 text-white space-y-2">
+                {/* Mobile Badges */}
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-1 rounded-full font-bold text-xs">
+                    {person.known_for_department || 'Actor'}
+                  </div>
+                  <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                    <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                    <span className="font-bold text-xs">{person.popularity?.toFixed(1) || 'N/A'}</span>
+                  </div>
+                </div>
+                
+                {/* Mobile Name */}
+                <h1 className="text-5xl xs:text-2xl font-black leading-tight line-clamp-2">
+                  {person.name || 'Unknown'}
+                </h1>
+              </div>
+            </div>
+
+            {/* Mobile Details */}
+            <div className="space-y-2 text-white mb-4">
+              {/* Mobile Birth Info */}
+              <div className="flex flex-wrap items-center gap-3 text-xs">
+                {person.birthday && (
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>
+                      {formatDate(person.birthday)}
+                      {calculateAge(person.birthday) && ` (${calculateAge(person.birthday)})`}
+                    </span>
+                  </div>
+                )}
+                {person.place_of_birth && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    <span className="line-clamp-1">{person.place_of_birth}</span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Mobile Also Known As */}
+              {person.also_known_as && person.also_known_as.length > 0 && (
+                <p className="text-gray-300 text-xs line-clamp-1">
+                  Also: {person.also_known_as.slice(0, 2).join(', ')}
+                </p>
+              )}
+            </div>
+
+            {/* Mobile Action Button */}
+            <div className="flex gap-2">
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-center gap-2 bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 font-bold px-4 py-2.5 rounded-lg transition-all duration-300 text-sm flex-1"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop/Tablet Layout (sm+) */}
+          <div className="hidden sm:flex flex-col lg:flex-row gap-6 md:gap-8 lg:gap-12 items-end">
             {/* Profile Image */}
             <div className="flex-shrink-0 relative group">
               <img
                 src={profileImage}
                 alt={person.name || 'Profile'}
-                className="w-80 h-96 object-cover rounded-3xl shadow-2xl border-4 border-white/20 group-hover:scale-105 transition-transform duration-300"
+                className="w-56 h-72 sm:w-64 sm:h-80 md:w-72 md:h-88 lg:w-80 lg:h-96 object-cover rounded-2xl sm:rounded-3xl shadow-2xl border-4 border-white/20 group-hover:scale-105 transition-transform duration-300"
               />
             </div>
 
             {/* Profile Info */}
-            <div className="flex-1 text-white space-y-6">
-              <div className="space-y-2">
-                <div className="flex items-center gap-4 mb-4">
+            <div className="flex-1 text-white space-y-3 sm:space-y-4 md:space-y-6">
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3 md:mb-4">
                   <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-4 py-2 rounded-full font-bold">
                     {person.known_for_department || 'Actor'}
                   </div>
@@ -180,11 +254,11 @@ const ActorProfilePage: React.FC = () => {
                     <span className="font-bold">{person.popularity?.toFixed(1) || 'N/A'}</span>
                   </div>
                 </div>
-                <h1 className="text-6xl font-black mb-4">{person.name || 'Unknown'}</h1>
-                <div className="flex flex-wrap items-center gap-6 text-lg">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-2 sm:mb-3 md:mb-4 leading-tight">{person.name || 'Unknown'}</h1>
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6 text-sm sm:text-base md:text-lg">
                   {person.birthday ? (
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-5 h-5" />
+                      <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span>
                         {formatDate(person.birthday)}
                         {calculateAge(person.birthday) && ` (${calculateAge(person.birthday)} years old)`}
@@ -192,49 +266,38 @@ const ActorProfilePage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-5 h-5" />
+                      <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span>Birthdate Unknown</span>
                     </div>
                   )}
                   {person.place_of_birth ? (
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5" />
+                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span>{person.place_of_birth}</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5" />
+                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span>Birthplace Unknown</span>
                     </div>
                   )}
                 </div>
                 {person.also_known_as && person.also_known_as.length > 0 ? (
-                  <p className="text-gray-300 text-lg">
+                  <p className="text-gray-300 text-sm sm:text-base md:text-lg">
                     Also known as: {person.also_known_as.slice(0, 3).join(', ') || 'N/A'}
                   </p>
                 ) : (
-                  <p className="text-gray-300 text-lg">No alternate names available</p>
+                  <p className="text-gray-300 text-sm sm:text-base md:text-lg">No alternate names available</p>
                 )}
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-4 pt-4">
-                {/* <button
-                  onClick={handleFollow}
-                  className={`flex items-center gap-3 font-bold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 ${
-                    isFollowing
-                      ? 'bg-green-500 hover:bg-green-600 text-white'
-                      : 'bg-white text-black hover:bg-gray-100'
-                  }`}
-                >
-                  <Heart className={`w-6 h-6 ${isFollowing ? 'fill-current' : ''}`} />
-                  <span>{isFollowing ? 'Following' : 'Follow'}</span>
-                </button> */}
+              <div className="flex items-center gap-3 sm:gap-4 pt-2 sm:pt-3 md:pt-4">
                 <button
                   onClick={handleShare}
-                  className="flex items-center gap-3 bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 font-bold px-6 py-4 rounded-xl transition-all duration-300"
+                  className="flex items-center gap-2 sm:gap-3 bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 font-bold px-4 py-2 sm:px-5 sm:py-3 md:px-6 md:py-4 rounded-lg sm:rounded-xl transition-all duration-300 text-sm sm:text-base"
                 >
-                  <Share2 className="w-6 h-6" />
+                  <Share2 className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
                   <span>Share</span>
                 </button>
               </div>

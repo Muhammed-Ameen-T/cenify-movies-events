@@ -18,7 +18,7 @@ export class StripeWebhookController implements IStripeWebhookController {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
-  async handleWebhook(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async handleWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
     const sig = req.headers['stripe-signature'] as string;
     let event: Stripe.Event;
 

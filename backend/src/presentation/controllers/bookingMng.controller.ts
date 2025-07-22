@@ -33,7 +33,7 @@ export class BookingMngController implements IBookingMngController {
     @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
   ) {}
 
-  async createBooking(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async createBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
@@ -58,11 +58,11 @@ export class BookingMngController implements IBookingMngController {
       const result = await this.createBookingUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async checkPaymentOptions(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async checkPaymentOptions(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
@@ -86,11 +86,11 @@ export class BookingMngController implements IBookingMngController {
         moviePass: { active: isMoviePassActive },
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async fetchBookings(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async fetchBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, sortBy, sortOrder } = req.query;
       // Convert query parameters
@@ -113,11 +113,11 @@ export class BookingMngController implements IBookingMngController {
       const result = await this.fetchBookingsUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async findBookingsOfVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async findBookingsOfVendor(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, status, sortBy, sortOrder } = req.query;
       const vendorId = req.decoded?.userId;
@@ -144,11 +144,11 @@ export class BookingMngController implements IBookingMngController {
       const result = await this.findBookingsOfVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-     next(error)
+      next(error);
     }
   }
 
-  async findBookingById(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async findBookingById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       if (!id) {
@@ -158,10 +158,11 @@ export class BookingMngController implements IBookingMngController {
       const booking = await this.findBookingByIdUseCase.execute(id);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, booking);
     } catch (error) {
-next(error)    }
+      next(error);
+    }
   }
 
-  async findBookingsOfUser(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async findBookingsOfUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, status, sortBy, sortOrder } = req.query;
       const userId = req.decoded?.userId;
@@ -188,11 +189,11 @@ next(error)    }
       const result = await this.findBookingsOfUserUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async cancelBooking(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const { reason } = req.body;
@@ -204,7 +205,7 @@ next(error)    }
       const cancelledBooking = await this.cancelBookingUseCase.execute(id, reason);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, cancelledBooking);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

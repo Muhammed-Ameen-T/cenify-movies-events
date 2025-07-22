@@ -17,11 +17,10 @@ export class SendOtpPhoneUseCase implements ISendOtpPhoneUseCase {
     @inject('SmsService') private smsService: SmsService,
   ) {}
 
-  async execute(dto:SendOtpPhoneRequestDTO): Promise<void> {
-    const parsedPhone = parseInt(dto.phone,10)
+  async execute(dto: SendOtpPhoneRequestDTO): Promise<void> {
+    const parsedPhone = parseInt(dto.phone, 10);
     // Check if phone number is already in use by another user
     const existingUser = await this.userRepository.findByPhone(parsedPhone);
-
 
     const otp = generateOtp(6);
     const otpKey = `otp:phone:${dto.phone}:${dto.userId}`;

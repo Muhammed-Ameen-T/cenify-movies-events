@@ -27,7 +27,7 @@ export class BookingStripeWebhookController {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
-  async handleWebhook(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async handleWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
     const sig = req.headers['stripe-signature'] as string;
     let event: Stripe.Event;
 
@@ -128,9 +128,12 @@ export class BookingStripeWebhookController {
         );
 
         // Save notifications to database
-        const savedUserNotification = await this.notificationRepository.createNotification(userNotification);
-        const savedVendorNotification = await this.notificationRepository.createNotification(vendorNotification);
-        const savedAdminNotification = await this.notificationRepository.createGlobalNotification(adminNotification);
+        const savedUserNotification =
+          await this.notificationRepository.createNotification(userNotification);
+        const savedVendorNotification =
+          await this.notificationRepository.createNotification(vendorNotification);
+        const savedAdminNotification =
+          await this.notificationRepository.createGlobalNotification(adminNotification);
 
         // Emit notifications with consistent structure
         const userNotificationPayload = {
@@ -144,7 +147,7 @@ export class BookingStripeWebhookController {
           updatedAt: savedUserNotification.updatedAt,
           isRead: savedUserNotification.isRead,
           isGlobal: savedUserNotification.isGlobal,
-          readedUsers: savedUserNotification.readedUsers
+          readedUsers: savedUserNotification.readedUsers,
         };
         console.log(`Emitting user notification to user-${userId}:`, userNotificationPayload);
         socketService.emitNotification(`user-${userId}`, userNotificationPayload);
@@ -160,9 +163,12 @@ export class BookingStripeWebhookController {
           updatedAt: savedVendorNotification.updatedAt,
           isRead: savedVendorNotification.isRead,
           isGlobal: savedVendorNotification.isGlobal,
-          readedUsers: savedUserNotification.readedUsers
+          readedUsers: savedUserNotification.readedUsers,
         };
-        console.log(`Emitting vendor notification to vendor-${show.vendorId}:`, vendorNotificationPayload);
+        console.log(
+          `Emitting vendor notification to vendor-${show.vendorId}:`,
+          vendorNotificationPayload,
+        );
         socketService.emitNotification(`vendor-${show.vendorId}`, vendorNotificationPayload);
 
         const adminNotificationPayload = {
@@ -176,7 +182,7 @@ export class BookingStripeWebhookController {
           updatedAt: savedAdminNotification.updatedAt,
           isRead: savedAdminNotification.isRead,
           isGlobal: savedAdminNotification.isGlobal,
-          readedUsers: savedUserNotification.readedUsers
+          readedUsers: savedUserNotification.readedUsers,
         };
         console.log(`Emitting admin notification to admin-global:`, adminNotificationPayload);
         socketService.emitNotification('admin-global', adminNotificationPayload);

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographic: SOLID & Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Energetic & Playful -->
+    <!-- Application Structure Plan: The infographic follows a narrative structure designed for progressive learning. It starts with a high-level hook, introduces the foundational SOLID principles individually, then visually explains Clean Architecture. The core of the narrative is the "Synergy" section, which uses a stacked bar chart to connect the two concepts, showing how principles apply to architectural layers. It then moves to a practical "Blueprint" for a MERN project and concludes with a summary of key benefits, using a donut chart and large stats for impact. This top-down approach (from principles to architecture to application) was chosen for maximum clarity and user understanding, guiding the user from "what" and "why" to "how." -->
+    <!-- Visualization & Content Choices: 
+        - SOLID Principles -> Goal: Inform/Organize -> Method: 5-card layout with Unicode icons and text. Justification: Quickly introduces all 5 concepts in a digestible, parallel format. NO SVG.
+        - Clean Architecture -> Goal: Organize/Inform -> Method: Custom HTML/CSS concentric circle diagram. Justification: Visually represents the core layered concept and the crucial "Dependency Rule" without relying on graphics files. NO SVG/Mermaid.
+        - Synergy -> Goal: Compare/Relationships -> Method: Chart.js Stacked Bar Chart. Justification: Best way to show the compositional impact of multiple principles across different architectural layers, revealing their relationships. Library: Chart.js (Canvas). NO SVG.
+        - MERN Blueprint -> Goal: Organize -> Method: Custom HTML/CSS flow diagram. Justification: Clearly displays the recommended folder structure as a practical takeaway. NO SVG/Mermaid.
+        - Benefits -> Goal: Inform -> Method: Chart.js Donut Chart & Big Number cards. Justification: Donut chart provides a simple, visually appealing metric for "Code Quality," while big numbers create high impact for key benefits. Library: Chart.js (Canvas). NO SVG.
+        - Code Example Generator -> Goal: Inform/Apply -> Method: LLM-generated TypeScript code snippet. Justification: Provides interactive, on-demand practical examples for theoretical concepts. Library: Gemini API.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 60vh;
+            }
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #004FFF;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-[#F0F8FF]">
+
+    <header class="bg-[#004FFF] text-white text-center py-20 px-4">
+        <h1 class="text-4xl md:text-6xl font-black uppercase tracking-wider">From Fragile to Future-Proof</h1>
+        <p class="mt-4 max-w-3xl mx-auto text-lg text-[#ADE8F4]">An Infographic Guide to Building Robust Backends with SOLID Principles and Clean Architecture</p>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+
+        <section id="solid-principles" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#004FFF]">The 5 SOLID Principles at a Glance</h2>
+                <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">These five foundational principles guide developers in creating understandable, flexible, and maintainable object-oriented designs.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-[#FF8C42] transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-4xl mb-3">🎯</div>
+                    <h3 class="font-bold text-xl mb-2">Single Responsibility</h3>
+                    <p class="text-gray-600">A class should have only one reason to change, meaning it has a single, well-defined job.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-[#FFD166] transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-4xl mb-3">📖</div>
+                    <h3 class="font-bold text-xl mb-2">Open/Closed</h3>
+                    <p class="text-gray-600">Software entities should be open for extension, but closed for modification.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-[#00B4D8] transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-4xl mb-3">🔄</div>
+                    <h3 class="font-bold text-xl mb-2">Liskov Substitution</h3>
+                    <p class="text-gray-600">Objects of a superclass should be replaceable with objects of its subclasses without errors.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-[#ADE8F4] transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-4xl mb-3">🧩</div>
+                    <h3 class="font-bold text-xl mb-2">Interface Segregation</h3>
+                    <p class="text-gray-600">Clients should not be forced to depend on interfaces they do not use.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-[#004FFF] transform hover:scale-105 transition-transform duration-300">
+                    <div class="text-4xl mb-3">🔌</div>
+                    <h3 class="font-bold text-xl mb-2">Dependency Inversion</h3>
+                    <p class="text-gray-600">High-level modules should depend on abstractions, not on concrete low-level modules.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="clean-architecture" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#004FFF]">Deconstructing Clean Architecture</h2>
+                <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">This architectural model organizes code into concentric layers to isolate business logic from external details like databases and frameworks.</p>
+            </div>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                <div class="relative flex items-center justify-center w-full max-w-md h-96">
+                    <div class="absolute w-96 h-96 rounded-full border-4 border-dashed border-[#004FFF] flex items-center justify-center">
+                        <div class="w-72 h-72 rounded-full border-4 border-dashed border-[#00B4D8] flex items-center justify-center">
+                            <div class="w-48 h-48 rounded-full border-4 border-dashed border-[#FF8C42] flex items-center justify-center">
+                                <div class="w-24 h-24 rounded-full bg-[#FFD166] flex items-center justify-center">
+                                    <span class="font-bold text-gray-800">Entities</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <div class="absolute -mt-28 -ml-1 text-center"><span class="bg-[#F0F8FF] px-2 font-semibold text-[#FF8C42]">Use Cases</span></div>
+                        <div class="absolute -mt-[164px] -ml-5 text-center"><span class="bg-[#F0F8FF] px-2 font-semibold text-[#00B4D8]">Interface Adapters</span></div>
+                        <div class="absolute -mt-[210px] -ml-12 text-center"><span class="bg-[#F0F8FF] px-2 font-semibold text-[#004FFF]">Frameworks & Drivers</span></div>
+                    </div>
+                </div>
+                <div class="max-w-md">
+                    <h3 class="text-2xl font-bold text-[#004FFF] mb-4">The Dependency Rule</h3>
+                    <p class="text-gray-700 text-lg mb-4">The core principle is that source code dependencies can only point inwards. Nothing in an inner circle can know anything at all about something in an outer circle. This protects the core business logic from changes in volatile outer layers.</p>
+                    <div class="text-6xl text-center text-[#FF8C42] font-black animate-pulse">&darr;</div>
+                    <p class="text-center font-bold text-gray-600">Dependencies Point Inwards</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="synergy" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#004FFF]">The Synergy: SOLID Powering Clean Architecture</h2>
+                <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">SOLID principles are not abstract theories; they are the tools used to build and maintain the boundaries between the layers of Clean Architecture. This chart shows the conceptual impact of each principle across the different layers.</p>
+            </div>
+            <div class="bg-white p-4 md:p-8 rounded-xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="synergyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="blueprint" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#004FFF]">A MERN Project Blueprint</h2>
+                <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">Here’s how these concepts translate into a tangible folder structure for a Node.js/Express.js backend, promoting separation of concerns.</p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <div class="flex flex-col space-y-4">
+                    <div class="flex items-center p-4 bg-blue-50 rounded-lg">
+                        <span class="text-2xl mr-4">📁</span>
+                        <div>
+                            <h4 class="font-bold text-lg text-blue-800">src/presentation/</h4>
+                            <p class="text-blue-700">Entry point. Handles HTTP requests, routing (Express.js), and middleware. The bridge to the outside world.</p>
+                        </div>
+                    </div>
+                    <div class="self-center text-2xl text-gray-400">&darr;</div>
+                    <div class="flex items-center p-4 bg-orange-50 rounded-lg">
+                        <span class="text-2xl mr-4">⚙️</span>
+                        <div>
+                            <h4 class="font-bold text-lg text-orange-800">src/application/</h4>
+                            <p class="text-orange-700">Contains application-specific business rules. Orchestrates use cases and calls on domain abstractions.</p>
+                        </div>
+                    </div>
+                    <div class="self-center text-2xl text-gray-400">&darr;</div>
+                    <div class="flex items-center p-4 bg-yellow-50 rounded-lg">
+                        <span class="text-2xl mr-4">🏛️</span>
+                        <div>
+                            <h4 class="font-bold text-lg text-yellow-800">src/domain/</h4>
+                            <p class="text-yellow-700">Core business logic. Contains entities and abstract interfaces for repositories and services.</p>
+                        </div>
+                    </div>
+                    <div class="self-center text-2xl text-gray-400">&darr;</div>
+                    <div class="flex items-center p-4 bg-teal-50 rounded-lg">
+                        <span class="text-2xl mr-4">💾</span>
+                        <div>
+                            <h4 class="font-bold text-lg text-teal-800">src/infrastructure/</h4>
+                            <p class="text-teal-700">Concrete implementations. Connects to databases (MongoDB), external APIs, and other low-level details.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gemini-examples" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#004FFF]">✨ Code Examples with Gemini ✨</h2>
+                <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">Select a concept below and let Gemini generate a simple TypeScript code example to illustrate it.</p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-6">
+                    <select id="conceptSelector" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004FFF] flex-grow">
+                        <option value="">Select a concept...</option>
+                        <optgroup label="SOLID Principles">
+                            <option value="Single Responsibility Principle (SRP)">Single Responsibility Principle (SRP)</option>
+                            <option value="Open/Closed Principle (OCP)">Open/Closed Principle (OCP)</option>
+                            <option value="Liskov Substitution Principle (LSP)">Liskov Substitution Principle (LSP)</option>
+                            <option value="Interface Segregation Principle (ISP)">Interface Segregation Principle (ISP)</option>
+                            <option value="Dependency Inversion Principle (DIP)">Dependency Inversion Principle (DIP)</option>
+                        </optgroup>
+                        <optgroup label="Clean Architecture Layers">
+                            <option value="Entities layer in Clean Architecture">Entities Layer</option>
+                            <option value="Use Cases layer in Clean Architecture">Use Cases Layer</option>
+                            <option value="Interface Adapters layer in Clean Architecture">Interface Adapters Layer</option>
+                            <option value="Frameworks and Drivers layer in Clean Architecture">Frameworks & Drivers Layer</option>
+                        </optgroup>
+                    </select>
+                    <button id="generateCodeBtn" class="bg-[#004FFF] text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-[#003BCC] transition-colors duration-300 flex items-center justify-center min-w-[150px]">
+                        <span id="buttonText">Generate Code</span>
+                        <div id="loadingSpinner" class="loading-spinner ml-2 hidden"></div>
+                    </button>
+                </div>
+                <div class="bg-gray-800 text-gray-200 p-4 rounded-lg overflow-x-auto text-sm">
+                    <pre><code id="codeOutput" class="language-typescript">// Your generated TypeScript code will appear here.</code></pre>
+                </div>
+                <p id="errorMessage" class="text-red-600 mt-2 hidden">An error occurred. Please try again.</p>
+            </div>
+        </section>
+
+        <section id="benefits">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#004FFF]">The Payoff: Key Benefits</h2>
+                <p class="mt-2 text-lg text-gray-600 max-w-2xl mx-auto">Adopting this structured approach yields significant, tangible benefits for the entire development lifecycle and business goals.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                    <h3 class="font-bold text-xl mb-4 text-gray-700">Enhanced Code Quality</h3>
+                    <div class="chart-container h-64 max-h-64">
+                        <canvas id="qualityChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-gray-600">A modular, decoupled codebase leads to fewer bugs and is easier to reason about.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center flex flex-col justify-center">
+                    <div class="text-6xl font-black text-[#FF8C42]">50%</div>
+                    <h3 class="font-bold text-xl mt-2 text-gray-700">Faster Onboarding</h3>
+                    <p class="mt-2 text-gray-600">A predictable structure helps new developers understand the codebase and contribute faster.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center flex flex-col justify-center">
+                    <div class="text-6xl font-black text-[#00B4D8]">100%</div>
+                    <h3 class="font-bold text-xl mt-2 text-gray-700">Framework Independence</h3>
+                    <p class="mt-2 text-gray-600">Core business logic is not tied to Express.js or any other framework, allowing for easier migrations.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#004FFF] text-white text-center p-6 mt-16">
+        <p>&copy; 2025 Infographic SPA. Built to make complex topics clear.</p>
+    </footer>
+
+    <script>
+        const wrapLabel = (label, maxWidth) => {
+            if (label.length <= maxWidth) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxWidth) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines;
+        };
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+        
+        const commonTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    }
+                }
+            }
+        };
+
+        const synergyCtx = document.getElementById('synergyChart').getContext('2d');
+        const synergyChart = new Chart(synergyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Entities', 'Use Cases', 'Interface Adapters', 'Frameworks & Drivers'],
+                datasets: [
+                    {
+                        label: 'SRP',
+                        data: [9, 8, 7, 7],
+                        backgroundColor: '#FF8C42',
+                    },
+                    {
+                        label: 'OCP',
+                        data: [3, 7, 8, 8],
+                        backgroundColor: '#FFD166',
+                    },
+                    {
+                        label: 'LSP',
+                        data: [4, 6, 8, 7],
+                        backgroundColor: '#ADE8F4',
+                    },
+                    {
+                        label: 'ISP',
+                        data: [2, 8, 9, 5],
+                        backgroundColor: '#00B4D8',
+                    },
+                    {
+                        label: 'DIP',
+                        data: [1, 9, 10, 2],
+                        backgroundColor: '#004FFF',
+                    }
+                ]
+            },
+            options: {
+                ...commonTooltipOptions,
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        title: { display: true, text: 'Conceptual Impact Score' }
+                    }
+                },
+                plugins: {
+                    ...commonTooltipOptions.plugins,
+                    title: {
+                        display: true,
+                        text: 'Principle Impact Across Architectural Layers',
+                        font: { size: 16 }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+        const qualityChart = new Chart(qualityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Maintainability', 'Testability', 'Scalability', 'Flexibility'],
+                datasets: [{
+                    label: 'Code Quality Score',
+                    data: [25, 25, 25, 25],
+                    backgroundColor: [
+                        '#004FFF',
+                        '#00B4D8',
+                        '#FF8C42',
+                        '#FFD166'
+                    ],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 4,
+                }]
+            },
+            options: {
+                ...commonTooltipOptions,
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    ...commonTooltipOptions.plugins,
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Overall Code Quality',
+                        position: 'bottom'
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // Gemini API Integration
+        const conceptSelector = document.getElementById('conceptSelector');
+        const generateCodeBtn = document.getElementById('generateCodeBtn');
+        const codeOutput = document.getElementById('codeOutput');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const buttonText = document.getElementById('buttonText');
+        const errorMessage = document.getElementById('errorMessage');
+
+        generateCodeBtn.addEventListener('click', async () => {
+            const selectedConcept = conceptSelector.value;
+            if (!selectedConcept) {
+                codeOutput.textContent = '// Please select a concept first.';
+                errorMessage.classList.add('hidden');
+                return;
+            }
+
+            loadingSpinner.classList.remove('hidden');
+            buttonText.textContent = 'Generating...';
+            generateCodeBtn.disabled = true;
+            codeOutput.textContent = ''; // Clear previous output
+            errorMessage.classList.add('hidden');
+
+            try {
+                const prompt = `Generate a simple and concise TypeScript code example demonstrating the "${selectedConcept}". Focus on clarity and a single, isolated example. Do not include excessive comments or explanations, just the code.`;
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = "yAIzaSyDAOOXit8QqGsc7Z5ogIWcauF18SsH8Zs0"; // Canvas will automatically provide the API key
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    // Attempt to extract code block if present
+                    const codeMatch = text.match(/```typescript\n([\s\S]*?)\n```/);
+                    if (codeMatch && codeMatch[1]) {
+                        codeOutput.textContent = codeMatch[1].trim();
+                    } else {
+                        codeOutput.textContent = text.trim(); // Fallback if no code block
+                    }
+                } else {
+                    codeOutput.textContent = '// No code generated. Please try again.';
+                    errorMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                codeOutput.textContent = '// Failed to generate code. Network error or API issue.';
+                errorMessage.classList.remove('hidden');
+            } finally {
+                loadingSpinner.classList.add('hidden');
+                buttonText.textContent = 'Generate Code';
+                generateCodeBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

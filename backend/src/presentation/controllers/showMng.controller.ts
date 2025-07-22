@@ -35,7 +35,7 @@ export class ShowManagementController implements IShowManagementController {
     @inject('ShowJobService') private showJobService: ShowJobService,
   ) {}
 
-  async createShow(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async createShow(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
       if (!vendorId) {
@@ -58,11 +58,11 @@ export class ShowManagementController implements IShowManagementController {
       }
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, shows);
     } catch (error) {
-     next(error)
+      next(error);
     }
   }
 
-  async updateShow(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async updateShow(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
@@ -78,11 +78,11 @@ export class ShowManagementController implements IShowManagementController {
       }
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async updateShowStatus(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async updateShowStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
     const { status } = req.body;
 
@@ -91,10 +91,11 @@ export class ShowManagementController implements IShowManagementController {
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
     } catch (error) {
       console.error('❌ ~ ShowManagementController ~ updateShowStatus ~ Error:', error);
-next(error)    }
+      next(error);
+    }
   }
 
-  async deleteShow(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async deleteShow(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
@@ -112,11 +113,11 @@ next(error)    }
         message: 'Show deleted successfully',
       });
     } catch (error) {
-   next(error)
+      next(error);
     }
   }
 
-  async getShowById(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getShowById(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
@@ -126,11 +127,11 @@ next(error)    }
       }
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
     } catch (error) {
-   next(error)
+      next(error);
     }
   }
 
-  async getAllShows(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getAllShows(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, theaterId, movieId, screenId, status, sortBy, sortOrder } =
         req.query;
@@ -150,11 +151,11 @@ next(error)    }
       const result = await this.findAllShowsUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-next(error)
+      next(error);
     }
   }
 
-  async getShowsOfVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getShowsOfVendor(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, sortBy, sortOrder } = req.query;
       const vendorId = req.decoded?.userId;
@@ -176,11 +177,11 @@ next(error)
       const result = await this.findShowsByVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
- next(error)
+      next(error);
     }
   }
 
-  async getShowSelection(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getShowSelection(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { movieId } = req.params;
       const { date, priceRanges, timeSlots, facilities } = req.query;
@@ -227,11 +228,11 @@ next(error)
       const result = await this.fetchShowSelectionUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-   next(error)
+      next(error);
     }
   }
 
-  async createRecurringShow(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async createRecurringShow(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { showId, startDate, endDate } = req.body;
       const vendorId = req.decoded?.userId;
@@ -263,7 +264,7 @@ next(error)
 
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, shows);
     } catch (error) {
-   next(error)
+      next(error);
     }
   }
 }

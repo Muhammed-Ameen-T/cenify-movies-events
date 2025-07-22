@@ -173,9 +173,7 @@ class SocketService {
       return;
     }
     if (!room) {
-      console.warn(
-        `Cannot emit notification: invalid room, instance ID: ${this.instanceId}`,
-      );
+      console.warn(`Cannot emit notification: invalid room, instance ID: ${this.instanceId}`);
       return;
     }
     console.log(

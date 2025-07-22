@@ -17,7 +17,10 @@ import { IMoviePassRepository } from '../../domain/interfaces/repositories/movie
 import { IChangePasswordUseCase } from '../../domain/interfaces/useCases/User/changePassword.interface';
 import { IFindUserWalletTransactionsUseCase } from '../../domain/interfaces/useCases/User/findUserTransaction.interface';
 import { IRedeemLoyalityToWalletUseCase } from '../../domain/interfaces/useCases/User/redeemLoyalityToWallet.interface';
-import { SendOtpPhoneRequestDTO, VerifyOtpPhoneRequestDTO } from '../../application/dtos/profile.dto';
+import {
+  SendOtpPhoneRequestDTO,
+  VerifyOtpPhoneRequestDTO,
+} from '../../application/dtos/profile.dto';
 import { ISendOtpPhoneUseCase } from '../../domain/interfaces/useCases/User/sendOtpPhone.interface';
 import { IVerifyOtpPhoneUseCase } from '../../domain/interfaces/useCases/User/verifyOtpPhone.interface';
 
@@ -39,7 +42,7 @@ export class UserProfileController implements IUserProfileController {
     @inject('VerifyOtpPhoneUseCase') private verifyOtpPhoneUseCase: IVerifyOtpPhoneUseCase,
   ) {}
 
-  async getCurrentUser(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
@@ -63,11 +66,11 @@ export class UserProfileController implements IUserProfileController {
         joinedDate: user.createdAt.toDateString(),
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async updateUserProfile(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async updateUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
@@ -78,8 +81,8 @@ export class UserProfileController implements IUserProfileController {
       const updateData = new UpdateProfileRequestDTO(
         req.body.name,
         req.body.phone !== undefined && req.body.phone !== 'N/A' && !isNaN(Number(req.body.phone))
-            ? Number(req.body.phone)
-            : null,
+          ? Number(req.body.phone)
+          : null,
         req.body.profileImage,
         req.body.dob == 'N/A' ? null : new Date(req.body.dob),
       );
@@ -88,11 +91,11 @@ export class UserProfileController implements IUserProfileController {
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { userResponse });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async findUserWallet(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async findUserWallet(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
@@ -107,11 +110,11 @@ export class UserProfileController implements IUserProfileController {
       }
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { wallet });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async findProfileContents(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async findProfileContents(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
@@ -132,11 +135,11 @@ export class UserProfileController implements IUserProfileController {
         moviePass,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async changePassword(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
@@ -150,11 +153,11 @@ export class UserProfileController implements IUserProfileController {
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { userResponse });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async findUserWalletTransactions(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async findUserWalletTransactions(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
@@ -187,11 +190,11 @@ export class UserProfileController implements IUserProfileController {
       );
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async redeemLoyaltyPoints(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async redeemLoyaltyPoints(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
@@ -211,7 +214,7 @@ export class UserProfileController implements IUserProfileController {
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { walletResponse });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
@@ -223,7 +226,7 @@ export class UserProfileController implements IUserProfileController {
     }
 
     try {
-      const {phone} = req.body;
+      const { phone } = req.body;
       const dto = new SendOtpPhoneRequestDTO(phone, userId);
       if (!phone || !/^\d{10}$/.test(phone)) {
         sendResponse(res, HttpResCode.BAD_REQUEST, ERROR_MESSAGES.VALIDATION.INVALID_PHONE);
@@ -245,15 +248,17 @@ export class UserProfileController implements IUserProfileController {
     }
 
     try {
-      const {phone, otp} = req.body;
-      const dto = new VerifyOtpPhoneRequestDTO(phone,otp,userId);
+      const { phone, otp } = req.body;
+      const dto = new VerifyOtpPhoneRequestDTO(phone, otp, userId);
       if (!phone || !otp) {
         sendResponse(res, HttpResCode.BAD_REQUEST, ERROR_MESSAGES.VALIDATION.INVALID_INPUT);
         return;
       }
 
       await this.verifyOtpPhoneUseCase.execute(dto);
-      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { message: 'OTP verified successfully' });
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
+        message: 'OTP verified successfully',
+      });
     } catch (error) {
       next(error);
     }

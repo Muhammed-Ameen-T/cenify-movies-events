@@ -18,7 +18,7 @@ export class UserManagementController implements IUserManagementController {
     private updateUserBlockStatusUseCase: IUpdateUserBlockStatusUseCase,
   ) {}
 
-  async getUsers(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
         page = '1',
@@ -67,11 +67,11 @@ export class UserManagementController implements IUserManagementController {
         },
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async updateUserBlockStatus(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async updateUserBlockStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const { isBlocked } = req.body;
@@ -82,7 +82,7 @@ export class UserManagementController implements IUserManagementController {
 
       await this.updateUserBlockStatusUseCase.execute(id, { isBlocked }, res);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

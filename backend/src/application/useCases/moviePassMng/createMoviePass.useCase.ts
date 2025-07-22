@@ -83,7 +83,6 @@ export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
     await this.notificationRepository.createNotification(notification);
     socketService.emitNotification(`user-${dto.userId}`, notification);
 
-
     // Schedule expiration job
     await this.moviePassJobService.scheduleMoviePassExpiration(dto.userId, dto.expireDate);
 

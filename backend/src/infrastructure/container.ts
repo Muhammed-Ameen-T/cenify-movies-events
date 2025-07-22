@@ -338,7 +338,9 @@ container.register<IUserProfileController>('UserProfileController', {
 });
 container.register('SmsService', { useClass: SmsService });
 container.register<ISendOtpPhoneUseCase>('SendOtpPhoneUseCase', { useClass: SendOtpPhoneUseCase });
-container.register<IVerifyOtpPhoneUseCase>('VerifyOtpPhoneUseCase', { useClass: VerifyOtpPhoneUseCase });
+container.register<IVerifyOtpPhoneUseCase>('VerifyOtpPhoneUseCase', {
+  useClass: VerifyOtpPhoneUseCase,
+});
 
 // Screen Management UseCase, Controller, Repository Registration
 container.register<IScreenRepository>('ScreenRepository', { useClass: ScreenRepository });
@@ -448,10 +450,9 @@ container.register<IBookingMngController>('BookingMngController', {
 container.register('PaymentService', { useClass: PaymentService });
 container.register('CloudinaryService', { useClass: CloudinaryService });
 container.register('BookingStripeWebhookController', { useClass: BookingStripeWebhookController });
-container.register<IProcessVendorPayout>(
-  'IProcessVendorPayout',
-  { useClass: ProcessVendorPayoutUseCase }
-);
+container.register<IProcessVendorPayout>('IProcessVendorPayout', {
+  useClass: ProcessVendorPayoutUseCase,
+});
 
 // Notification Service Registration
 container.register('NotificationService', { useClass: NotificationService });

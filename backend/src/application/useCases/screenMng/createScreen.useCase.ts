@@ -37,7 +37,6 @@ export class CreateScreenUseCase implements ICreateScreenUseCase {
       );
     }
 
-
     try {
       const savedScreen = await this.screenRepository.create(newScreen);
       await this.theaterRepository.updateScreens(

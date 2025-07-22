@@ -15,7 +15,12 @@ const ShowMngController = container.resolve<IShowManagementController>('ShowMana
 const router = Router();
 
 // Fetch all shows
-router.get('/fetch', verifyAccessToken,authorizeRoles(['vendor','admin','user']), ShowMngController.getAllShows.bind(ShowMngController));
+router.get(
+  '/fetch',
+  verifyAccessToken,
+  authorizeRoles(['vendor', 'admin', 'user']),
+  ShowMngController.getAllShows.bind(ShowMngController),
+);
 
 // Fetch shows for a vendor
 router.get(
@@ -26,13 +31,18 @@ router.get(
 );
 
 // Fetch a show by ID
-router.get('/find/:id', verifyAccessToken,  authorizeRoles(['vendor','admin','user']), ShowMngController.getShowById.bind(ShowMngController));
+router.get(
+  '/find/:id',
+  verifyAccessToken,
+  authorizeRoles(['vendor', 'admin', 'user']),
+  ShowMngController.getShowById.bind(ShowMngController),
+);
 
 // Create a new show
 router.post(
   '/create',
   verifyAccessToken,
-  authorizeRoles(['vendor','admin']),
+  authorizeRoles(['vendor', 'admin']),
   validateRequest(CreateShowSchema),
   ShowMngController.createShow.bind(ShowMngController),
 );
@@ -41,7 +51,7 @@ router.post(
 router.put(
   '/update/:id',
   verifyAccessToken,
-  authorizeRoles(['vendor','admin']),
+  authorizeRoles(['vendor', 'admin']),
   // validateRequest(UpdateShowSchema),
   ShowMngController.updateShow.bind(ShowMngController),
 );
@@ -50,7 +60,7 @@ router.put(
 router.patch(
   '/status/:id',
   verifyAccessToken,
-  authorizeRoles(['vendor','admin']),
+  authorizeRoles(['vendor', 'admin']),
   // validateRequest(UpdateShowStatusSchema),
   ShowMngController.updateShowStatus.bind(ShowMngController),
 );
@@ -59,7 +69,7 @@ router.patch(
 router.delete(
   '/delete/:id',
   verifyAccessToken,
-  authorizeRoles(['vendor','admin']),
+  authorizeRoles(['vendor', 'admin']),
   ShowMngController.deleteShow.bind(ShowMngController),
 );
 
@@ -71,7 +81,7 @@ router.get(
 );
 
 // Create Reccuring Shows
-router.post('/recurring', verifyAccessToken,authorizeRoles(['vendor']), (req, res, next) =>
+router.post('/recurring', verifyAccessToken, authorizeRoles(['vendor']), (req, res, next) =>
   ShowMngController.createRecurringShow(req, res, next),
 );
 

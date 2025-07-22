@@ -19,7 +19,7 @@ export class DashboardController implements IDashboardController {
     private fetchAdminDashboardUseCase: IFetchAdminDashboardUseCase,
   ) {}
 
-  async getDashboardData(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getDashboardData(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
       if (!vendorId) {
@@ -36,11 +36,11 @@ export class DashboardController implements IDashboardController {
       const result = await this.fetchDashboardUseCase.execute(vendorId, params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async getAdminDashboardData(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getAdminDashboardData(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const adminId = req.decoded?.userId;
       if (!adminId) {
@@ -57,7 +57,7 @@ export class DashboardController implements IDashboardController {
       const result = await this.fetchAdminDashboardUseCase.execute(adminId, params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

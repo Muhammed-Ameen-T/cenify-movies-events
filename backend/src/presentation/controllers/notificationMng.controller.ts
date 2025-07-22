@@ -22,7 +22,7 @@ export class NotificationMngController implements INotificationMngController {
    * @body {string} description - The description/content of the global notification
    * @body {string} type - The type of the notification (e.g., 'announcement', 'update')
    */
-  async createGlobalNotification(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async createGlobalNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { title, description, type } = req.body;
 
@@ -38,7 +38,7 @@ export class NotificationMngController implements INotificationMngController {
         message: 'Global notification created successfully',
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
@@ -50,7 +50,7 @@ export class NotificationMngController implements INotificationMngController {
    * @body {string} description - The description/content of the notification
    * @body {string} type - The type of the notification (e.g., 'booking_update', 'promo')
    */
-  async createUserNotification(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async createUserNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
@@ -77,7 +77,7 @@ export class NotificationMngController implements INotificationMngController {
       const newNotification = await this.notificationService.createNotification(notificationData);
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, newNotification);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
@@ -87,7 +87,7 @@ export class NotificationMngController implements INotificationMngController {
    * @access Authenticated User
    * @param {string} id - The ID of the notification to mark as read
    */
-  async readOneNotification(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async readOneNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id: notificationId } = req.params;
       const userId = req.decoded?.userId;
@@ -111,7 +111,7 @@ export class NotificationMngController implements INotificationMngController {
         sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND);
       }
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
@@ -120,7 +120,7 @@ export class NotificationMngController implements INotificationMngController {
    * @desc Mark all notifications as read for the authenticated user
    * @access Authenticated User
    */
-  async readAllNotification(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async readAllNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
@@ -140,11 +140,11 @@ export class NotificationMngController implements INotificationMngController {
         );
       }
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async readAllAdminNotification(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async readAllAdminNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const adminId = req.decoded?.userId;
       if (!adminId) {
@@ -164,7 +164,7 @@ export class NotificationMngController implements INotificationMngController {
         );
       }
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
@@ -173,7 +173,7 @@ export class NotificationMngController implements INotificationMngController {
    * @desc Fetch all notifications for the authenticated user (including relevant global ones)
    * @access Authenticated User
    */
-  async fetchAllUserNotification(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async fetchAllUserNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
@@ -201,7 +201,7 @@ export class NotificationMngController implements INotificationMngController {
         readCount,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
@@ -214,7 +214,7 @@ export class NotificationMngController implements INotificationMngController {
    * @body {string} description - The description/content of the notification
    * @body {string} type - The type of the notification (e.g., 'payout_alert', 'order_update')
    */
-  async createVendorNotification(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async createVendorNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       // Assuming `vendorId` might come from `req.body` or `req.decoded` based on the auth context.
       // For this example, I'll assume it's passed in the body if an admin is creating it for a specific vendor.
@@ -235,7 +235,7 @@ export class NotificationMngController implements INotificationMngController {
         message: 'Vendor notification created successfully',
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
@@ -245,7 +245,7 @@ export class NotificationMngController implements INotificationMngController {
    * @access Vendor (needs appropriate authorization check)
    * @param {string} vendorId - The ID of the vendor
    */
-  async fetchAllAdminNotification(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async fetchAllAdminNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const adminId = req.decoded?.userId;
       if (!adminId) {
@@ -271,7 +271,7 @@ export class NotificationMngController implements INotificationMngController {
         readCount,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

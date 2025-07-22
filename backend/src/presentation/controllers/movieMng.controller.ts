@@ -39,7 +39,7 @@ export class MovieMngController implements IMovieMngController {
     @inject('MovieRepository') private movieRepository: IMovieRepository,
   ) {}
 
-  async createMovie(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async createMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
         name,
@@ -71,11 +71,11 @@ export class MovieMngController implements IMovieMngController {
       const movie = await this.createMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_ADDED, movie);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async fetchMovies(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async fetchMovies(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, genre, sortBy, sortOrder } = req.query;
 
@@ -109,11 +109,11 @@ export class MovieMngController implements IMovieMngController {
       const result = await this.fetchMoviesUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async updateMovieStatus(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async updateMovieStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id, status } = req.body;
       const dto = new UpdateMovieStatusDTO(id, status);
@@ -126,7 +126,7 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
-  async updateMovie(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async updateMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
         id,
@@ -161,11 +161,11 @@ export class MovieMngController implements IMovieMngController {
       const movie = await this.updateMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_UPDATED, movie);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async findMovieById(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async findMovieById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -177,11 +177,11 @@ export class MovieMngController implements IMovieMngController {
       const movie = await this.findMovieByIdUseCase.execute(id);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, movie);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async fetchMoviesUser(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async fetchMoviesUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, genre, sortBy, sortOrder } = req.query;
       let { latitude, longitude, selectedLocation } = req.cookies;
@@ -227,11 +227,11 @@ export class MovieMngController implements IMovieMngController {
       const result = await this.fetchMoviesUserUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async submitRating(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async submitRating(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { movieId, theaterId, movieRating, theaterRating, review } = req.body;
 
@@ -253,11 +253,11 @@ export class MovieMngController implements IMovieMngController {
       const result = await this.rateMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, 'Rating submitted successfully', result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async likeOrUnlikeMovie(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async likeOrUnlikeMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { movieId, isLike } = req.body;
       const userId = req.decoded?.userId;
@@ -277,11 +277,11 @@ export class MovieMngController implements IMovieMngController {
 
       sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_UPDATED, updatedMovie);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async isMovieLiked(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async isMovieLiked(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { movieId } = req.params;
       const userId = req.decoded?.userId;
@@ -296,7 +296,7 @@ export class MovieMngController implements IMovieMngController {
       const isLiked = await this.movieRepository.hasUserLikedMovie(movieId, userId);
       sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_FETCHED, { isLiked });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

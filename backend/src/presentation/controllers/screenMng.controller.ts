@@ -18,25 +18,27 @@ export class ScreenManagementController implements IScreenManagementController {
     private fetchScreensOfVendorUseCase: IFetchScreensOfVendorUseCase,
   ) {}
 
-  async createScreen(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async createScreen(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const screen = await this.createScreenUseCase.execute(req.body);
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, screen);
     } catch (error) {
-next(error)    }
+      next(error);
+    }
   }
 
-  async updateScreen(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async updateScreen(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
       const screen = await this.updateScreenUseCase.execute(id, req.body);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, screen);
     } catch (error) {
-next(error)    }
+      next(error);
+    }
   }
 
-  async getScreensOfVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getScreensOfVendor(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, theaterId, sortBy, sortOrder } = req.query;
       const vendorId = req.decoded?.userId;
@@ -58,6 +60,7 @@ next(error)    }
       const result = await this.fetchScreensOfVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-next(error)    }
+      next(error);
+    }
   }
 }

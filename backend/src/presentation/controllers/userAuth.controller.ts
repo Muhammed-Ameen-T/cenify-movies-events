@@ -48,7 +48,7 @@ export class UserAuthController implements IUserAuthController {
     @inject('IUserRepository') private userRepository: IUserRepository,
   ) {}
 
-  async googleCallback(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async googleCallback(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const result = await this.googleAuthUseCase.execute(req.body);
       res.cookie('refreshToken', result.refreshToken, {
@@ -62,13 +62,12 @@ export class UserAuthController implements IUserAuthController {
         user: result.user,
       });
     } catch (error) {
-     next(error)
+      next(error);
     }
   }
 
-  async refreshToken(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-
       if (!req.cookies.refreshToken) {
         sendResponse(
           res,
@@ -110,11 +109,11 @@ export class UserAuthController implements IUserAuthController {
       // Send new token response
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { accessToken: newAccessToken });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async getCurrentUser(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
       sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
@@ -140,11 +139,11 @@ export class UserAuthController implements IUserAuthController {
         joinedDate: user.createdAt.toDateString(),
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async sendOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async sendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email } = req.body;
 
@@ -156,11 +155,11 @@ export class UserAuthController implements IUserAuthController {
 
       sendResponse(res, HttpResCode.OK, SuccessMsg.OTP_SENT);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async verifyOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { name, email, password, otp } = req.body;
 
@@ -177,11 +176,11 @@ export class UserAuthController implements IUserAuthController {
         user: result.user,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async login(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password } = req.body;
 
@@ -200,49 +199,49 @@ export class UserAuthController implements IUserAuthController {
         user: response.user,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async logout(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       res.clearCookie('refreshToken');
       sendResponse(res, HttpResCode.OK, SuccessMsg.USER_LOGGED_OUT);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async forgotPassSendOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async forgotPassSendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email } = req.body as ForgotPassSendOtpDTO;
 
       await this.forgotPassSendOtpUseCase.execute(email.trim());
       sendResponse(res, HttpResCode.OK, SuccessMsg.OTP_SENT);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async forgotPassVerifyOtp(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async forgotPassVerifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, otp } = req.body as ForgotPassVerifyOtpDTO;
 
       await this.forgotPassVerifyOtpUseCase.execute(email, otp);
       sendResponse(res, HttpResCode.OK, SuccessMsg.OTP_VERIFIED);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async forgotPassUpdatePassword(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async forgotPassUpdatePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password } = req.body as ForgotPassUpdateDTO;
 
       await this.forgotPassUpdatePassUseCase.execute(email, password);
       sendResponse(res, HttpResCode.OK, SuccessMsg.PASSWORD_UPDATED);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

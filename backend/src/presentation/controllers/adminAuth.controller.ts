@@ -11,7 +11,7 @@ import { ILoginAdminUseCase } from '../../domain/interfaces/useCases/Admin/admin
 export class AdminAuthController implements IAdminAuthController {
   constructor(@inject('LoginAdminUseCase') private loginAdminUseCase: ILoginAdminUseCase) {}
 
-  async login(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password } = req.body;
 
@@ -32,7 +32,7 @@ export class AdminAuthController implements IAdminAuthController {
         user: result.user,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

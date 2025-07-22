@@ -26,7 +26,7 @@ router.patch(
 router.get(
   '/wallet',
   verifyAccessToken,
-  authorizeRoles(['user','admin','vendor']),
+  authorizeRoles(['user', 'admin', 'vendor']),
   userAuthController.findUserWallet.bind(userAuthController),
 );
 router.get(

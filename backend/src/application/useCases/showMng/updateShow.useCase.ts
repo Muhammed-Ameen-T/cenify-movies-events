@@ -30,7 +30,7 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
       if (['Running', 'Completed', 'Cancelled'].includes(existingShow.status)) {
         throw new CustomError(
           `Cannot update a ${existingShow.status.toLowerCase()} show`,
-          HttpResCode.BAD_REQUEST
+          HttpResCode.BAD_REQUEST,
         );
       }
 
@@ -53,7 +53,10 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
 
       let startTime = dto.startTime ? new Date(dto.startTime) : existingShow.startTime;
       if (isNaN(startTime.getTime())) {
-        throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_START_TIME, HttpResCode.BAD_REQUEST);
+        throw new CustomError(
+          ERROR_MESSAGES.VALIDATION.INVALID_START_TIME,
+          HttpResCode.BAD_REQUEST,
+        );
       }
 
       let showDate: Date;
@@ -71,19 +74,19 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
       adjustedStartTime.setFullYear(
         showDate.getFullYear(),
         showDate.getMonth(),
-        showDate.getDate()
+        showDate.getDate(),
       );
 
-      const adjustedEndTime = new Date(adjustedStartTime.getTime() + movieDurationMs + intervalGapMs);
+      const adjustedEndTime = new Date(
+        adjustedStartTime.getTime() + movieDurationMs + intervalGapMs,
+      );
 
       if (dto.endTime) {
         const providedEndTime = new Date(dto.endTime);
-        if (
-          Math.abs(providedEndTime.getTime() - adjustedEndTime.getTime()) > 1000
-        ) {
+        if (Math.abs(providedEndTime.getTime() - adjustedEndTime.getTime()) > 1000) {
           throw new CustomError(
             ERROR_MESSAGES.VALIDATION.INVALID_END_TIME,
-            HttpResCode.BAD_REQUEST
+            HttpResCode.BAD_REQUEST,
           );
         }
       }
@@ -92,12 +95,12 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
         dto.screenId || existingShow.screenId,
         adjustedStartTime,
         adjustedEndTime,
-        dto.id
+        dto.id,
       );
       if (!isSlotAvailable) {
         throw new CustomError(
           ERROR_MESSAGES.VALIDATION.SHOW_TIME_CONFLICT,
-          HttpResCode.BAD_REQUEST
+          HttpResCode.BAD_REQUEST,
         );
       }
 
@@ -111,7 +114,7 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
         existingShow.status,
         existingShow.bookedSeats,
         adjustedEndTime,
-        showDate
+        showDate,
       );
 
       return await this.showRepository.update(updatedShow, existingShow.startTime);
@@ -120,7 +123,7 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
       if (error instanceof CustomError) throw error;
       throw new CustomError(
         ERROR_MESSAGES.DATABASE.RECORD_NOT_SAVED,
-        HttpResCode.INTERNAL_SERVER_ERROR
+        HttpResCode.INTERNAL_SERVER_ERROR,
       );
     }
   }

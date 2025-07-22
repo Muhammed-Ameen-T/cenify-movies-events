@@ -32,7 +32,6 @@ export class TheaterRepository implements ITheaterRepository {
         rating: theater.rating,
       };
 
-
       const newTheater = new TheaterModel(theaterData);
       const savedTheater = await newTheater.save();
 

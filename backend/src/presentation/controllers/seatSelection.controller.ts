@@ -20,7 +20,7 @@ export class SeatSelectionController implements ISeatSelectionController {
     // @inject('SocketService') private socketService: SocketService,
   ) {}
 
-  async getSeatSelection(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async getSeatSelection(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { showId } = req.params;
       // const userId = req.decoded?.userId;
@@ -36,11 +36,11 @@ export class SeatSelectionController implements ISeatSelectionController {
       const result = await this.fetchSeatSelectionUseCase.execute(showId);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async selectSeats(req: Request, res: Response, next:NextFunction): Promise<void> {
+  async selectSeats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { showId } = req.params;
       const { seatIds } = req.body;
@@ -62,7 +62,7 @@ export class SeatSelectionController implements ISeatSelectionController {
       // this.socketService.emitSeatUpdate(showId, seatIds, 'pending');
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

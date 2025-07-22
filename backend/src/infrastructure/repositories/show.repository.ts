@@ -23,9 +23,7 @@ dotenv.config();
 
 @injectable()
 export class ShowRepository implements IShowRepository {
-  constructor(
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
-  ) {}
+  constructor(@inject('WalletRepository') private walletRepository: IWalletRepository) {}
 
   async create(show: Show): Promise<Show> {
     try {
@@ -898,7 +896,7 @@ export class ShowRepository implements IShowRepository {
 
       const totalRevenue = completedBookings.reduce(
         (sum: number, booking: IBooking) => sum + booking.payment.amount,
-        0
+        0,
       );
 
       if (totalRevenue <= 0) {
@@ -930,24 +928,25 @@ export class ShowRepository implements IShowRepository {
 
       const updatedAdminWallet = await this.walletRepository.pushTransactionAndUpdateBalance(
         targetUserId,
-        adminTransaction
+        adminTransaction,
       );
 
       const updatedVendorWallet = await this.walletRepository.pushTransactionAndUpdateBalance(
         show.vendorId.toString(),
-        vendorTransaction
+        vendorTransaction,
       );
 
       if (!updatedAdminWallet || !updatedVendorWallet) {
         throw new Error(`Wallet update failed (Admin: ${targetUserId}, Vendor: ${show.vendorId})`);
       }
 
-      console.log(`✅ ₹${adminCommission} credited to Admin and ₹${vendorShare} credited to Vendor for show ${showId}`);
+      console.log(
+        `✅ ₹${adminCommission} credited to Admin and ₹${vendorShare} credited to Vendor for show ${showId}`,
+      );
       return totalRevenue;
     } catch (error) {
       console.error(`❌ Error in creditRevenueToWallet for show ${showId}:`, error);
       throw error;
     }
   }
-
 }
