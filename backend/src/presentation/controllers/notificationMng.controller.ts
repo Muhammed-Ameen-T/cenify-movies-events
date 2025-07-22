@@ -10,17 +10,29 @@ import { INotificationMngController } from './interface/notificationMng.controll
 import { NotificationService } from '../../infrastructure/services/notification.service';
 import { Notification } from '../../domain/entities/notification.entity';
 
+/**
+ * Controller for managing notifications, including creating, fetching, and marking as read for global, user-specific, and admin notifications.
+ * @implements {INotificationMngController}
+ */
 @injectable()
 export class NotificationMngController implements INotificationMngController {
+  /**
+   * Constructs an instance of NotificationMngController.
+   * @param {NotificationService} notificationService - The service responsible for notification operations.
+   */
   constructor(@inject('NotificationService') private notificationService: NotificationService) {}
 
   /**
    * @route POST /api/notifications/global
    * @desc Create a new global notification
    * @access Admin
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
    * @body {string} title - The title of the global notification
    * @body {string} description - The description/content of the global notification
    * @body {string} type - The type of the notification (e.g., 'announcement', 'update')
+   * @returns {Promise<void>}
    */
   async createGlobalNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -46,9 +58,13 @@ export class NotificationMngController implements INotificationMngController {
    * @route POST /api/notifications/user
    * @desc Create a new user-specific notification
    * @access Authenticated User
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
    * @body {string} title - The title of the notification
    * @body {string} description - The description/content of the notification
    * @body {string} type - The type of the notification (e.g., 'booking_update', 'promo')
+   * @returns {Promise<void>}
    */
   async createUserNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -85,7 +101,11 @@ export class NotificationMngController implements INotificationMngController {
    * @route PATCH /api/notifications/:id/read
    * @desc Mark a specific notification as read for the authenticated user
    * @access Authenticated User
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
    * @param {string} id - The ID of the notification to mark as read
+   * @returns {Promise<void>}
    */
   async readOneNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -119,6 +139,10 @@ export class NotificationMngController implements INotificationMngController {
    * @route PATCH /api/notifications/read-all
    * @desc Mark all notifications as read for the authenticated user
    * @access Authenticated User
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
    */
   async readAllNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -144,6 +168,13 @@ export class NotificationMngController implements INotificationMngController {
     }
   }
 
+  /**
+   * Marks all global admin notifications as read.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async readAllAdminNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const adminId = req.decoded?.userId;
@@ -172,6 +203,10 @@ export class NotificationMngController implements INotificationMngController {
    * @route GET /api/notifications/user
    * @desc Fetch all notifications for the authenticated user (including relevant global ones)
    * @access Authenticated User
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
    */
   async fetchAllUserNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -209,10 +244,14 @@ export class NotificationMngController implements INotificationMngController {
    * @route POST /api/notifications/vendor
    * @desc Create a new vendor-specific notification
    * @access Admin/Vendor Management (needs appropriate authorization check)
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
    * @body {string} vendorId - The ID of the vendor to notify
    * @body {string} title - The title of the notification
    * @body {string} description - The description/content of the notification
    * @body {string} type - The type of the notification (e.g., 'payout_alert', 'order_update')
+   * @returns {Promise<void>}
    */
   async createVendorNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -243,7 +282,11 @@ export class NotificationMngController implements INotificationMngController {
    * @route GET /api/notifications/vendor/:vendorId (or /api/notifications/vendors/me)
    * @desc Fetch all notifications specific to a vendor
    * @access Vendor (needs appropriate authorization check)
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
    * @param {string} vendorId - The ID of the vendor
+   * @returns {Promise<void>}
    */
   async fetchAllAdminNotification(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {

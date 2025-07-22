@@ -1,4 +1,4 @@
-// src/presentation/controllers/auth.controller.ts
+// src/presentation/controllers/userProfile.controller.ts
 import 'reflect-metadata';
 import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
@@ -24,8 +24,27 @@ import {
 import { ISendOtpPhoneUseCase } from '../../domain/interfaces/useCases/User/sendOtpPhone.interface';
 import { IVerifyOtpPhoneUseCase } from '../../domain/interfaces/useCases/User/verifyOtpPhone.interface';
 
+/**
+ * Controller for managing user profile-related operations, including fetching profile details,
+ * updating profile, managing wallet, changing password, and handling phone OTP for updates.
+ * @implements {IUserProfileController}
+ */
 @injectable()
 export class UserProfileController implements IUserProfileController {
+  /**
+   * Constructs an instance of UserProfileController.
+   * @param {IgetUserDetailsUseCase} getUserDetailsUseCase - Use case for fetching authenticated user details.
+   * @param {IupdateUserProfileUseCase} updateUserDetailsUseCase - Use case for updating user profile information.
+   * @param {IFindUserWalletUseCase} findUserWalletUseCase - Use case for finding a user's wallet.
+   * @param {IChangePasswordUseCase} changePasswordUseCase - Use case for changing a user's password.
+   * @param {IFindUserWalletTransactionsUseCase} findWalletTransaction - Use case for finding user wallet transactions.
+   * @param {IRedeemLoyalityToWalletUseCase} redeemLoyalityToWalletUseCase - Use case for redeeming loyalty points to wallet.
+   * @param {IBookingRepository} bookingRepository - Repository for booking data.
+   * @param {IWalletRepository} walletRepository - Repository for wallet data.
+   * @param {IMoviePassRepository} moviePassRepository - Repository for movie pass data.
+   * @param {ISendOtpPhoneUseCase} sendOtpPhoneUseCase - Use case for sending OTP to a phone number.
+   * @param {IVerifyOtpPhoneUseCase} verifyOtpPhoneUseCase - Use case for verifying phone OTP.
+   */
   constructor(
     @inject('GetUserDetailsUseCase') private getUserDetailsUseCase: IgetUserDetailsUseCase,
     @inject('UpdateUserProfileUseCase') private updateUserDetailsUseCase: IupdateUserProfileUseCase,
@@ -42,6 +61,13 @@ export class UserProfileController implements IUserProfileController {
     @inject('VerifyOtpPhoneUseCase') private verifyOtpPhoneUseCase: IVerifyOtpPhoneUseCase,
   ) {}
 
+  /**
+   * Retrieves the details of the currently authenticated user.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
@@ -70,6 +96,13 @@ export class UserProfileController implements IUserProfileController {
     }
   }
 
+  /**
+   * Updates the profile information of the currently authenticated user.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId` and update data in `req.body`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async updateUserProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
@@ -95,6 +128,13 @@ export class UserProfileController implements IUserProfileController {
     }
   }
 
+  /**
+   * Retrieves the wallet details for the currently authenticated user.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async findUserWallet(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
@@ -114,6 +154,14 @@ export class UserProfileController implements IUserProfileController {
     }
   }
 
+  /**
+   * Fetches summary information for the user's profile dashboard, including wallet balance,
+   * booking count, and movie pass status.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async findProfileContents(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
@@ -139,6 +187,13 @@ export class UserProfileController implements IUserProfileController {
     }
   }
 
+  /**
+   * Allows the authenticated user to change their password.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId` and `oldPassword`, `newPassword` in `req.body`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
@@ -157,6 +212,13 @@ export class UserProfileController implements IUserProfileController {
     }
   }
 
+  /**
+   * Retrieves paginated and filtered wallet transactions for the authenticated user.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId` and optional query parameters for `page`, `limit`, and `filter`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async findUserWalletTransactions(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
@@ -194,6 +256,13 @@ export class UserProfileController implements IUserProfileController {
     }
   }
 
+  /**
+   * Redeems a specified amount of loyalty points for wallet balance for the authenticated user.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId` and `amount` in `req.body`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async redeemLoyaltyPoints(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
@@ -218,6 +287,13 @@ export class UserProfileController implements IUserProfileController {
     }
   }
 
+  /**
+   * Sends an OTP to the user's provided phone number for verification (e.g., for updating phone number).
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId` and `phone` in `req.body`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async sendOtpPhone(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
@@ -240,6 +316,13 @@ export class UserProfileController implements IUserProfileController {
     }
   }
 
+  /**
+   * Verifies the OTP provided for phone number verification.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId`, `phone`, and `otp` in `req.body`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async verifyOtpPhone(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {

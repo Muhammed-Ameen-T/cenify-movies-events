@@ -26,8 +26,23 @@ import { IFetchMoviesUserUseCase } from '../../domain/interfaces/useCases/User/f
 import { IRateMovieUseCase } from '../../domain/interfaces/useCases/User/rateMovie.interface';
 import { IMovieRepository } from '../../domain/interfaces/repositories/movie.repository';
 
+/**
+ * Controller for managing movie-related operations, accessible by both admins and users.
+ * @implements {IMovieMngController}
+ */
 @injectable()
 export class MovieMngController implements IMovieMngController {
+  /**
+   * Constructs an instance of MovieMngController.
+   * @param {ICreateMovieUseCase} createMovieUseCase - Use case for creating a new movie.
+   * @param {IFetchMoviesUseCase} fetchMoviesUseCase - Use case for fetching movies (admin view).
+   * @param {IUpdateMovieStatusUseCase} updateMovieStatusUseCase - Use case for updating a movie's status.
+   * @param {IUpdateMovieUseCase} updateMovieUseCase - Use case for updating movie details.
+   * @param {IFindMovieByIdUseCase} findMovieByIdUseCase - Use case for finding a movie by ID.
+   * @param {IFetchMoviesUserUseCase} fetchMoviesUserUseCase - Use case for fetching movies (user view).
+   * @param {IRateMovieUseCase} rateMovieUseCase - Use case for submitting movie and theater ratings.
+   * @param {IMovieRepository} movieRepository - Repository for movie data, used for like/unlike functionality.
+   */
   constructor(
     @inject('CreateMovieUseCase') private createMovieUseCase: ICreateMovieUseCase,
     @inject('FetchMoviesUseCase') private fetchMoviesUseCase: IFetchMoviesUseCase,
@@ -39,6 +54,13 @@ export class MovieMngController implements IMovieMngController {
     @inject('MovieRepository') private movieRepository: IMovieRepository,
   ) {}
 
+  /**
+   * Handles the creation of a new movie by an admin.
+   * @param {Request} req - The Express request object, containing movie details in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async createMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
@@ -75,6 +97,13 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
+  /**
+   * Fetches a list of movies with pagination, search, and filtering options for admin view.
+   * @param {Request} req - The Express request object, containing query parameters for filtering.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async fetchMovies(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, genre, sortBy, sortOrder } = req.query;
@@ -113,6 +142,13 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
+  /**
+   * Updates the status of a movie.
+   * @param {Request} req - The Express request object, containing movie ID and new status in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async updateMovieStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id, status } = req.body;
@@ -126,6 +162,13 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
+  /**
+   * Updates the details of an existing movie.
+   * @param {Request} req - The Express request object, containing updated movie details in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async updateMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
@@ -165,6 +208,13 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
+  /**
+   * Finds a movie by its ID.
+   * @param {Request} req - The Express request object, containing the movie ID in `req.params.id`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async findMovieById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
@@ -181,6 +231,14 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
+  /**
+   * Fetches a list of movies with pagination, search, filtering, and location-based relevance for user view.
+   * Uses latitude and longitude from cookies for location awareness, defaulting to "Calicut" if not present.
+   * @param {Request} req - The Express request object, containing query parameters and potentially cookies for location.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async fetchMoviesUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, genre, sortBy, sortOrder } = req.query;
@@ -231,6 +289,13 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
+  /**
+   * Submits a rating for a movie and a theater by a user.
+   * @param {Request} req - The Express request object, containing `movieId`, `theaterId`, `movieRating`, `theaterRating`, and `review` in the body. User ID is from `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async submitRating(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { movieId, theaterId, movieRating, theaterRating, review } = req.body;
@@ -257,6 +322,13 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
+  /**
+   * Handles liking or unliking a movie by a user.
+   * @param {Request} req - The Express request object, containing `movieId` and `isLike` (boolean) in the body. User ID is from `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async likeOrUnlikeMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { movieId, isLike } = req.body;
@@ -281,6 +353,13 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
+  /**
+   * Checks if a user has liked a specific movie.
+   * @param {Request} req - The Express request object, containing `movieId` in `req.params.id`. User ID is from `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async isMovieLiked(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { movieId } = req.params;

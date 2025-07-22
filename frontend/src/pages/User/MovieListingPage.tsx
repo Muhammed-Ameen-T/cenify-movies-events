@@ -187,15 +187,11 @@ const MovieListingPage: React.FC = () => {
 
   // Fetch movies query
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["movies", filters],
+    queryKey: ["movies", filters, currentLocation],
     queryFn: () => getMoviesWithFilters(filters),
     keepPreviousData: true,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
-  const handleFilterChange = (key: keyof FilterState, value: any) => {
-    setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
-  };
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newSortBy = e.target.value;
@@ -255,17 +251,6 @@ const MovieListingPage: React.FC = () => {
   const handlePageChange = (page: number) => {
     setFilters((prev) => ({ ...prev, page }));
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const formatDuration = (duration: { hours: number; minutes: number }) => {
-    return `${duration.hours}h ${duration.minutes}m`;
-  };
-
-  const isNewRelease = (releaseDate: string) => {
-    const date = new Date(releaseDate);
-    const now = new Date();
-    const diffDays = (now.getTime() - date.getTime()) / (1000 * 3600 * 24);
-    return diffDays <= 30;
   };
 
   const movies = data?.movies || [];
@@ -814,7 +799,7 @@ const MovieGridCard: React.FC<{
     >
       <div className="relative bg-white rounded-3xl overflow-hidden shadow-xl transform transition-all duration-500 hover:scale-105 hover:shadow-2xl border border-gray-100 hover:border-yellow-200">
         {/* Movie Poster */}
-        <div className="relative h-100 overflow-hidden">
+        <div className="relative h-140 md:h-110 overflow-hidden">
           <img
             src={movie.poster}
             alt={movie.name}

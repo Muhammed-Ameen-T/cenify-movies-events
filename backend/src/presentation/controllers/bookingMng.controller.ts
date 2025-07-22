@@ -17,8 +17,24 @@ import { IMoviePassRepository } from '../../domain/interfaces/repositories/movie
 import { IFindBookingsOfVendorUseCase } from '../../domain/interfaces/useCases/User/findBookingsOfVendor.interface';
 import { ICancelBookingUseCase } from '../../domain/interfaces/useCases/User/cancelBooking.interface';
 
+/**
+ * Controller for managing booking-related operations.
+ * @implements {IBookingMngController}
+ */
 @injectable()
 export class BookingMngController implements IBookingMngController {
+  /**
+   * Constructs an instance of BookingMngController.
+   * @param {ICreateBookingUseCase} createBookingUseCase - Use case for creating a booking.
+   * @param {IFetchAllBookingsUseCase} fetchBookingsUseCase - Use case for fetching all bookings.
+   * @param {IFindBookingByIdUseCase} findBookingByIdUseCase - Use case for finding a booking by ID.
+   * @param {ICancelBookingUseCase} cancelBookingUseCase - Use case for canceling a booking.
+   * @param {IFindBookingsOfUserUseCase} findBookingsOfUserUseCase - Use case for finding bookings of a specific user.
+   * @param {IFindBookingsOfVendorUseCase} findBookingsOfVendorUseCase - Use case for finding bookings of a specific vendor.
+   * @param {PaymentService} paymentService - Service for handling payment operations.
+   * @param {IWalletRepository} walletRepository - Repository for wallet data.
+   * @param {IMoviePassRepository} moviePassRepository - Repository for movie pass data.
+   */
   constructor(
     @inject('CreateBookingUseCase') private createBookingUseCase: ICreateBookingUseCase,
     @inject('FetchAllBookingsUseCase') private fetchBookingsUseCase: IFetchAllBookingsUseCase,
@@ -33,6 +49,13 @@ export class BookingMngController implements IBookingMngController {
     @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
   ) {}
 
+  /**
+   * Handles the creation of a new booking.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async createBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
@@ -62,6 +85,13 @@ export class BookingMngController implements IBookingMngController {
     }
   }
 
+  /**
+   * Checks available payment options for a given total amount.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async checkPaymentOptions(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
@@ -90,6 +120,13 @@ export class BookingMngController implements IBookingMngController {
     }
   }
 
+  /**
+   * Fetches all bookings based on provided query parameters.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async fetchBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, sortBy, sortOrder } = req.query;
@@ -117,6 +154,13 @@ export class BookingMngController implements IBookingMngController {
     }
   }
 
+  /**
+   * Finds bookings associated with a specific vendor.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async findBookingsOfVendor(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, status, sortBy, sortOrder } = req.query;
@@ -148,6 +192,13 @@ export class BookingMngController implements IBookingMngController {
     }
   }
 
+  /**
+   * Finds a specific booking by its ID.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async findBookingById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
@@ -162,6 +213,13 @@ export class BookingMngController implements IBookingMngController {
     }
   }
 
+  /**
+   * Finds bookings associated with a specific user.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async findBookingsOfUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, status, sortBy, sortOrder } = req.query;
@@ -193,6 +251,13 @@ export class BookingMngController implements IBookingMngController {
     }
   }
 
+  /**
+   * Cancels a booking by its ID.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;

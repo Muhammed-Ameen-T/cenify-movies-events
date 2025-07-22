@@ -152,9 +152,9 @@ const CitySelectionModal: React.FC<CitySelectionModalProps> = ({
         return;
       }
 
-      Cookies.set('selectedLocation', city, { expires: 7, secure: true, sameSite: 'Lax', domain: '.muhammedameen.site' });
-      Cookies.set('latitude', lat.toString(), { expires: 7, secure: true, sameSite: 'Lax', domain: '.muhammedameen.site' });
-      Cookies.set('longitude', lng.toString(), { expires: 7, secure: true, sameSite: 'Lax', domain: '.muhammedameen.site' });
+      setAppCookie('selectedLocation', city);
+      setAppCookie('latitude', lat.toString());
+      setAppCookie('longitude', lng.toString());
 
       dispatch(setSelectedLocation(city)); // Dispatch Redux action
       setIsCityModalOpen(false);

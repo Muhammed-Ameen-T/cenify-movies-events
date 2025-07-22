@@ -14,10 +14,20 @@ import { IUserRepository } from '../../domain/interfaces/repositories/user.repos
 import { socketService } from '../../infrastructure/services/socket.service';
 import { SuccessMsg } from '../../utils/constants/commonSuccessMsg.constants';
 
+/**
+ * Controller for handling Stripe webhooks related to booking payments.
+ */
 @injectable()
 export class BookingStripeWebhookController {
   private stripe: Stripe;
 
+  /**
+   * Constructs an instance of BookingStripeWebhookController.
+   * @param {INotificationRepository} notificationRepository - Repository for notification data.
+   * @param {ISeatRepository} seatRepository - Repository for seat data.
+   * @param {IShowRepository} showRepository - Repository for show data.
+   * @param {IUserRepository} userRepository - Repository for user data.
+   */
   constructor(
     @inject('NotificationRepository') private notificationRepository: INotificationRepository,
     @inject('SeatRepository') private seatRepository: ISeatRepository,
@@ -27,6 +37,15 @@ export class BookingStripeWebhookController {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
+  /**
+   * Handles incoming Stripe webhook events.
+   * Processes 'checkout.session.completed' events to confirm bookings, update seat statuses,
+   * increment loyalty points, and create/emit notifications for users, vendors, and admins.
+   * @param {Request} req - The Express request object containing the Stripe event.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async handleWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
     const sig = req.headers['stripe-signature'] as string;
     let event: Stripe.Event;

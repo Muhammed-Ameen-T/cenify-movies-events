@@ -11,7 +11,7 @@ export const setAppCookie = (
   const defaultOptions: Cookies.CookieAttributes = {
     expires: 7,
     secure: true,
-    sameSite: 'Lax',
+    sameSite: isProd ? 'Lax' : 'Strict',
     ...(isProd && { domain: '.muhammedameen.site' }),
     ...options
   };
@@ -21,4 +21,9 @@ export const setAppCookie = (
     typeof value === 'string' ? value : JSON.stringify(value),
     defaultOptions
   );
+};
+
+export const getAppCookie = (key: string): string | null => {
+  const cookieValue = Cookies.get(key);
+  return cookieValue ? cookieValue : null;
 };

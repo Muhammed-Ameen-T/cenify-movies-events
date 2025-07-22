@@ -11,14 +11,30 @@ import { IFetchDashboardUseCase } from '../../domain/interfaces/useCases/Vendor/
 import { AdminDashboardQueryParams } from '../../domain/interfaces/model/adminDashboard.interface';
 import { IFetchAdminDashboardUseCase } from '../../domain/interfaces/useCases/Admin/adminDashboard.interface';
 
+/**
+ * Controller for handling dashboard related requests for both vendors and admins.
+ * @implements {IDashboardController}
+ */
 @injectable()
 export class DashboardController implements IDashboardController {
+  /**
+   * Constructs an instance of DashboardController.
+   * @param {IFetchDashboardUseCase} fetchDashboardUseCase - The use case for fetching vendor dashboard data.
+   * @param {IFetchAdminDashboardUseCase} fetchAdminDashboardUseCase - The use case for fetching admin dashboard data.
+   */
   constructor(
     @inject('FetchDashboardUseCase') private fetchDashboardUseCase: IFetchDashboardUseCase,
     @inject('FetchAdminDashboardUseCase')
     private fetchAdminDashboardUseCase: IFetchAdminDashboardUseCase,
   ) {}
 
+  /**
+   * Retrieves dashboard data for a vendor.
+   * @param {Request} req - The Express request object, expecting vendor ID in `req.decoded.userId` and query parameters for filtering.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async getDashboardData(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
@@ -40,6 +56,13 @@ export class DashboardController implements IDashboardController {
     }
   }
 
+  /**
+   * Retrieves dashboard data for an admin.
+   * @param {Request} req - The Express request object, expecting admin ID in `req.decoded.userId` and query parameters for filtering.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async getAdminDashboardData(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const adminId = req.decoded?.userId;

@@ -7,10 +7,25 @@ import { LoginAdminDTO } from '../../application/dtos/auth.dto';
 import { IAdminAuthController } from './interface/adminAuth.controller.interface';
 import { ILoginAdminUseCase } from '../../domain/interfaces/useCases/Admin/adminLogin.interface';
 
+/**
+ * Controller for handling admin authentication related requests.
+ * @implements {IAdminAuthController}
+ */
 @injectable()
 export class AdminAuthController implements IAdminAuthController {
+  /**
+   * Creates an instance of AdminAuthController.
+   * @param {ILoginAdminUseCase} loginAdminUseCase - The use case for admin login.
+   */
   constructor(@inject('LoginAdminUseCase') private loginAdminUseCase: ILoginAdminUseCase) {}
 
+  /**
+   * Handles the admin login request.
+   * @param {Request} req - The express request object.
+   * @param {Response} res - The express response object.
+   * @param {NextFunction} next - The express next middleware function.
+   * @returns {Promise<void>}
+   */
   async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password } = req.body;

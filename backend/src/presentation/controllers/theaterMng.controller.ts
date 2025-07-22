@@ -12,8 +12,20 @@ import { IUpdateTheaterUseCase } from '../../domain/interfaces/useCases/Vendor/u
 import { IFetchTheatersUseCase } from '../../domain/interfaces/useCases/Vendor/fetchTheaters.interface';
 import { IFetchAdminTheatersUseCase } from '../../domain/interfaces/useCases/Admin/fetchAdminTheaters.interface';
 
+/**
+ * Controller for managing theater-related operations for both vendors and administrators.
+ * @implements {ITheaterManagementController}
+ */
 @injectable()
 export class TheaterManagementController implements ITheaterManagementController {
+  /**
+   * Constructs an instance of TheaterManagementController.
+   * @param {IFetchTheaterOfVendorUseCase} fetchTheaterUseCase - Use case for fetching theaters owned by a specific vendor.
+   * @param {IFetchTheatersUseCase} fetchTheatersUseCase - Use case for fetching all theaters (general public view).
+   * @param {IUpdateTheaterStatusUseCase} updateTheaterStatusUseCase - Use case for updating a theater's status.
+   * @param {IFetchAdminTheatersUseCase} fetchAdminTheatersUseCase - Use case for fetching theaters for admin panel.
+   * @param {IUpdateTheaterUseCase} updateTheaterUseCase - Use case for updating theater details.
+   */
   constructor(
     @inject('FetchTheaterOfVendorUseCase')
     private fetchTheaterUseCase: IFetchTheaterOfVendorUseCase,
@@ -24,6 +36,13 @@ export class TheaterManagementController implements ITheaterManagementController
     @inject('UpdateTheater') private updateTheaterUseCase: IUpdateTheaterUseCase,
   ) {}
 
+  /**
+   * Fetches all theaters available in the system.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async getTheaters(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const theaters = await this.fetchTheatersUseCase.execute();
@@ -33,6 +52,13 @@ export class TheaterManagementController implements ITheaterManagementController
     }
   }
 
+  /**
+   * Updates the status of a specific theater.
+   * @param {Request} req - The Express request object, containing theater ID in `req.params.id` and new status in `req.body.status`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async updateTheaterStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
     const { status } = req.body;
@@ -44,6 +70,13 @@ export class TheaterManagementController implements ITheaterManagementController
     }
   }
 
+  /**
+   * Updates the details of an existing theater.
+   * @param {Request} req - The Express request object, containing theater ID in `req.params.id` and updated theater details in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async updateTheater(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
     try {
@@ -53,10 +86,11 @@ export class TheaterManagementController implements ITheaterManagementController
     }
   }
   /**
-   * Fetches theaters for a specific vendor.
-   * @param req - The request object.
-   * @param res - The response object.
-   * @returns A promise that resolves to void.
+   * Fetches theaters for a specific vendor with pagination and filtering options.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId` for the vendor ID and optional query parameters.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
    */
   getTheatersOfVendor = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -86,6 +120,13 @@ export class TheaterManagementController implements ITheaterManagementController
     }
   };
 
+  /**
+   * Fetches theaters for the admin panel with comprehensive filtering, pagination, and sorting.
+   * @param {Request} req - The Express request object, containing various query parameters for filtering and sorting.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
   async fetchTheatersByAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, features, rating, location, sortBy, sortOrder } =
