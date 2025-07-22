@@ -5,7 +5,6 @@ import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import { CustomError } from '../../utils/errors/custom.error';
 import { IDashboardController } from './interface/dashboard.controller.interface';
-import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 import { DashboardQueryParams } from '../../domain/interfaces/model/vendorDashboard.interface';
 import { IFetchDashboardUseCase } from '../../domain/interfaces/useCases/Vendor/fetchDashboard.interface';
 import { AdminDashboardQueryParams } from '../../domain/interfaces/model/adminDashboard.interface';

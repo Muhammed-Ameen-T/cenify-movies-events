@@ -151,35 +151,35 @@ export class UserAuthController implements IUserAuthController {
    * @param {NextFunction} next - The Express next middleware function.
    * @returns {Promise<void>}
    */
-  async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
-      return;
-    }
-    try {
-      const jwtService = container.resolve<JwtService>('JwtService');
-      const decoded = jwtService.verifyAccessToken(token);
-      const user = await this.getUserDetailsUseCase.execute(decoded.userId);
-      if (!user) {
-        sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
-        return;
-      }
-      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
-        id: user._id?.toString() || '',
-        name: user.name,
-        email: user.email,
-        phone: user.phone ? user.phone : 'N/A',
-        profileImage: user.profileImage,
-        role: user.role,
-        loyalityPoints: user.loyalityPoints || 0,
-        dateOfBirth: user.dob ? user.dob : 'N/A',
-        joinedDate: user.createdAt.toDateString(),
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  // async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+  //   const token = req.headers.authorization?.split(' ')[1];
+  //   if (!token) {
+  //     sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
+  //     return;
+  //   }
+  //   try {
+  //     const jwtService = container.resolve<JwtService>('JwtService');
+  //     const decoded = jwtService.verifyAccessToken(token);
+  //     const user = await this.getUserDetailsUseCase.execute(decoded.userId);
+  //     if (!user) {
+  //       sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
+  //       return;
+  //     }
+  //     sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
+  //       id: user._id?.toString() || '',
+  //       name: user.name,
+  //       email: user.email,
+  //       phone: user.phone ? user.phone : 'N/A',
+  //       profileImage: user.profileImage,
+  //       role: user.role,
+  //       loyalityPoints: user.loyalityPoints || 0,
+  //       dateOfBirth: user.dob ? user.dob : 'N/A',
+  //       joinedDate: user.createdAt.toDateString(),
+  //     });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 
   /**
    * Sends an OTP to the provided email address for user registration or verification.

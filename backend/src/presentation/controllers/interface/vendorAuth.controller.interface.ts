@@ -5,5 +5,5 @@ export interface IVendorAuthController {
   login(req: Request, res: Response, next: NextFunction): Promise<void>;
   createNewTheater(req: Request, res: Response, next: NextFunction): Promise<void>;
   // refreshToken(req: Request, res: Response, next:NextFunction): Promise<void>;
-  getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void>;
+  // getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

@@ -3,7 +3,6 @@ import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
-import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 import { CustomError } from '../../utils/errors/custom.error';
 import { CreateBookingDTO } from '../../application/dtos/booking.dto';
 import { IBookingMngController } from './interface/bookingMng.controller.interface';

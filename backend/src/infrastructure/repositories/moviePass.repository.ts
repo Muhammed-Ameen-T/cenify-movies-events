@@ -38,11 +38,43 @@ export class MoviePassRepository implements IMoviePassRepository {
     return this.mapToEntity(doc);
   }
 
-  async update(userId: string, updates: Partial<MoviePass>): Promise<MoviePass | null> {
-    const doc = await this.model
-      .findOneAndUpdate({ userId }, { $set: updates }, { new: true })
-      .lean();
-    return doc ? this.mapToEntity(doc) : null;
+  async update(userId: string, updates: MoviePass): Promise<MoviePass | null> {
+    try {
+      // Prefer updates.userId for consistency
+      const resolvedUserId = updates.userId;
+      const userObjectId = new mongoose.Types.ObjectId(resolvedUserId);
+
+      const {
+        status,
+        history,
+        purchaseDate,
+        expireDate,
+        moneySaved,
+        totalMovies,
+      } = updates;
+
+      const updatePayload = {
+        status,
+        history,
+        purchaseDate,
+        expireDate,
+        moneySaved,
+        totalMovies,
+      };
+      
+      const doc = await this.model
+        .findOneAndUpdate(
+          { userId: userObjectId },
+          { $set: updatePayload },
+          { new: true, upsert: true }
+        )
+        .lean();
+
+      return doc ? this.mapToEntity(doc) : null;
+    } catch (error) {
+      console.error(`Error updating MoviePass for user ${userId}:`, error);
+      return null;
+    }
   }
 
   async incrementMovieStats(userId: string, newSaving: number): Promise<MoviePass | null> {
