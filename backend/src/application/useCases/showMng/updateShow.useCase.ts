@@ -21,7 +21,6 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
   ) {}
 
   async execute(dto: UpdateShowDTO): Promise<Show> {
-    console.log('🚀 ~ UpdateShowUseCase ~ execute ~ dto:', dto);
     try {
       const existingShow = await this.showRepository.findById(dto.id);
       if (!existingShow) {
