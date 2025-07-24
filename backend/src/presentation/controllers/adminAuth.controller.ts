@@ -39,7 +39,7 @@ export class AdminAuthController implements IAdminAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: parseInt(process.env.ADMIN_MAX_AGE || '0', 10),
       });
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.CREATED, {

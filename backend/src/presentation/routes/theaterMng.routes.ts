@@ -41,5 +41,11 @@ router.patch(
   authorizeRoles(['vendor', 'admin']),
   TheaterMngController.updateTheater.bind(TheaterMngController),
 );
+router.get(
+  '/find/:id',
+  verifyAccessToken,
+  authorizeRoles(['vendor']),
+  TheaterMngController.findTheaterById.bind(TheaterMngController),
+);
 
 export default router;

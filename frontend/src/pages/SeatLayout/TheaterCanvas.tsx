@@ -7,7 +7,8 @@ import {
   ArrowUp, ArrowDown, ArrowLeft, ArrowRight, 
   Trash2, Save, RotateCcw, RotateCw,
  ChevronsUp, ChevronsDown, ZoomIn, ZoomOut,
-  Key
+  Key,
+  X
 } from 'lucide-react';
 
 const CELL_SIZE = 44; // Size of each grid cell
@@ -15,7 +16,7 @@ const GRID_PADDING = 20; // Padding around the grid
 
 const TheaterCanvas: React.FC = () => {
   const {
-     currentLayout,
+    currentLayout,
     addSeat,
     canAddSeat,
     undoAction,
@@ -257,115 +258,186 @@ const TheaterCanvas: React.FC = () => {
 
   // Show help modal
   const ShortcutsModal = () => (
-    <>
+     <>
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={() => setShowShortcutsModal(false)}
+    >
       <div 
-        className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center"
-        onClick={() => setShowShortcutsModal(false)}
+        className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-0 max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={e => e.stopPropagation()}
       >
-        <div 
-          className="bg-gray-800 rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-auto"
-          onClick={e => e.stopPropagation()}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-blue-400 flex items-center">
-              <Key size={20} className="mr-2" />
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <Key size={20} className="text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
               Keyboard Shortcuts
             </h3>
-            <button 
-              className="text-gray-400 hover:text-white"
-              onClick={() => setShowShortcutsModal(false)}
-            >
-              ×
-            </button>
           </div>
-          
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-medium text-gray-300 mb-2">Selection</h4>
-              <ul className="space-y-2">
-                <li className="flex justify-between">
-                  <span>Click</span>
-                  <span className="text-gray-400">Select single seat</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Shift + Click</span>
-                  <span className="text-gray-400">Add to selection</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Drag</span>
-                  <span className="text-gray-400">Box select</span>
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-medium text-gray-300 mb-2">Editing</h4>
-              <ul className="space-y-2">
-                <li className="flex justify-between">
-                  <span>Delete</span>
-                  <span className="text-gray-400">Remove selected seats</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>1, 2, 3, 4</span>
-                  <span className="text-gray-400">Change seat type</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Right-click</span>
-                  <span className="text-gray-400">Seat context menu</span>
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-medium text-gray-300 mb-2">Movement</h4>
-              <ul className="space-y-2">
-                <li className="flex justify-between">
-                  <span>Arrow keys</span>
-                  <span className="text-gray-400">Move selected seats</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Drag selected seat</span>
-                  <span className="text-gray-400">Move seat(s)</span>
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-medium text-gray-300 mb-2">General</h4>
-              <ul className="space-y-2">
-                <li className="flex justify-between">
-                  <span>Ctrl+Z</span>
-                  <span className="text-gray-400">Undo</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Ctrl+Y</span>
-                  <span className="text-gray-400">Redo</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Ctrl+S</span>
-                  <span className="text-gray-400">Save layout</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Ctrl+Plus/Minus</span>
-                  <span className="text-gray-400">Zoom in/out</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>?</span>
-                  <span className="text-gray-400">Show this help</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
           <button 
-            className="mt-6 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             onClick={() => setShowShortcutsModal(false)}
           >
-            Close
+            <X size={20} />
+          </button>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-6 pt-4">
+          <div className="space-y-6">
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3 text-sm uppercase tracking-wide">
+                Selection
+              </h4>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300">Click</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Select single seat</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      Shift
+                    </kbd>
+                    <span className="text-gray-400">+</span>
+                    <span className="text-gray-700 dark:text-gray-300">Click</span>
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Add to selection</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300">Drag</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Box select</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3 text-sm uppercase tracking-wide">
+                Editing
+              </h4>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                    Delete
+                  </kbd>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Remove selected seats</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    {['1', '2', '3', '4'].map((key, index) => (
+                      <kbd key={key} className={`px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 ${index < 3 ? 'mr-1' : ''}`}>
+                        {key}
+                      </kbd>
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Change seat type</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300">Right-click</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Seat context menu</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3 text-sm uppercase tracking-wide">
+                Movement
+              </h4>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      ↑↓←→
+                    </kbd>
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Move selected seats</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700 dark:text-gray-300">Drag selected seat</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Move seat(s)</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3 text-sm uppercase tracking-wide">
+                General
+              </h4>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      Ctrl
+                    </kbd>
+                    <span className="text-gray-400">+</span>
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      Z
+                    </kbd>
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Undo</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      Ctrl
+                    </kbd>
+                    <span className="text-gray-400">+</span>
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      Y
+                    </kbd>
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Redo</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      Ctrl
+                    </kbd>
+                    <span className="text-gray-400">+</span>
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      S
+                    </kbd>
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Save layout</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      Ctrl
+                    </kbd>
+                    <span className="text-gray-400">+</span>
+                    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                      +/-
+                    </kbd>
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Zoom in/out</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                    ?
+                  </kbd>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Show this help</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Footer */}
+        <div className="p-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button 
+            className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800 text-white font-medium rounded-lg transition-all duration-200 focus:outline-none"
+            onClick={() => setShowShortcutsModal(false)}
+          >
+            Got it
           </button>
         </div>
       </div>
-    </>
+    </div>
+  </>
   );
 
   return (
@@ -429,7 +501,7 @@ const TheaterCanvas: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-3">
-          <div className="flex space-x-1">
+          {/* <div className="flex space-x-1">
             <button 
               className="p-2 rounded hover:bg-gray-700 text-blue-400"
               onClick={() => handlePan(0, -CELL_SIZE * 2)}
@@ -473,7 +545,7 @@ const TheaterCanvas: React.FC = () => {
             >
               <ArrowRight size={20} />
             </button>
-          </div>
+          </div> */}
 
           <button 
             className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded flex items-center space-x-1 transition-colors"

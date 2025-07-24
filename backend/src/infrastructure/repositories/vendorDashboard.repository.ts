@@ -43,13 +43,11 @@ export class DashboardRepository implements IDashboardRepository {
       if (location) theaterMatch['location.city'] = new RegExp(location, 'i');
       const theaters = await TheaterModel.find(theaterMatch).select('_id').lean();
       const theaterIds = theaters.map((t) => new mongoose.Types.ObjectId(t._id));
-      console.log('Theater IDs:', theaterIds); // Debug log
 
       // Get vendor's show IDs
       const showMatch: any = { vendorId: vendorObjectId, theaterId: { $in: theaterIds } };
       const shows = await ShowModel.find(showMatch).select('_id').lean();
       const showIds = shows.map((s) => s._id);
-      console.log('Show IDs:', showIds); // Debug log
 
       // Base booking match
       const bookingMatch: any = {
@@ -59,7 +57,6 @@ export class DashboardRepository implements IDashboardRepository {
       };
       if (startDate) bookingMatch.createdAt = { $gte: new Date(startDate) };
       if (endDate) bookingMatch.createdAt = { ...bookingMatch.createdAt, $lte: new Date(endDate) };
-      console.log('Booking Match:', bookingMatch); // Debug log
 
       // Fetch all data in parallel
       const [statistics, monthlyRevenue, occupancyRate, topSellingShows, topTheaters] =

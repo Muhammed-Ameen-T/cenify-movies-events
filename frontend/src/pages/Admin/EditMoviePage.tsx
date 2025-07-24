@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Upload, Info, CheckCircle2, Plus } from 'lucide-react';
 import { z } from 'zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
@@ -72,6 +72,7 @@ const CREW_ROLES = ['Director', 'Producer', 'Cinematographer', 'Editor', 'Compos
 const EditMovieForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -349,10 +350,18 @@ const EditMovieForm: React.FC = () => {
 
   const updateMovieMutation = useMutation({
     mutationFn: (data: Partial<MovieFormData>) => movieService.updateMovie(id!, data),
-    onSuccess: () => {
+    onSuccess: async () => {
       setFormSubmitted(true);
       localStorage.setItem(MOVIE_UPDATED_KEY, 'true');
       toast.success('Movie updated successfully!');
+      await queryClient.invalidateQueries({ 
+        queryKey: ['movies'],
+        refetchType: 'active', 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['movie', id],
+        refetchType: 'active', 
+      });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to update movie');

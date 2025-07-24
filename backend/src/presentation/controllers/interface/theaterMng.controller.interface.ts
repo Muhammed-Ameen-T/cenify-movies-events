@@ -6,4 +6,5 @@ export interface ITheaterManagementController {
   updateTheater(req: Request, res: Response, next: NextFunction): Promise<void>;
   getTheatersOfVendor(req: Request, res: Response, next: NextFunction): Promise<void>;
   fetchTheatersByAdmin(req: Request, res: Response, next: NextFunction): Promise<void>;
+  findTheaterById(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

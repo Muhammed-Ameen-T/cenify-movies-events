@@ -10,7 +10,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
 import { createNewSeatLayout } from '../../services/Vendor/seatLayoutApi';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 interface TheaterContextType {
@@ -52,6 +52,7 @@ export const useTheater = () => {
 };
 
 export const TheaterProvider: React.FC<TheaterProviderProps> = ({ children }) => {
+  const queryClient = useQueryClient(); // Add queryClient
   const [currentLayout, setCurrentLayout] = useState<TheaterLayout | null>(null);
   const [history, setHistory] = useState<TheaterLayout[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
@@ -358,9 +359,13 @@ export const TheaterProvider: React.FC<TheaterProviderProps> = ({ children }) =>
     mutationFn: async (layoutData: any) => {
       return await createNewSeatLayout(layoutData);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Layout saved successfully!');
-      navigate('/vendor/seats'); 
+      await queryClient.invalidateQueries({ 
+        queryKey: ['seatLayouts'],
+        refetchType: 'active', // Ensure active queries are refetched
+      });
+      setTimeout(() => navigate('/vendor/seats'), 100); // Small delay to allow refetch
     },
     onError: (error) => {
       toast.error(error.message || 'Failed to save layout');

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle2, X, Clock, Info } from 'lucide-react';
-import { useMutation, useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useMutation, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { debounce } from 'lodash';
 import DatePicker from 'react-datepicker';
@@ -113,6 +113,7 @@ const boxVariants = {
 
 const UpdateShowForm: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { id } = useParams<{ id: string }>();
   const showId = id ? id : null;
   const [formSubmitted, setFormSubmitted] = useState<boolean>(false);
@@ -300,9 +301,13 @@ const UpdateShowForm: React.FC = () => {
         startTime: data.startTime,
         endTime: data.endTime,
       }),
-    onSuccess: () => {
+    onSuccess: async() => {
       setFormSubmitted(true);
       toast.success('Show updated successfully!');
+      await queryClient.invalidateQueries({ 
+        queryKey: ['shows'],
+        refetchType: 'active', 
+      });
       setTimeout(() => {
         navigate('/vendor/shows');
       }, 2000);

@@ -11,6 +11,7 @@ import { IFetchTheaterOfVendorUseCase } from '../../domain/interfaces/useCases/V
 import { IUpdateTheaterUseCase } from '../../domain/interfaces/useCases/Vendor/updateTheater.interfase';
 import { IFetchTheatersUseCase } from '../../domain/interfaces/useCases/Vendor/fetchTheaters.interface';
 import { IFetchAdminTheatersUseCase } from '../../domain/interfaces/useCases/Admin/fetchAdminTheaters.interface';
+import { IFindTheaterByIdUseCase } from '../../domain/interfaces/useCases/Vendor/findTheaterById.interface';
 
 /**
  * Controller for managing theater-related operations for both vendors and administrators.
@@ -34,6 +35,7 @@ export class TheaterManagementController implements ITheaterManagementController
     @inject('FetchAdminTheatersUseCase')
     private fetchAdminTheatersUseCase: IFetchAdminTheatersUseCase,
     @inject('UpdateTheater') private updateTheaterUseCase: IUpdateTheaterUseCase,
+    @inject('FindTheaterByIdUseCase') private findTheaterByIdUseCase: IFindTheaterByIdUseCase,
   ) {}
 
   /**
@@ -148,6 +150,26 @@ export class TheaterManagementController implements ITheaterManagementController
       // Fetch theaters using the use case
       const result = await this.fetchAdminTheatersUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Find theater By using Id from param.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async findTheaterById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const theater = await this.findTheaterByIdUseCase.execute(id);
+      if (!theater) {
+        throw new CustomError(HttpResMsg.NOT_FOUND, HttpResCode.NOT_FOUND);
+      }
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, theater);
     } catch (error) {
       next(error);
     }

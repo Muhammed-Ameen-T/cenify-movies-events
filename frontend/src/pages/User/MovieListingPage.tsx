@@ -189,7 +189,7 @@ const MovieListingPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["movies", filters, currentLocation],
     queryFn: () => getMoviesWithFilters(filters),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, 
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 

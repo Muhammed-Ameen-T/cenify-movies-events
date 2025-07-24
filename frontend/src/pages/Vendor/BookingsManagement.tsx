@@ -54,7 +54,7 @@ const VendorBookings: React.FC = () => {
         sortOrder: filters.bookingDate === 'newest' ? 'desc' : filters.bookingDate === 'oldest' ? 'asc' : undefined,
         search: filters.search || undefined,
       }),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, 
     retry: 2,
   });
 

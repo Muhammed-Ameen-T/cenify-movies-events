@@ -172,7 +172,7 @@ const BookingsTab: React.FC<BookingsTabProps> = ({ initialBookings = [] }) => {
         totalPages: response.totalPages,
       };
     },
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, 
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 

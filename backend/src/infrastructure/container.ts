@@ -202,6 +202,8 @@ import { ISendOtpPhoneUseCase } from '../domain/interfaces/useCases/User/sendOtp
 import { IVerifyOtpPhoneUseCase } from '../domain/interfaces/useCases/User/verifyOtpPhone.interface';
 import { IProcessVendorPayout } from '../domain/interfaces/useCases/User/ProcessVendorPayoutUseCase.interface';
 import { ProcessVendorPayoutUseCase } from '../application/useCases/bookingMng/ProcessVendorPayout';
+import { FindTheaterByIdUseCase } from '../application/useCases/theaterMng/findTheaterById.useCase';
+import { IFindTheaterByIdUseCase } from '../domain/interfaces/useCases/Vendor/findTheaterById.interface';
 // import { VendorPayoutJobService } from './services/scheduleVendorPayouts.service';
 
 //Controller Registration
@@ -298,6 +300,9 @@ container.register<IFetchTheaterOfVendorUseCase>('FetchTheaterOfVendorUseCase', 
 });
 container.register<IFetchAdminTheatersUseCase>('FetchAdminTheatersUseCase', {
   useClass: FetchAdminTheatersUseCase,
+});
+container.register<IFindTheaterByIdUseCase>('FindTheaterByIdUseCase', {
+  useClass: FindTheaterByIdUseCase,
 });
 
 // Seat Layout UseCases and Controller Registration

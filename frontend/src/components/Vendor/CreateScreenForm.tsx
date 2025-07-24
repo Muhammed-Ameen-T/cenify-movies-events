@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle2 } from 'lucide-react';
-import { useMutation, useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useMutation, useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import BackButton from '../Buttons/BackButton';
 import { createScreen } from '../../services/Vendor/screenApi';
@@ -12,6 +12,8 @@ import { fetchSeatLayoutsVendorCreateScreen } from '../../services/Vendor/seatLa
 import { fetchTheatersByVendor } from '../../services/Vendor/theaterApi';
 import { screenFormSchema } from '../../types/screen';
 import '../../style/scroll.css';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 
 const SCREEN_SUBMITTED_KEY = 'screenDetailsSubmitted';
 
@@ -72,6 +74,9 @@ const boxVariants = {
 
 const CreateScreenForm: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // ADDED: Initialize useQueryClient
+  const user = useSelector((state: RootState) => state.auth.user);
+  const vendorId = user?.id;
   const [formSubmitted, setFormSubmitted] = useState<boolean>(() => {
     return localStorage.getItem(SCREEN_SUBMITTED_KEY) === 'true';
   });
@@ -79,6 +84,8 @@ const CreateScreenForm: React.FC = () => {
   const [selectedLayout, setSelectedLayout] = useState<string | null>(null);
   const [visibleLayouts, setVisibleLayouts] = useState<any[]>([]);
   const [layoutPage, setLayoutPage] = useState(1);
+
+
 
   const {
     register,
@@ -196,6 +203,7 @@ const CreateScreenForm: React.FC = () => {
       setFormSubmitted(true);
       localStorage.setItem(SCREEN_SUBMITTED_KEY, 'true');
       toast.success('Screen created successfully!');
+      queryClient.invalidateQueries({ queryKey: ['screens', vendorId] });
     },
     onError: (error: any) => {
       toast.error(error.message);

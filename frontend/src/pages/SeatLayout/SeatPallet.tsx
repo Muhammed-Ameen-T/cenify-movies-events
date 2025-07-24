@@ -27,16 +27,16 @@ const SeatPaletteItem: React.FC<SeatPaletteItemProps> = ({ seatType }) => {
   };
 
   return (
-    <div 
-      ref={drag} 
+    <div
+      ref={drag}
       className={`cursor-grab p-2 rounded-md transition-all duration-200 ${
         isDragging ? 'opacity-50 scale-95' : 'opacity-100 hover:bg-gray-700'
       }`}
     >
       <div className="flex items-center space-x-3">
-        <SeatVisual 
-          type={seatType} 
-          isSelected={false} 
+        <SeatVisual
+          type={seatType}
+          isSelected={false}
         />
         <div>
           <p className="font-medium capitalize text-sm">
@@ -55,59 +55,59 @@ const SeatPaletteItem: React.FC<SeatPaletteItemProps> = ({ seatType }) => {
 const SeatPalette: React.FC = () => {
   const { selectedSeats, deleteSelectedSeats, changeSelectedSeatsType } = useTheater();
   const [showInfo, setShowInfo] = React.useState(true);
-  
+
   const selectedCount = Object.keys(selectedSeats).filter(id => selectedSeats[id]).length;
   const seatTypes: SeatType[] = ['regular', 'premium', 'vip', 'unavailable'];
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <div className="bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col h-full"> {/* MODIFIED: Added flex flex-col h-full */}
       <div className="border-b border-gray-700">
         <h3 className="px-4 py-3 text-lg font-medium text-blue-400">Seat Types</h3>
       </div>
-      
-      <div className="p-4 space-y-2">
+
+      <div className="p-4 space-y-2 flex-grow overflow-y-auto custom-scrollbar"> {/* MODIFIED: Added flex-grow, overflow-y-auto, and custom-scrollbar */}
         {seatTypes.map((type) => (
           <SeatPaletteItem key={type} seatType={type} />
         ))}
       </div>
-      
+
       {selectedCount > 0 && (
-        <div className="p-4 border-t border-gray-700 bg-gray-750">
+        <div className="p-4 border-t border-gray-700 bg-gray-750 flex-shrink-0"> {/* MODIFIED: Added flex-shrink-0 */}
           <p className="text-sm mb-2">
             <span className="font-medium">{selectedCount}</span> seat{selectedCount !== 1 ? 's' : ''} selected
           </p>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={() => changeSelectedSeatsType('regular')}
-              className="px-2 py-1 text-xs rounded bg-blue-600 hover:bg-blue-700 transition-colors"
+              className="px-1 py-1 text-xs rounded bg-blue-600 hover:bg-blue-700 transition-colors"
             >
               Regular
             </button>
-            <button 
+            <button
               onClick={() => changeSelectedSeatsType('premium')}
-              className="px-2 py-1 text-xs rounded bg-purple-600 hover:bg-purple-700 transition-colors"
+              className="px-1 py-1 text-xs rounded bg-purple-600 hover:bg-purple-700 transition-colors"
             >
               Premium
             </button>
-            <button 
+            <button
               onClick={() => changeSelectedSeatsType('vip')}
-              className="px-2 py-1 text-xs rounded bg-amber-600 hover:bg-amber-700 transition-colors text-black"
+              className="px-1 py-1 text-xs rounded bg-amber-600 hover:bg-amber-700 transition-colors text-black"
             >
               VIP
             </button>
-            <button 
+            <button
               onClick={deleteSelectedSeats}
-              className="px-2 py-1 text-xs rounded bg-red-600 hover:bg-red-700 transition-colors flex items-center"
+              className="px-1 py-1 text-xs rounded bg-red-600 hover:bg-red-700 transition-colors flex items-center"
             >
-              <Trash2 size={12} className="mr-1" />
+              {/* <Trash2 size={12} className="mr-0" /> */}
               Delete
             </button>
           </div>
         </div>
       )}
-      
-      <div className="px-4 py-3 bg-gray-750 border-t border-gray-700">
-        <button 
+
+      <div className="px-4 py-3 bg-gray-750 border-t border-gray-700 flex-shrink-0"> {/* MODIFIED: Added flex-shrink-0 */}
+        <button
           className="flex items-center justify-between w-full text-sm font-medium text-gray-300 hover:text-white transition-colors"
           onClick={() => setShowInfo(prev => !prev)}
         >
@@ -117,7 +117,7 @@ const SeatPalette: React.FC = () => {
           </span>
           {showInfo ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
-        
+
         {showInfo && (
           <div className="mt-3 space-y-2 text-xs">
             <p className="flex justify-between">

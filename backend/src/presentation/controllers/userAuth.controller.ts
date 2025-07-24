@@ -79,7 +79,7 @@ export class UserAuthController implements IUserAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: parseInt(process.env.MAX_AGE || '0', 10)
       });
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
         accessToken: result.accessToken,
@@ -221,7 +221,7 @@ export class UserAuthController implements IUserAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: parseInt(process.env.MAX_AGE || '0', 10)
       });
       sendResponse(res, HttpResCode.OK, SuccessMsg.USER_REGISTERED, {
         accessToken: result.accessToken,
@@ -250,7 +250,7 @@ export class UserAuthController implements IUserAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: parseInt(process.env.MAX_AGE || '0', 10)
       });
 
       sendResponse(res, HttpResCode.OK, SuccessMsg.USER_LOGGED_IN, {

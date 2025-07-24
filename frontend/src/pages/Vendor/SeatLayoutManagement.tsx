@@ -86,8 +86,9 @@ const SeatLayoutManagement: React.FC = () => {
         sortBy: filters.sortBy || undefined,
         sortOrder: filters.sortOrder || undefined,
       }),
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, 
     retry: 2,
+    staleTime: 0,
     onError: (err: any) => {
       toast.error(err.message || 'Failed to load seat layouts');
     },
@@ -230,7 +231,29 @@ const SeatLayoutManagement: React.FC = () => {
       {/* Layout Table */}
       <Card className="p-6 bg-gray-900/80 backdrop-blur-xl border border-gray-700/30 rounded-2xl shadow-xl">
         {isLoading ? (
-          <div className="text-center text-gray-400 py-6">Loading layouts...</div>
+          <div className="flex flex-col items-center justify-center py-6 text-center text-gray-400">
+            <svg
+              className="animate-spin h-8 w-8 text-blue-500 mb-3"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4l5-5-5-5v4a10 10 0 00-10 10h4z"
+              ></path>
+            </svg>
+            <p className="text-sm">Loading layouts...</p>
+          </div>
         ) : error ? (
           <div className="text-center text-red-400 py-6">
             Failed to load layouts: {(error as any).message || 'An error occurred'}
