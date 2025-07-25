@@ -41,7 +41,8 @@ export const ERROR_MESSAGES = {
     FETCH_DASHBOARD_FAILED: 'Failed to fetch dashboard data',
     FAILED_CHANGING_PASSWORD: 'Failed to change password.',
     FETCH_WALLET_TRANSACTIONS_FAILED: 'Failed to fetch wallet transactions',
-    FETCH_MOVIE_PASS_HISTORY_FAILED: 'Feth movie pass '
+    FETCH_MOVIE_PASS_HISTORY_FAILED: 'Feth movie pass ',
+    WALLET_WITHDRAW_FAILED: 'Failed to withdraw from wallet',
 };
 
 // src/constants/notification.messages.ts

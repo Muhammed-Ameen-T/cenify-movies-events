@@ -24,7 +24,8 @@ import { SuccessMsg } from '../../utils/constants/commonSuccessMsg.constants';
 import mongoose from 'mongoose';
 import { IFetchMoviesUserUseCase } from '../../domain/interfaces/useCases/User/fetchMovieUser.interface';
 import { IRateMovieUseCase } from '../../domain/interfaces/useCases/User/rateMovie.interface';
-import { IMovieRepository } from '../../domain/interfaces/repositories/movie.repository';
+import { IIsMovieLikedUseCase } from '../../domain/interfaces/useCases/User/isMovieLiked.interface';
+import { ILikeOrUnlikeMovieUseCase } from '../../domain/interfaces/useCases/User/likeOrUnlikeMovie.interface';
 
 /**
  * Controller for managing movie-related operations, accessible by both admins and users.
@@ -41,7 +42,8 @@ export class MovieMngController implements IMovieMngController {
    * @param {IFindMovieByIdUseCase} findMovieByIdUseCase - Use case for finding a movie by ID.
    * @param {IFetchMoviesUserUseCase} fetchMoviesUserUseCase - Use case for fetching movies (user view).
    * @param {IRateMovieUseCase} rateMovieUseCase - Use case for submitting movie and theater ratings.
-   * @param {IMovieRepository} movieRepository - Repository for movie data, used for like/unlike functionality.
+   * @param {IIsMovieLikedUseCase} isMovieLikedUseCase - Use case for checking if a movie is liked by a user.
+   * @param {ILikeOrUnlikeMovieUseCase} likeOrUnlikeMovieUseCase - Use case for liking or unliking a movie.
    */
   constructor(
     @inject('CreateMovieUseCase') private createMovieUseCase: ICreateMovieUseCase,
@@ -51,7 +53,8 @@ export class MovieMngController implements IMovieMngController {
     @inject('FindMovieByIdUseCase') private findMovieByIdUseCase: IFindMovieByIdUseCase,
     @inject('FetchMoviesUserUseCase') private fetchMoviesUserUseCase: IFetchMoviesUserUseCase,
     @inject('RateMovieUseCase') private rateMovieUseCase: IRateMovieUseCase,
-    @inject('MovieRepository') private movieRepository: IMovieRepository,
+    @inject('IsMovieLikedUseCase') private isMovieLikedUseCase: IIsMovieLikedUseCase,
+    @inject('LikeOrUnlikeMovieUseCase') private likeOrUnlikeMovieUseCase: ILikeOrUnlikeMovieUseCase,
   ) {}
 
   /**
@@ -303,7 +306,7 @@ export class MovieMngController implements IMovieMngController {
       const userId = req.decoded?.userId;
 
       if (!movieId || !theaterId || !userId) {
-        throw new CustomError('Missing required fields', HttpResCode.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS, HttpResCode.BAD_REQUEST);
       }
 
       const dto = new SubmitRatingDTO(
@@ -331,23 +334,15 @@ export class MovieMngController implements IMovieMngController {
    */
   async likeOrUnlikeMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { movieId, isLike } = req.body;
       const userId = req.decoded?.userId;
-
-      if (!movieId || typeof isLike !== 'boolean' || !userId) {
-        throw new CustomError(
-          ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
-          HttpResCode.BAD_REQUEST,
-        );
+      if (!userId) {
+        throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
+      const { movieId, isLike } = req.body;
 
-      const updatedMovie = await this.movieRepository.likeMovie(movieId, userId, isLike);
+      const response = await this.likeOrUnlikeMovieUseCase.execute(movieId, userId, isLike);
 
-      if (!updatedMovie) {
-        throw new CustomError(ERROR_MESSAGES.GENERAL.MOVIE_NOT_UPDATED, HttpResCode.NOT_FOUND);
-      }
-
-      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_UPDATED, updatedMovie);
+      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_UPDATED, response);
     } catch (error) {
       next(error);
     }
@@ -362,18 +357,13 @@ export class MovieMngController implements IMovieMngController {
    */
   async isMovieLiked(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { movieId } = req.params;
       const userId = req.decoded?.userId;
-
-      if (!movieId || !userId) {
-        throw new CustomError(
-          ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
-          HttpResCode.BAD_REQUEST,
-        );
+      if (!userId) {
+        throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
-
-      const isLiked = await this.movieRepository.hasUserLikedMovie(movieId, userId);
-      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_FETCHED, { isLiked });
+      const { movieId } = req.params;
+      const response = await this.isMovieLikedUseCase.execute(movieId, userId);
+      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_FETCHED, response);
     } catch (error) {
       next(error);
     }

@@ -66,6 +66,7 @@ const ERROR_MESSAGES = {
     TWILIO_CONFIG_MISSING: 'Twilio configuration missing: ACCOUNT_SID or AUTH_TOKEN not set',
     TWILIO_PHONE_MISSING: 'Twilio phone number not configured',
     PHONE_UNCHANGED: 'Phone number unchanged.,',
+    INVALID_TOTAL_AMOUNT: 'Invalid total amount.',
   },
   DATABASE: {
     CONNECTION_FAILED: 'Database connection failed.',

@@ -11,9 +11,6 @@ import { IupdateUserProfileUseCase } from '../../domain/interfaces/useCases/User
 import { ChangePasswordRequestDTO, UpdateProfileRequestDTO } from '../../application/dtos/user.dto';
 import { IUserProfileController } from './interface/userProfile.controller.interface';
 import { IFindUserWalletUseCase } from '../../domain/interfaces/useCases/User/findUserWallet.interface';
-import { IWalletRepository } from '../../domain/interfaces/repositories/wallet.repository';
-import { IBookingRepository } from '../../domain/interfaces/repositories/booking.repository';
-import { IMoviePassRepository } from '../../domain/interfaces/repositories/moviePass.repository';
 import { IChangePasswordUseCase } from '../../domain/interfaces/useCases/User/changePassword.interface';
 import { IFindUserWalletTransactionsUseCase } from '../../domain/interfaces/useCases/User/findUserTransaction.interface';
 import { IRedeemLoyalityToWalletUseCase } from '../../domain/interfaces/useCases/User/redeemLoyalityToWallet.interface';
@@ -23,6 +20,9 @@ import {
 } from '../../application/dtos/profile.dto';
 import { ISendOtpPhoneUseCase } from '../../domain/interfaces/useCases/User/sendOtpPhone.interface';
 import { IVerifyOtpPhoneUseCase } from '../../domain/interfaces/useCases/User/verifyOtpPhone.interface';
+import { IFindProfileContentsUseCase } from '../../domain/interfaces/useCases/User/findProfileContents.interface';
+import { CustomError } from '../../utils/errors/custom.error';
+import { IWithdrawFundsUseCase } from '../../domain/interfaces/useCases/Vendor/withdrawFunds.interface';
 
 /**
  * Controller for managing user profile-related operations, including fetching profile details,
@@ -39,11 +39,10 @@ export class UserProfileController implements IUserProfileController {
    * @param {IChangePasswordUseCase} changePasswordUseCase - Use case for changing a user's password.
    * @param {IFindUserWalletTransactionsUseCase} findWalletTransaction - Use case for finding user wallet transactions.
    * @param {IRedeemLoyalityToWalletUseCase} redeemLoyalityToWalletUseCase - Use case for redeeming loyalty points to wallet.
-   * @param {IBookingRepository} bookingRepository - Repository for booking data.
-   * @param {IWalletRepository} walletRepository - Repository for wallet data.
-   * @param {IMoviePassRepository} moviePassRepository - Repository for movie pass data.
    * @param {ISendOtpPhoneUseCase} sendOtpPhoneUseCase - Use case for sending OTP to a phone number.
    * @param {IVerifyOtpPhoneUseCase} verifyOtpPhoneUseCase - Use case for verifying phone OTP.
+   * @param {IFindProfileContentsUseCase} findProfileContentsUseCase - Use case for finding profile contents.
+   * @param {IWithdrawFundsUseCase} withdrawFundsUseCase - Use case for withdrawing funds from wallet.
    */
   constructor(
     @inject('GetUserDetailsUseCase') private getUserDetailsUseCase: IgetUserDetailsUseCase,
@@ -54,11 +53,10 @@ export class UserProfileController implements IUserProfileController {
     private findWalletTransaction: IFindUserWalletTransactionsUseCase,
     @inject('RedeemLoyalityToWalletUseCase')
     private redeemLoyalityToWalletUseCase: IRedeemLoyalityToWalletUseCase,
-    @inject('BookingRepository') private bookingRepository: IBookingRepository,
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
-    @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
     @inject('SendOtpPhoneUseCase') private sendOtpPhoneUseCase: ISendOtpPhoneUseCase,
     @inject('VerifyOtpPhoneUseCase') private verifyOtpPhoneUseCase: IVerifyOtpPhoneUseCase,
+    @inject('FindProfileContentsUseCase') private findProfileContentsUseCase: IFindProfileContentsUseCase,
+    @inject('WithdrawFundsUseCase') private withdrawFundsUseCase: IWithdrawFundsUseCase,
   ) {}
 
   /**
@@ -169,19 +167,8 @@ export class UserProfileController implements IUserProfileController {
       return;
     }
     try {
-      let walletBalance = await this.walletRepository.walletbalance(userId);
-
-      if (!walletBalance) {
-        walletBalance = 0;
-      }
-      const bookingsCount = await this.bookingRepository.countBookings(userId);
-
-      const moviePass = await this.moviePassRepository.findByUserId(userId);
-      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
-        walletBalance,
-        bookingsCount,
-        moviePass,
-      });
+      const response = await this.findProfileContentsUseCase.execute(userId);
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, response);
     } catch (error) {
       next(error);
     }
@@ -346,4 +333,28 @@ export class UserProfileController implements IUserProfileController {
       next(error);
     }
   }
+
+  /**
+   * Withdraws a specified amount from the user's wallet to their Stripe account.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId`, `amount`, and `stripeAccountId` in `req.body`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async withdrawFromWallet(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.decoded?.userId;
+      const { amount, stripeAccountId } = req.body;
+
+      if (!userId || typeof amount !== 'number' || amount <= 0 || !stripeAccountId) {
+        throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_INPUT, HttpResCode.BAD_REQUEST);
+      }
+
+      const result = await this.withdrawFundsUseCase.execute(userId, amount, stripeAccountId);
+
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
+    } catch (error) {
+      next(error);
+    }
+  };
 }

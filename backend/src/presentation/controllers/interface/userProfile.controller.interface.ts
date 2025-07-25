@@ -11,4 +11,5 @@ export interface IUserProfileController {
   redeemLoyaltyPoints(req: Request, res: Response, next: NextFunction): Promise<void>;
   sendOtpPhone(req: Request, res: Response, next: NextFunction): Promise<void>;
   verifyOtpPhone(req: Request, res: Response, next: NextFunction): Promise<void>;
+  withdrawFromWallet(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

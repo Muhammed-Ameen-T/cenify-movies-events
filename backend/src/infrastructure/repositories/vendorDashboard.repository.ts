@@ -2,8 +2,6 @@ import mongoose, { Types } from 'mongoose';
 import BookingModel from '../database/booking.model';
 import ShowModel from '../database/show.model';
 import { TheaterModel } from '../database/theater.model';
-import ScreenModel from '../database/screen.model';
-import SeatLayoutModel from '../database/seatLayout.model';
 import {
   DashboardQueryParams,
   VendorStatistics,
@@ -289,6 +287,7 @@ export class DashboardRepository implements IDashboardRepository {
           title: { $first: '$movie.name' },
           tickets: { $sum: { $size: '$bookedSeatsId' } },
           revenue: { $sum: '$totalAmount' },
+          startTime: { $first: '$show.startTime' },
         },
       },
       { $sort: { tickets: -1 } },
@@ -299,6 +298,7 @@ export class DashboardRepository implements IDashboardRepository {
           title: 1,
           tickets: 1,
           revenue: 1,
+          showTime: '$startTime',
         },
       },
     ]);

@@ -37,6 +37,7 @@ export const USER_ENDPOINTS = {
   verifyOtpPhone: '/profile/verify-otp-phone',
   sendOtpPhone: '/profile/send-otp-phone',
   redeemPoints: '/profile/redeem-points',
+  walletWithdraw: '/profile/wallet-withdraw',
   getMoviePassHistory: 'movie-pass/history'
 };
 

@@ -71,4 +71,11 @@ router.post(
   userAuthController.verifyOtpPhone.bind(userAuthController),
 );
 
+router.post(
+  '/wallet-withdraw',
+  verifyAccessToken,
+  authorizeRoles(['vendor']),
+  userAuthController.withdrawFromWallet.bind(userAuthController),
+);
+
 export default router;

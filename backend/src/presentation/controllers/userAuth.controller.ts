@@ -2,13 +2,9 @@
 import 'reflect-metadata';
 import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
-import { container } from 'tsyringe';
-
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
-import { CustomError } from '../../utils/errors/custom.error';
-
 import {
   VerifyOtpDTO,
   LoginDTO,
@@ -16,23 +12,16 @@ import {
   ForgotPassSendOtpDTO,
   ForgotPassUpdateDTO,
 } from '../../application/dtos/auth.dto';
-
 import { IUserAuthController } from './interface/userAuth.controller.interface';
-
 import { ISendOtpUseCase } from '../../domain/interfaces/useCases/User/sentOtpUser.interface';
 import { IVerifyOtpUseCase } from '../../domain/interfaces/useCases/User/verifyOtpUser.interface';
 import { IGoogleAuthUseCase } from '../../domain/interfaces/useCases/User/googleAuthUser.interface';
 import { ILoginUserUseCase } from '../../domain/interfaces/useCases/User/loginUser.interface';
-
-import { IAuthRepository } from '../../domain/interfaces/repositories/userAuth.types';
-import { JwtService } from '../../infrastructure/services/jwt.service';
 import { IForgotPasswordSendOtpUseCase } from '../../domain/interfaces/useCases/Admin/forgotPasswordSendOtp.interface';
 import { IForgotPasswordUpdateUseCase } from '../../domain/interfaces/useCases/Admin/forgotPasswordUpdate.interface';
 import { IForgotPasswordVerifyOtpUseCase } from '../../domain/interfaces/useCases/Admin/forgotPasswordVerifyOtp.interface';
-import jwt from 'jsonwebtoken';
-import { IUserRepository } from '../../domain/interfaces/repositories/user.repository';
-import { IgetUserDetailsUseCase } from '../../domain/interfaces/useCases/User/getUserDetails.interface';
 import { SuccessMsg } from '../../utils/constants/commonSuccessMsg.constants';
+import { IRefreshTokenUseCase } from '../../domain/interfaces/useCases/User/refreshToken.interface';
 /**
  * Controller for handling user authentication, including OTP-based registration, login,
  * Google authentication, token refreshing, and password reset functionalities.
@@ -49,8 +38,7 @@ export class UserAuthController implements IUserAuthController {
    * @param {IForgotPasswordSendOtpUseCase} forgotPassSendOtpUseCase - Use case for sending OTP for password reset.
    * @param {IForgotPasswordUpdateUseCase} forgotPassUpdatePassUseCase - Use case for updating password after OTP verification.
    * @param {IForgotPasswordVerifyOtpUseCase} forgotPassVerifyOtpUseCase - Use case for verifying OTP during password reset.
-   * @param {IgetUserDetailsUseCase} getUserDetailsUseCase - Use case for fetching authenticated user details.
-   * @param {IUserRepository} userRepository - Repository for user data, used for token refreshing.
+   * @param {IRefreshTokenUseCase} refreshTokenUseCase - Use case for creaeting new Access Token Using refreshToken.
    */
   constructor(
     @inject('SendOtpUserUseCase') private sendOtpUseCase: ISendOtpUseCase,
@@ -59,10 +47,8 @@ export class UserAuthController implements IUserAuthController {
     @inject('LoginUserUseCase') private loginUserUseCase: ILoginUserUseCase,
     @inject('ForgotPassSendOtp') private forgotPassSendOtpUseCase: IForgotPasswordSendOtpUseCase,
     @inject('ForgotPassUpdate') private forgotPassUpdatePassUseCase: IForgotPasswordUpdateUseCase,
-    @inject('ForgotPassVerifyOtp')
-    private forgotPassVerifyOtpUseCase: IForgotPasswordVerifyOtpUseCase,
-    @inject('GetUserDetailsUseCase') private getUserDetailsUseCase: IgetUserDetailsUseCase,
-    @inject('IUserRepository') private userRepository: IUserRepository,
+    @inject('ForgotPassVerifyOtp') private forgotPassVerifyOtpUseCase: IForgotPasswordVerifyOtpUseCase,
+    @inject('RefreshTokenUseCase') private refreshTokenUseCase: IRefreshTokenUseCase,
   ) {}
 
   /**
@@ -99,44 +85,8 @@ export class UserAuthController implements IUserAuthController {
    */
   async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.cookies.refreshToken) {
-        sendResponse(
-          res,
-          HttpResCode.UNAUTHORIZED,
-          ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-        );
-        return;
-      }
-
       const refreshToken = req.cookies.refreshToken;
-
-      // Decode first to check expiration
-      const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
-
-      if (!decoded || !decoded.exp || Date.now() >= decoded.exp * 1000) {
-        sendResponse(
-          res,
-          HttpResCode.UNAUTHORIZED,
-          ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
-        );
-        return;
-      }
-
-      // Verify token
-      const jwtService = container.resolve<JwtService>('JwtService');
-      const verifiedDecoded = jwtService.verifyRefreshToken(refreshToken);
-
-      // const authRepository = container.resolve<IAuthRepository>('AuthRepository');
-      const user = await this.userRepository.findById(verifiedDecoded.userId);
-
-      if (!user) {
-        sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
-        return;
-      }
-
-      // Generate new access token
-      const newAccessToken = jwtService.generateAccessToken(user._id.toString(), user.role);
-
+      const newAccessToken = await this.refreshTokenUseCase.execute(refreshToken);
       // Send new token response
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { accessToken: newAccessToken });
     } catch (error) {

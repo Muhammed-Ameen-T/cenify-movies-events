@@ -10,11 +10,10 @@ import { ICreateBookingUseCase } from '../../domain/interfaces/useCases/User/cre
 import { IFetchAllBookingsUseCase } from '../../domain/interfaces/useCases/User/fetchBookings.interface';
 import { IFindBookingByIdUseCase } from '../../domain/interfaces/useCases/User/findBookingById.interface';
 import { IFindBookingsOfUserUseCase } from '../../domain/interfaces/useCases/User/findBookingsOfUser.interface';
-import { PaymentService } from '../../infrastructure/services/checkoutPayment.service';
-import { IWalletRepository } from '../../domain/interfaces/repositories/wallet.repository';
-import { IMoviePassRepository } from '../../domain/interfaces/repositories/moviePass.repository';
 import { IFindBookingsOfVendorUseCase } from '../../domain/interfaces/useCases/User/findBookingsOfVendor.interface';
 import { ICancelBookingUseCase } from '../../domain/interfaces/useCases/User/cancelBooking.interface';
+import { ICheckPaymentOptionsUseCase } from '../../domain/interfaces/useCases/User/checkPaymentOptions.interface';
+import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 
 /**
  * Controller for managing booking-related operations.
@@ -30,9 +29,7 @@ export class BookingMngController implements IBookingMngController {
    * @param {ICancelBookingUseCase} cancelBookingUseCase - Use case for canceling a booking.
    * @param {IFindBookingsOfUserUseCase} findBookingsOfUserUseCase - Use case for finding bookings of a specific user.
    * @param {IFindBookingsOfVendorUseCase} findBookingsOfVendorUseCase - Use case for finding bookings of a specific vendor.
-   * @param {PaymentService} paymentService - Service for handling payment operations.
-   * @param {IWalletRepository} walletRepository - Repository for wallet data.
-   * @param {IMoviePassRepository} moviePassRepository - Repository for movie pass data.
+   * @param {ICheckPaymentOptionsUseCase} checkPaymentOptionsUseCase - Use case for checking payment options.
    */
   constructor(
     @inject('CreateBookingUseCase') private createBookingUseCase: ICreateBookingUseCase,
@@ -43,9 +40,7 @@ export class BookingMngController implements IBookingMngController {
     private findBookingsOfUserUseCase: IFindBookingsOfUserUseCase,
     @inject('FindBookingsOfVendorUseCase')
     private findBookingsOfVendorUseCase: IFindBookingsOfVendorUseCase,
-    @inject('PaymentService') private paymentService: PaymentService,
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
-    @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
+    @inject('CheckPaymentOptionsUseCase') private checkPaymentOptionsUseCase: ICheckPaymentOptionsUseCase,
   ) {}
 
   /**
@@ -97,23 +92,14 @@ export class BookingMngController implements IBookingMngController {
       if (!userId) {
         throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
+
       const totalAmount = parseFloat(req.query.totalAmount as string);
       if (isNaN(totalAmount)) {
-        throw new CustomError('Invalid total amount', HttpResCode.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_TOTAL_AMOUNT, HttpResCode.BAD_REQUEST);
       }
 
-      const hasSufficientWalletBalance = await this.paymentService.checkWalletBalance(
-        userId,
-        totalAmount,
-      );
-      const hasMoviePass = await this.moviePassRepository.findByUserId(userId);
-      const isMoviePassActive = hasMoviePass && hasMoviePass.status === 'Active';
-      const wallet = await this.walletRepository.findByUserId(userId);
-      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
-        wallet: { enabled: hasSufficientWalletBalance, balance: wallet?.balance || 0 },
-        stripe: { enabled: true },
-        moviePass: { active: isMoviePassActive },
-      });
+      const response = await this.checkPaymentOptionsUseCase.execute(userId, totalAmount);
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, response);
     } catch (error) {
       next(error);
     }
