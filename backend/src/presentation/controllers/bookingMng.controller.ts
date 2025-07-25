@@ -3,7 +3,6 @@ import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
-import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 import { CustomError } from '../../utils/errors/custom.error';
 import { CreateBookingDTO } from '../../application/dtos/booking.dto';
 import { IBookingMngController } from './interface/bookingMng.controller.interface';
@@ -11,14 +10,27 @@ import { ICreateBookingUseCase } from '../../domain/interfaces/useCases/User/cre
 import { IFetchAllBookingsUseCase } from '../../domain/interfaces/useCases/User/fetchBookings.interface';
 import { IFindBookingByIdUseCase } from '../../domain/interfaces/useCases/User/findBookingById.interface';
 import { IFindBookingsOfUserUseCase } from '../../domain/interfaces/useCases/User/findBookingsOfUser.interface';
-import { PaymentService } from '../../infrastructure/services/checkoutPayment.service';
-import { IWalletRepository } from '../../domain/interfaces/repositories/wallet.repository';
-import { IMoviePassRepository } from '../../domain/interfaces/repositories/moviePass.repository';
 import { IFindBookingsOfVendorUseCase } from '../../domain/interfaces/useCases/User/findBookingsOfVendor.interface';
 import { ICancelBookingUseCase } from '../../domain/interfaces/useCases/User/cancelBooking.interface';
+import { ICheckPaymentOptionsUseCase } from '../../domain/interfaces/useCases/User/checkPaymentOptions.interface';
+import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 
+/**
+ * Controller for managing booking-related operations.
+ * @implements {IBookingMngController}
+ */
 @injectable()
 export class BookingMngController implements IBookingMngController {
+  /**
+   * Constructs an instance of BookingMngController.
+   * @param {ICreateBookingUseCase} createBookingUseCase - Use case for creating a booking.
+   * @param {IFetchAllBookingsUseCase} fetchBookingsUseCase - Use case for fetching all bookings.
+   * @param {IFindBookingByIdUseCase} findBookingByIdUseCase - Use case for finding a booking by ID.
+   * @param {ICancelBookingUseCase} cancelBookingUseCase - Use case for canceling a booking.
+   * @param {IFindBookingsOfUserUseCase} findBookingsOfUserUseCase - Use case for finding bookings of a specific user.
+   * @param {IFindBookingsOfVendorUseCase} findBookingsOfVendorUseCase - Use case for finding bookings of a specific vendor.
+   * @param {ICheckPaymentOptionsUseCase} checkPaymentOptionsUseCase - Use case for checking payment options.
+   */
   constructor(
     @inject('CreateBookingUseCase') private createBookingUseCase: ICreateBookingUseCase,
     @inject('FetchAllBookingsUseCase') private fetchBookingsUseCase: IFetchAllBookingsUseCase,
@@ -28,12 +40,17 @@ export class BookingMngController implements IBookingMngController {
     private findBookingsOfUserUseCase: IFindBookingsOfUserUseCase,
     @inject('FindBookingsOfVendorUseCase')
     private findBookingsOfVendorUseCase: IFindBookingsOfVendorUseCase,
-    @inject('PaymentService') private paymentService: PaymentService,
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
-    @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
+    @inject('CheckPaymentOptionsUseCase') private checkPaymentOptionsUseCase: ICheckPaymentOptionsUseCase,
   ) {}
 
-  async createBooking(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Handles the creation of a new booking.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async createBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
@@ -58,39 +75,44 @@ export class BookingMngController implements IBookingMngController {
       const result = await this.createBookingUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async checkPaymentOptions(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Checks available payment options for a given total amount.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async checkPaymentOptions(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.decoded?.userId;
       if (!userId) {
         throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
+
       const totalAmount = parseFloat(req.query.totalAmount as string);
       if (isNaN(totalAmount)) {
-        throw new CustomError('Invalid total amount', HttpResCode.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_TOTAL_AMOUNT, HttpResCode.BAD_REQUEST);
       }
 
-      const hasSufficientWalletBalance = await this.paymentService.checkWalletBalance(
-        userId,
-        totalAmount,
-      );
-      const hasMoviePass = await this.moviePassRepository.findByUserId(userId);
-      const isMoviePassActive = hasMoviePass && hasMoviePass.status === 'Active';
-      const wallet = await this.walletRepository.findByUserId(userId);
-      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
-        wallet: { enabled: hasSufficientWalletBalance, balance: wallet?.balance || 0 },
-        stripe: { enabled: true },
-        moviePass: { active: isMoviePassActive },
-      });
+      const response = await this.checkPaymentOptionsUseCase.execute(userId, totalAmount);
+      sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, response);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async fetchBookings(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Fetches all bookings based on provided query parameters.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async fetchBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, sortBy, sortOrder } = req.query;
       // Convert query parameters
@@ -113,11 +135,18 @@ export class BookingMngController implements IBookingMngController {
       const result = await this.fetchBookingsUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async findBookingsOfVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Finds bookings associated with a specific vendor.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async findBookingsOfVendor(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, status, sortBy, sortOrder } = req.query;
       const vendorId = req.decoded?.userId;
@@ -144,11 +173,18 @@ export class BookingMngController implements IBookingMngController {
       const result = await this.findBookingsOfVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-     next(error)
+      next(error);
     }
   }
 
-  async findBookingById(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Finds a specific booking by its ID.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async findBookingById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       if (!id) {
@@ -158,10 +194,18 @@ export class BookingMngController implements IBookingMngController {
       const booking = await this.findBookingByIdUseCase.execute(id);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, booking);
     } catch (error) {
-next(error)    }
+      next(error);
+    }
   }
 
-  async findBookingsOfUser(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Finds bookings associated with a specific user.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async findBookingsOfUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, status, sortBy, sortOrder } = req.query;
       const userId = req.decoded?.userId;
@@ -188,11 +232,18 @@ next(error)    }
       const result = await this.findBookingsOfUserUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async cancelBooking(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Cancels a booking by its ID.
+   * @param {Request} req - The Express request object.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const { reason } = req.body;
@@ -204,7 +255,7 @@ next(error)    }
       const cancelledBooking = await this.cancelBookingUseCase.execute(id, reason);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, cancelledBooking);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

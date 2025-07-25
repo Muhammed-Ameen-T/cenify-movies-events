@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
 import { v4 as uuidv4 } from 'uuid';
 import { Notification } from '../../domain/entities/notification.entity';
+import { env } from '../../config/env.config';
 
 class SocketService {
   private io: Server | null = null;
@@ -22,7 +23,7 @@ class SocketService {
       path: '/socket.io',
       cors: {
         origin: (origin, callback) => {
-          const allowedOrigins = ['http://localhost:5173'];
+          const allowedOrigins = ['http://localhost:5173', env.CLIENT_ORIGIN];
           console.log(`CORS check for origin: ${origin}, instance ID: ${this.instanceId}`);
           if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
@@ -172,9 +173,7 @@ class SocketService {
       return;
     }
     if (!room) {
-      console.warn(
-        `Cannot emit notification: invalid room, instance ID: ${this.instanceId}`,
-      );
+      console.warn(`Cannot emit notification: invalid room, instance ID: ${this.instanceId}`);
       return;
     }
     console.log(

@@ -13,17 +13,17 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
     sendResponse(
       res,
       HttpResCode.INTERNAL_SERVER_ERROR,
-      err.message || HttpResMsg.SOMETHING_WENT_WRONG
+      err.message || HttpResMsg.SOMETHING_WENT_WRONG,
     );
   }
 };
 
 export default errorHandler;
 
-  // Clear cookie In case of an UnAuthorized Access
-  // if (
-  //   err.message === HttpResMsg.REFRESH_TOKEN_REQUIRED ||
-  //   err.message === HttpResMsg.INVALID_OR_EXPIRED_REFRESH_TOKEN
-  // ) {
-  //   res.clearCookie('refreshToken');
-  // }
+// Clear cookie In case of an UnAuthorized Access
+// if (
+//   err.message === HttpResMsg.REFRESH_TOKEN_REQUIRED ||
+//   err.message === HttpResMsg.INVALID_OR_EXPIRED_REFRESH_TOKEN
+// ) {
+//   res.clearCookie('refreshToken');
+// }

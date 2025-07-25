@@ -10,8 +10,6 @@ import { CustomError } from '../../../utils/errors/custom.error';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { SuccessMsg } from '../../../utils/constants/commonSuccessMsg.constants';
 import { Theater } from '../../../domain/entities/theater.entity';
-import { theaterUpdateSchema } from '../../../presentation/validation/theater.validation';
-import { z } from 'zod';
 
 @injectable()
 export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
@@ -19,7 +17,6 @@ export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
 
   async execute(id: string, data: Partial<Theater>, res: Response): Promise<void> {
     try {
-      //   const validatedData = theaterUpdateSchema.parse(data);
 
       const theater = await this.theaterRepository.findById(id);
       if (!theater) {
@@ -38,7 +35,7 @@ export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
         theater.createdAt,
         new Date(),
         data.intervalTime || theater.intervalTime,
-        theater.gallery,
+        data.gallery || theater.gallery,
         data.email || theater.email,
         data.phone || theater.phone,
         data.description || theater.description,

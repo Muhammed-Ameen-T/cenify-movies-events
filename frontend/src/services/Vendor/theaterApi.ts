@@ -206,6 +206,18 @@ export const fetchTheatersByVendor = async (params: {
   return response.data.data;
 };
 
+export const fetchTheatersById = async (id: string): Promise<ITheater | null> => {
+  try {
+    const response = await api.get(`${VENDOR_ENDPOINTS.findTheater}${id}`);
+    console.log('Backend theater response:', response.data); // Debug full response
+    console.log('Theater gallery:', response.data.data?.gallery); // Debug gallery specifically
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching theater by ID:', error);
+    return null;
+  }
+};
+
 export const updateTheaterStatus = async (id: string, status: string): Promise<void> => {
   await api.patch(`${VENDOR_ENDPOINTS.updateStatus}${id}`, { status });
 };

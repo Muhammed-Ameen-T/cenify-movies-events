@@ -13,10 +13,20 @@ import { env } from '../../config/env.config';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 import { IFindMoviePassHistoryUseCase } from '../../domain/interfaces/useCases/User/findUserMoviePassHistory.interface';
 
+/**
+ * Controller for managing movie pass related operations, including Stripe checkout and movie pass creation/fetching.
+ * @implements {IMoviePassController}
+ */
 @injectable()
 export class MoviePassController implements IMoviePassController {
   private stripe: Stripe;
 
+  /**
+   * Constructs an instance of MoviePassController.
+   * @param {ICreateMoviePassUseCase} createMoviePassUseCase - Use case for creating a movie pass.
+   * @param {IFetchMoviePassUseCase} fetchMoviePassUseCase - Use case for fetching a user's movie pass.
+   * @param {IFindMoviePassHistoryUseCase} findMoviePassHistoryUseCase - Use case for finding a user's movie pass history.
+   */
   constructor(
     @inject('CreateMoviePassUseCase') private createMoviePassUseCase: ICreateMoviePassUseCase,
     @inject('FetchMoviePassUseCase') private fetchMoviePassUseCase: IFetchMoviePassUseCase,
@@ -26,7 +36,14 @@ export class MoviePassController implements IMoviePassController {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
-  async createCheckoutSession(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Creates a Stripe checkout session for purchasing a movie pass.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async createCheckoutSession(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
@@ -56,10 +73,18 @@ export class MoviePassController implements IMoviePassController {
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { sessionId: session.id });
     } catch (error) {
-next(error)    }
+      next(error);
+    }
   }
 
-  async createMoviePass(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Creates a new movie pass for a user after successful payment.
+   * @param {Request} req - The Express request object. Requires `req.body.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async createMoviePass(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.body.userId;
     if (!userId) {
       throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
@@ -78,10 +103,18 @@ next(error)    }
 
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, moviePass);
     } catch (error) {
-next(error)    }
+      next(error);
+    }
   }
 
-  async getMoviePass(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Fetches the current movie pass details for a user.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async getMoviePass(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
@@ -91,10 +124,18 @@ next(error)    }
       const moviePass = await this.fetchMoviePassUseCase.execute(userId);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, moviePass || {});
     } catch (error) {
-next(error)    }
+      next(error);
+    }
   }
 
-  async findMoviePassHistory(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Finds the movie pass history for a specific user with pagination.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId` and optional `page` and `limit` query parameters.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async findMoviePassHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
     const userId = req.decoded?.userId;
     if (!userId) {
       throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
@@ -115,7 +156,7 @@ next(error)    }
       const result = await this.findMoviePassHistoryUseCase.execute(userId, pageNum, limitNum);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

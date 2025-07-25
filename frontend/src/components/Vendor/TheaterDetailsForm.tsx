@@ -10,7 +10,7 @@ import { createNewTheater } from '../../services/Vendor/theaterApi';
 import MapSelector from '../Shared/MapSelector';
 import ImageCropper from '../Shared/ImageCropper';
 import ImageGallery from '../Shared/ImageGallery';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { TheaterDetailsFormData } from '../../types/theater';
 import { toast } from 'react-toastify';
 import BackButton from '../Buttons/BackButton';
@@ -19,6 +19,7 @@ const THEATER_SUBMITTED_KEY = 'theaterDetailsSubmitted';
 
 const TheaterDetailsForm: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // Add queryClient
   const {
     register,
     handleSubmit,
@@ -72,10 +73,14 @@ const TheaterDetailsForm: React.FC = () => {
   // Use mutation for form submission
   const createTheaterMutation = useMutation({
     mutationFn: createNewTheater,
-    onSuccess: () => {
+    onSuccess: async() => {
       setFormSubmitted(true);
       localStorage.setItem(THEATER_SUBMITTED_KEY, 'true');
-      toast.success('Theater details saved successfully!');
+      toast.success('Theater details saved successfully!'); 
+      await queryClient.invalidateQueries({ 
+        queryKey: ['theaters'],
+        refetchType: 'active', 
+      });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to save theater details');

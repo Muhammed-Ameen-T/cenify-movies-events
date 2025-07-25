@@ -196,7 +196,7 @@ const ShowViewModal: React.FC<ShowModalProps> = ({ isOpen, onClose, show }) => {
                             </span>
                             <span className="text-gray-300 text-xs">{seat.type}</span>
                           </div>
-                          <span className="text-green-400 font-medium text-sm">${seat.seatPrice}</span>
+                          <span className="text-green-400 font-medium text-sm">₹{seat.seatPrice}</span>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-1 text-xs text-gray-400">

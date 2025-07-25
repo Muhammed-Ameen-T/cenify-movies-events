@@ -7,7 +7,6 @@ import { handleAxiosError } from '../../utils/exios-error-handler';
 export const fetchSeatSelection = async (showId: string): Promise<SeatSelectionResponseDTO> => {
   try {
     const response = await api.get(`${USER_ENDPOINTS.getSeats}/${showId}`);
-    console.log("🚀 ~ fetchSeatSelection ~ response:", response)
     if (!response.data?.success) {
       throw new Error(response.data?.message || 'Failed to fetch seat selection');
     }

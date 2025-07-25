@@ -10,15 +10,31 @@ import { IUpdateUserBlockStatusUseCase } from '../../domain/interfaces/useCases/
 import { IUserManagementController } from '../controllers/interface/userMng.controller.interface';
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 
+/**
+ * Controller for managing user-related operations, primarily for administrative tasks.
+ * @implements {IUserManagementController}
+ */
 @injectable()
 export class UserManagementController implements IUserManagementController {
+  /**
+   * Constructs an instance of UserManagementController.
+   * @param {IFetchUsersUseCase} fetchUsersUseCase - Use case for fetching a list of users.
+   * @param {IUpdateUserBlockStatusUseCase} updateUserBlockStatusUseCase - Use case for updating a user's block status.
+   */
   constructor(
     @inject('FetchUsersUseCase') private fetchUsersUseCase: IFetchUsersUseCase,
     @inject('UpdateUserBlockStatusUseCase')
     private updateUserBlockStatusUseCase: IUpdateUserBlockStatusUseCase,
   ) {}
 
-  async getUsers(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Fetches a list of users with pagination, filtering, searching, and sorting capabilities.
+   * @param {Request} req - The Express request object, containing query parameters for pagination, filtering (isBlocked, role), search, and sorting.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async getUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
         page = '1',
@@ -67,11 +83,18 @@ export class UserManagementController implements IUserManagementController {
         },
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async updateUserBlockStatus(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Updates the block status of a specific user (e.g., block or unblock).
+   * @param {Request} req - The Express request object, containing user ID in `req.params.id` and `isBlocked` (boolean) in `req.body`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async updateUserBlockStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const { isBlocked } = req.body;
@@ -82,7 +105,7 @@ export class UserManagementController implements IUserManagementController {
 
       await this.updateUserBlockStatusUseCase.execute(id, { isBlocked }, res);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

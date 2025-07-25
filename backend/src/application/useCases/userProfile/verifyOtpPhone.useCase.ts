@@ -6,14 +6,11 @@ import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import { IVerifyOtpPhoneUseCase } from '../../../domain/interfaces/useCases/User/verifyOtpPhone.interface';
 import { VerifyOtpPhoneRequestDTO } from '../../dtos/profile.dto';
 
-
 @injectable()
 export class VerifyOtpPhoneUseCase implements IVerifyOtpPhoneUseCase {
-  constructor(
-    @inject('RedisService') private redisService: RedisService,
-  ) {}
+  constructor(@inject('RedisService') private redisService: RedisService) {}
 
-  async execute(dto:VerifyOtpPhoneRequestDTO): Promise<void> {
+  async execute(dto: VerifyOtpPhoneRequestDTO): Promise<void> {
     const otpKey = `otp:phone:${dto.phone}:${dto.userId}`;
     const storedOtp = await this.redisService.get(otpKey);
 

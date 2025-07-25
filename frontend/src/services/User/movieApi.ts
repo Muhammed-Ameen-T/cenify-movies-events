@@ -51,7 +51,6 @@ export const getMoviesWithFilters = async (filters: MovieFilters = { page: 1, li
     
     const response = await api.get(USER_AUTH_ENDPOINTS.userMovies, { params: cleanParams });
     
-    console.log("🚀 ~ getMoviesWithFilters ~ response:", response)
     return {
       movies: response.data.data.movies || [],
       totalCount: response.data.data.totalCount || 0,
@@ -175,7 +174,6 @@ export const likeMovie = async (movieId:string,isLike:boolean): Promise<IMovie| 
 export const isLikedMovie = async (movieId:string): Promise<boolean> => {
   try {
     const response = await api.get(`${USER_AUTH_ENDPOINTS.isLikedMovie}/${movieId}`);
-    console.log("🚀 ~ isLikedMovie ~ response:", response)
     return response.data.data.isLiked
   } catch (error) {
     handleAxiosError(error, 'Faile to fetch isLiked movie');

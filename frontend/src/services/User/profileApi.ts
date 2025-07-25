@@ -119,6 +119,15 @@ export const redeemPoints = async (amount:number): Promise<Wallet> => {
   }
 };
 
+export const walletWithdraw = async (amount:number,stripeAccountId:string): Promise<Wallet> => {
+  try {
+    const response = await api.post(USER_ENDPOINTS.walletWithdraw, {amount,stripeAccountId});
+    return response.data.data;  
+  } catch (error) {
+    handleAxiosError(error, ERROR_MESSAGES.WALLET_WITHDRAW_FAILED);
+  }
+};
+
 
 export const sendOtpPhone = async (phone: string): Promise<void> => {
   try {

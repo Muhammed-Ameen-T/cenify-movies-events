@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "./store/store";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import { useSelector } from "react-redux";
+// import { RootState } from "./store/store";
 import Loader from "./components/Shared/Loading.tsx";
 import Toast from "./components/Shared/Toaster.tsx";
 import AdminRoutes from "./routes/AdminRoutes";
@@ -11,8 +11,7 @@ import PageNotFound from "./components/Shared/PageNotFound.tsx";
 import "./App.css";
 
 const App: React.FC = () => {
-  const user = useSelector((state: RootState) => state.auth.user);
-  console.log("new user", user);
+  // const user = useSelector((state: RootState) => state.auth.user);
 
   return (
     <Suspense fallback={<Loader />}>

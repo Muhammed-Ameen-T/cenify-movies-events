@@ -19,6 +19,7 @@ import SeatLayoutManagement from '../pages/Vendor/SeatLayoutManagement.tsx';
 import VendorBookings from '../pages/Vendor/BookingsManagement.tsx';
 import VendorNotifications from '../pages/Vendor/VendorNotifications.tsx';
 import VendorWalletTab from '../pages/Vendor/VendorWallet.tsx';
+import UpdateTheater from '../pages/Vendor/UpdateTheaterPage.tsx';
 
 const VendorRoutes = () => {
   return (
@@ -41,6 +42,7 @@ const VendorRoutes = () => {
             <Route path="notifications" element={<VendorNotifications />} />
             <Route path="wallet" element={<VendorWalletTab />} />
             <Route path="update-show/:id" element={<UpdateShowForm />} />
+            <Route path="update-theater/:id" element={<UpdateTheater />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/pagenotfound" replace />} />

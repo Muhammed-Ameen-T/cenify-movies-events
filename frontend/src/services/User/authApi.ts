@@ -83,7 +83,6 @@ export const login = async (email: string,password: string): Promise<AuthRespons
 
     return response.data.data;
   } catch (error) {
-    console.log("🚀 ~ login ~ error:", error)
     handleAxiosError(error, AUTH_MESSAGES.LOGIN_FAILED);
   }
 };

@@ -15,8 +15,11 @@ const TheaterEditor: React.FC = () => {
           <h1 className="text-xl font-bold text-blue-400">
             Theater Layout Creator
           </h1>
-          <div className="text-lg font-medium">
-            {currentLayout?.name}
+          <div className="text-lg font-medium flex items-center gap-2">
+            Layout Name:
+            <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm font-semibold">
+              {currentLayout?.name}
+            </span>
           </div>
         </div>
       </header>

@@ -160,7 +160,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       localStorage.setItem('user', JSON.stringify(response.user));
       onClose();
     } catch (error) {
-      console.log('🚀 ~ handleLogin ~ error:', error);
       showErrorToast(error instanceof Error ? error.message : 'Login failed. Please check your credentials.');
     } finally {
       setIsLoginLoading(false);

@@ -100,13 +100,6 @@ const CheckoutPage: React.FC = () => {
     refetchOnWindowFocus: false,
   });
 
-  // Log bookingData only when it changes
-  useEffect(() => {
-    if (bookingData) {
-      console.log('🚀 ~ bookingData:', bookingData);
-    }
-  }, [bookingData]);
-
   // Calculate pricing
   const subtotal = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
   const convenienceFee = Math.round(subtotal * 0.15);

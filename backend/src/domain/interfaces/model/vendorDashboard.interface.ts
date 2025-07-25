@@ -23,6 +23,7 @@ export interface TopSellingShow {
   title: string; // Movie name
   tickets: number; // Number of booked seats
   revenue: number; // Total amount
+  showTime: Date; // Start time of the show
 }
 
 export interface TopTheater {

@@ -20,11 +20,14 @@ import {
   Search,
   CreditCard,
   Loader,
+  DollarSign,
+  CheckCircle,
+  AlertCircle,
 } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { WalletData, Transaction, WalletTransactionsResponse, UserProfile } from '../../types';
-import { getUserWallet, getUserWalletTransactions } from '../../services/User/profileApi';
+import { getUserWallet, getUserWalletTransactions, walletWithdraw } from '../../services/User/profileApi';
 import { formatRelativeTime } from '../../utils/timeFormator';
 import BackButton from '../../components/Buttons/BackButton';
 import { useSelector } from 'react-redux';
@@ -110,6 +113,15 @@ const VendorWalletTab: React.FC = () => {
   const [filterType, setFilterType] = useState<'all' | 'credit' | 'debit'>(filter);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Withdrawal modal states
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [stripeId, setStripeId] = useState('');
+  const [withdrawErrors, setWithdrawErrors] = useState<{
+    amount?: string;
+    stripeId?: string;
+  }>({});
 
   // Update URL when limit or filter changes
   const updateUrl = useCallback(
@@ -164,6 +176,70 @@ const VendorWalletTab: React.FC = () => {
     staleTime: 5 * 60 * 1000,
     enabled: !!userId,
   });
+
+  // Withdrawal mutation
+  const withdrawMutation = useMutation({
+    mutationFn: ({ amount, paypalId }: { amount: number; paypalId: string }) => 
+      walletWithdraw(amount, paypalId),
+    onSuccess: () => {
+      // Refetch wallet data to reflect changes
+      queryClient.invalidateQueries({ queryKey: ['vendorWallet', userId] });
+      queryClient.invalidateQueries({ queryKey: ['vendorWalletTransactions', userId] });
+      
+      // Reset form and close modal
+      setWithdrawAmount('');
+      setStripeId('');
+      setWithdrawErrors({});
+      setShowWithdrawModal(false);
+    },
+    onError: (error: any) => {
+      console.error('Withdrawal failed:', error);
+    },
+  });
+
+  // Validation functions
+  const validateStripeId = (id: string): boolean => {
+    const trimmedId = id.trim();
+    return trimmedId.startsWith('cus_') || trimmedId.startsWith('acct_');
+  };
+
+  const validateWithdrawAmount = (amount: string, balance: number): boolean => {
+    const numAmount = parseFloat(amount);
+    return !isNaN(numAmount) && numAmount > 0 && numAmount <= balance;
+  };
+
+  // Handle withdrawal form submission
+  const handleWithdrawSubmit = () => {
+    const errors: { amount?: string; stripeId?: string } = {};
+    const numAmount = parseFloat(withdrawAmount);
+    const balance = walletData?.balance || 0;
+
+    // Validate amount
+    if (!withdrawAmount.trim()) {
+      errors.amount = 'Amount is required';
+    } else if (isNaN(numAmount) || numAmount <= 0) {
+      errors.amount = 'Please enter a valid amount';
+    } else if (numAmount > balance) {
+      errors.amount = `Amount cannot exceed wallet balance (₹${balance.toLocaleString()})`;
+    }
+
+    // Validate Stripe ID
+    if (!stripeId.trim()) {
+      errors.stripeId = 'Stripe ID is required';
+    } else if (!validateStripeId(stripeId)) {
+      errors.stripeId = 'Invalid Stripe ID. Must start with "cus_" or "acct_"';
+    }
+
+    setWithdrawErrors(errors);
+
+    // If no errors, submit withdrawal
+    if (Object.keys(errors).length === 0) {
+      withdrawMutation.mutate({
+        amount: numAmount,
+        paypalId: stripeId.trim(), // Note: API expects paypalId parameter name
+      });
+    }
+  };
 
   const handleLoadMore = () => {
     const newLimit = currentLimit + 10;
@@ -266,14 +342,26 @@ const VendorWalletTab: React.FC = () => {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-indigo-100 text-sm font-medium">Available Balance</span>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowBalance(!showBalance)}
-                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                >
-                  {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                </motion.button>
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowBalance(!showBalance)}
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  >
+                    {showBalance ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowWithdrawModal(true)}
+                    disabled={(walletData?.balance || 0) <= 0}
+                    className="bg-white/20 hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Withdraw
+                  </motion.button>
+                </div>
               </div>
               <div className="text-3xl font-bold mb-1">
                 {showBalance ? `₹${(walletData?.balance || 0).toLocaleString()}` : '₹••••••'}
@@ -456,6 +544,187 @@ const VendorWalletTab: React.FC = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Withdrawal Modal */}
+      <AnimatePresence>
+        {showWithdrawModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowWithdrawModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-900 rounded-2xl p-6 max-w-md w-full border border-gray-800"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center border border-indigo-500/30">
+                    <Download className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">Withdraw Funds</h3>
+                    <p className="text-gray-400 text-sm">Transfer money to your Stripe account</p>
+                  </div>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowWithdrawModal(false)}
+                  disabled={withdrawMutation.isPending}
+                  className="bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg p-2 disabled:opacity-50"
+                >
+                  <X className="w-5 h-5" />
+                </motion.button>
+              </div>
+
+              {/* Current Balance Display */}
+              <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Available Balance</span>
+                  <span className="text-white font-semibold text-lg">
+                    ₹{(walletData?.balance || 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Form */}
+              <div className="space-y-6">
+                {/* Amount Input */}
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                    Withdrawal Amount
+                  </label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input
+                      type="number"
+                      value={withdrawAmount}
+                      onChange={(e) => setWithdrawAmount(e.target.value)}
+                      placeholder="Enter amount"
+                      min="1"
+                      max={walletData?.balance || 0}
+                      className={`w-full bg-gray-800 border rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-colors ${
+                        withdrawErrors.amount
+                          ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                          : 'border-gray-700 focus:ring-indigo-500 focus:border-indigo-500'
+                      }`}
+                      disabled={withdrawMutation.isPending}
+                    />
+                  </div>
+                  {withdrawErrors.amount && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-red-400 text-sm mt-2 flex items-center gap-1"
+                    >
+                      <AlertCircle className="w-4 h-4" />
+                      {withdrawErrors.amount}
+                    </motion.p>
+                  )}
+                </div>
+
+                {/* Stripe ID Input */}
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                    Stripe Account ID
+                  </label>
+                  <input
+                    type="text"
+                    value={stripeId}
+                    onChange={(e) => setStripeId(e.target.value)}
+                    placeholder="cus_XXXXXXXXXX or acct_XXXXXXXXXX"
+                    className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-colors ${
+                      withdrawErrors.stripeId
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                        : 'border-gray-700 focus:ring-indigo-500 focus:border-indigo-500'
+                    }`}
+                    disabled={withdrawMutation.isPending}
+                  />
+                  <p className="text-gray-500 text-xs mt-1">
+                    Must start with "cus_" for customer ID or "acct_" for payment intent
+                  </p>
+                  {withdrawErrors.stripeId && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-red-400 text-sm mt-2 flex items-center gap-1"
+                    >
+                      <AlertCircle className="w-4 h-4" />
+                      {withdrawErrors.stripeId}
+                    </motion.p>
+                  )}
+                </div>
+
+                {/* Submit Button */}
+                <motion.button
+                  whileHover={{ scale: withdrawMutation.isPending ? 1 : 1.02 }}
+                  whileTap={{ scale: withdrawMutation.isPending ? 1 : 0.98 }}
+                  onClick={handleWithdrawSubmit}
+                  disabled={withdrawMutation.isPending}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-600/50 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  {withdrawMutation.isPending ? (
+                    <>
+                      <Loader className="w-4 h-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Withdraw Funds
+                    </>
+                  )}
+                </motion.button>
+
+                {/* Error Message */}
+                {withdrawMutation.isError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-center gap-2"
+                  >
+                    <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                    <span className="text-red-400 text-sm">
+                      {withdrawMutation.error?.message || 'Withdrawal failed. Please try again.'}
+                    </span>
+                  </motion.div>
+                )}
+
+                {/* Success Message */}
+                {withdrawMutation.isSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 flex items-center gap-2"
+                  >
+                    <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span className="text-emerald-400 text-sm">
+                      Withdrawal request submitted successfully!
+                    </span>
+                  </motion.div>
+                )}
+
+                {/* Security Notice */}
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <Shield className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-yellow-300 text-xs">
+                      <p className="font-medium mb-1">Security Notice</p>
+                      <p>Withdrawals are processed securely through Stripe. Please ensure your Stripe account ID is correct as transactions cannot be reversed.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Transaction Detail Modal */}
       <AnimatePresence>

@@ -4,8 +4,7 @@ import { container } from 'tsyringe';
 import { verifyAccessToken } from '../middleware/verifyToken.middleware';
 import { authorizeRoles } from '../middleware/rbac.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
-import {
-  CreateGlobalNotificationSchema} from '../validation/notification.validation';
+import { CreateGlobalNotificationSchema } from '../validation/notification.validation';
 import { INotificationMngController } from '../controllers/interface/notificationMng.controller.interface';
 
 const NotificationMngController = container.resolve<INotificationMngController>(
@@ -35,7 +34,7 @@ const router = Router();
 router.patch(
   '/read/:id',
   verifyAccessToken,
-  authorizeRoles(['vendor','user','admin']),
+  authorizeRoles(['vendor', 'user', 'admin']),
   NotificationMngController.readOneNotification.bind(NotificationMngController),
 );
 
@@ -43,7 +42,7 @@ router.patch(
 router.patch(
   '/read-all',
   verifyAccessToken,
-  authorizeRoles(['vendor','user']),
+  authorizeRoles(['vendor', 'user']),
   NotificationMngController.readAllNotification.bind(NotificationMngController),
 );
 
@@ -58,7 +57,7 @@ router.patch(
 router.get(
   '/user',
   verifyAccessToken,
-  authorizeRoles(['user','vendor']),
+  authorizeRoles(['user', 'vendor']),
   NotificationMngController.fetchAllUserNotification.bind(NotificationMngController),
 );
 
