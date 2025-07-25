@@ -21,18 +21,30 @@ const sendResponse_utils_1 = require("../../utils/response/sendResponse.utils");
 const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode.utils");
 const custom_error_1 = require("../../utils/errors/custom.error");
 const mongoose_1 = __importDefault(require("mongoose"));
+/**
+ * Controller for handling seat selection and retrieval for shows.
+ * @implements {ISeatSelectionController}
+ */
 let SeatSelectionController = class SeatSelectionController {
+    /**
+     * Constructs an instance of SeatSelectionController.
+     * @param {IFetchSeatSelectionUseCase} fetchSeatSelectionUseCase - Use case for fetching seat selection status for a show.
+     * @param {ISelectSeatsUseCase} selectSeatsUseCase - Use case for selecting/reserving seats.
+     */
     constructor(fetchSeatSelectionUseCase, selectSeatsUseCase) {
         this.fetchSeatSelectionUseCase = fetchSeatSelectionUseCase;
         this.selectSeatsUseCase = selectSeatsUseCase;
     }
+    /**
+     * Retrieves the current seat selection status for a given show.
+     * @param {Request} req - The Express request object, containing `showId` in `req.params`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getSeatSelection(req, res, next) {
         try {
             const { showId } = req.params;
-            // const userId = req.decoded?.userId;
-            // if (!userId) {
-            //   throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
-            // }
             if (!mongoose_1.default.Types.ObjectId.isValid(showId)) {
                 throw new custom_error_1.CustomError('Invalid show ID', httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
             }
@@ -43,6 +55,13 @@ let SeatSelectionController = class SeatSelectionController {
             next(error);
         }
     }
+    /**
+     * Handles the selection/reservation of seats for a specific show by a user.
+     * @param {Request} req - The Express request object, containing `showId` in `req.params`, `seatIds` in `req.body`, and `userId` in `req.decoded`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async selectSeats(req, res, next) {
         try {
             const { showId } = req.params;
@@ -58,7 +77,6 @@ let SeatSelectionController = class SeatSelectionController {
                 throw new custom_error_1.CustomError('Invalid seat selection', httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
             }
             const result = await this.selectSeatsUseCase.execute({ showId, seatIds, userId });
-            // this.socketService.emitSeatUpdate(showId, seatIds, 'pending');
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.SUCCESS, result);
         }
         catch (error) {

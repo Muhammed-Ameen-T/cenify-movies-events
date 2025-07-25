@@ -17,11 +17,27 @@ const tsyringe_1 = require("tsyringe");
 const sendResponse_utils_1 = require("../../utils/response/sendResponse.utils");
 const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode.utils");
 const custom_error_1 = require("../../utils/errors/custom.error");
+/**
+ * Controller for handling dashboard related requests for both vendors and admins.
+ * @implements {IDashboardController}
+ */
 let DashboardController = class DashboardController {
+    /**
+     * Constructs an instance of DashboardController.
+     * @param {IFetchDashboardUseCase} fetchDashboardUseCase - The use case for fetching vendor dashboard data.
+     * @param {IFetchAdminDashboardUseCase} fetchAdminDashboardUseCase - The use case for fetching admin dashboard data.
+     */
     constructor(fetchDashboardUseCase, fetchAdminDashboardUseCase) {
         this.fetchDashboardUseCase = fetchDashboardUseCase;
         this.fetchAdminDashboardUseCase = fetchAdminDashboardUseCase;
     }
+    /**
+     * Retrieves dashboard data for a vendor.
+     * @param {Request} req - The Express request object, expecting vendor ID in `req.decoded.userId` and query parameters for filtering.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getDashboardData(req, res, next) {
         try {
             const vendorId = req.decoded?.userId;
@@ -41,6 +57,13 @@ let DashboardController = class DashboardController {
             next(error);
         }
     }
+    /**
+     * Retrieves dashboard data for an admin.
+     * @param {Request} req - The Express request object, expecting admin ID in `req.decoded.userId` and query parameters for filtering.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getAdminDashboardData(req, res, next) {
         try {
             const adminId = req.decoded?.userId;

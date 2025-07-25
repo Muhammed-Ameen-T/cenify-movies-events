@@ -10,20 +10,23 @@ import jwt from 'jsonwebtoken';
 
 @injectable()
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
-  constructor(
-    @inject('IUserRepository') private userRepository: IUserRepository
-  ) {}
+  constructor(@inject('IUserRepository') private userRepository: IUserRepository) {}
 
   async execute(refreshToken: string): Promise<string> {
-
     if (!refreshToken) {
-      throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN, HttpResCode.UNAUTHORIZED);
+      throw new CustomError(
+        ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
+        HttpResCode.UNAUTHORIZED,
+      );
     }
 
     const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
 
     if (!decoded || !decoded.exp || Date.now() >= decoded.exp * 1000) {
-      throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN, HttpResCode.UNAUTHORIZED);
+      throw new CustomError(
+        ERROR_MESSAGES.AUTHENTICATION.INVALID_REFRESH_TOKEN,
+        HttpResCode.UNAUTHORIZED,
+      );
     }
     const jwtService = container.resolve<JwtService>('JwtService');
 

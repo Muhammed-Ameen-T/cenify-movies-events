@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.socketService = void 0;
 const socket_io_1 = require("socket.io");
 const uuid_1 = require("uuid");
+const env_config_1 = require("../../config/env.config");
 class SocketService {
     constructor() {
         this.io = null;
@@ -19,7 +20,7 @@ class SocketService {
             path: '/socket.io',
             cors: {
                 origin: (origin, callback) => {
-                    const allowedOrigins = ['http://localhost:5173'];
+                    const allowedOrigins = ['http://localhost:5173', env_config_1.env.CLIENT_ORIGIN];
                     console.log(`CORS check for origin: ${origin}, instance ID: ${this.instanceId}`);
                     if (!origin || allowedOrigins.includes(origin)) {
                         callback(null, true);

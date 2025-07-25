@@ -18,12 +18,29 @@ const tsyringe_1 = require("tsyringe");
 const sendResponse_utils_1 = require("../../utils/response/sendResponse.utils");
 const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode.utils");
 const custom_error_1 = require("../../utils/errors/custom.error");
+/**
+ * Controller for managing screen-related operations, primarily for vendors.
+ * @implements {IScreenManagementController}
+ */
 let ScreenManagementController = class ScreenManagementController {
+    /**
+     * Constructs an instance of ScreenManagementController.
+     * @param {ICreateScreenUseCase} createScreenUseCase - Use case for creating a new screen.
+     * @param {IUpdateScreenUseCase} updateScreenUseCase - Use case for updating an existing screen.
+     * @param {IFetchScreensOfVendorUseCase} fetchScreensOfVendorUseCase - Use case for fetching screens belonging to a specific vendor.
+     */
     constructor(createScreenUseCase, updateScreenUseCase, fetchScreensOfVendorUseCase) {
         this.createScreenUseCase = createScreenUseCase;
         this.updateScreenUseCase = updateScreenUseCase;
         this.fetchScreensOfVendorUseCase = fetchScreensOfVendorUseCase;
     }
+    /**
+     * Handles the creation of a new screen.
+     * @param {Request} req - The Express request object, containing screen details in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async createScreen(req, res, next) {
         try {
             const screen = await this.createScreenUseCase.execute(req.body);
@@ -33,6 +50,13 @@ let ScreenManagementController = class ScreenManagementController {
             next(error);
         }
     }
+    /**
+     * Handles the update of an existing screen.
+     * @param {Request} req - The Express request object, containing screen ID in `req.params.id` and updated screen details in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async updateScreen(req, res, next) {
         const { id } = req.params;
         try {
@@ -43,6 +67,13 @@ let ScreenManagementController = class ScreenManagementController {
             next(error);
         }
     }
+    /**
+     * Fetches a list of screens belonging to a specific vendor, with pagination and filtering options.
+     * @param {Request} req - The Express request object. Requires `req.decoded.userId` for the vendor ID and optional query parameters for filtering.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getScreensOfVendor(req, res, next) {
         try {
             const { page, limit, search, theaterId, sortBy, sortOrder } = req.query;

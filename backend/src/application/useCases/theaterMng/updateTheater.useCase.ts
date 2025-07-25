@@ -17,7 +17,6 @@ export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
 
   async execute(id: string, data: Partial<Theater>, res: Response): Promise<void> {
     try {
-
       const theater = await this.theaterRepository.findById(id);
       if (!theater) {
         sendResponse(res, HttpResCode.NOT_FOUND, HttpResMsg.THEATER_NOT_FOUND);

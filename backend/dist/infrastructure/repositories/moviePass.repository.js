@@ -47,10 +47,28 @@ let MoviePassRepository = class MoviePassRepository {
         return this.mapToEntity(doc);
     }
     async update(userId, updates) {
-        const doc = await this.model
-            .findOneAndUpdate({ userId }, { $set: updates }, { new: true })
-            .lean();
-        return doc ? this.mapToEntity(doc) : null;
+        try {
+            // Prefer updates.userId for consistency
+            const resolvedUserId = updates.userId;
+            const userObjectId = new mongoose_1.default.Types.ObjectId(resolvedUserId);
+            const { status, history, purchaseDate, expireDate, moneySaved, totalMovies } = updates;
+            const updatePayload = {
+                status,
+                history,
+                purchaseDate,
+                expireDate,
+                moneySaved,
+                totalMovies,
+            };
+            const doc = await this.model
+                .findOneAndUpdate({ userId: userObjectId }, { $set: updatePayload }, { new: true, upsert: true })
+                .lean();
+            return doc ? this.mapToEntity(doc) : null;
+        }
+        catch (error) {
+            console.error(`Error updating MoviePass for user ${userId}:`, error);
+            return null;
+        }
     }
     async incrementMovieStats(userId, newSaving) {
         const update = {

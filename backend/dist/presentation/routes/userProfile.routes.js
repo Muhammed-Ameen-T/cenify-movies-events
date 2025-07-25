@@ -17,4 +17,5 @@ router.put('/changePassword', verifyToken_middleware_1.verifyAccessToken, (0, rb
 router.put('/redeem-points', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), userAuthController.redeemLoyaltyPoints.bind(userAuthController));
 router.post('/send-otp-phone', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), (0, validate_middleware_1.validateRequest)(profile_validation_1.SendOtpPhoneSchema), userAuthController.sendOtpPhone.bind(userAuthController));
 router.post('/verify-otp-phone', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['user']), (0, validate_middleware_1.validateRequest)(profile_validation_1.VerifyOtpPhoneSchema), userAuthController.verifyOtpPhone.bind(userAuthController));
+router.post('/wallet-withdraw', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['vendor']), userAuthController.withdrawFromWallet.bind(userAuthController));
 exports.default = router;

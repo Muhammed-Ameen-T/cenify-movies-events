@@ -24,7 +24,24 @@ const custom_error_1 = require("../../utils/errors/custom.error");
 const showAgenda_service_1 = require("../../infrastructure/services/showAgenda.service");
 const commonErrorMsg_constants_1 = __importDefault(require("../../utils/constants/commonErrorMsg.constants"));
 const mongoose_1 = __importDefault(require("mongoose"));
+/**
+ * Controller for managing movie shows, including creation, updates, deletion, and fetching for both vendors and users.
+ * @implements {IShowManagementController}
+ */
 let ShowManagementController = class ShowManagementController {
+    /**
+     * Constructs an instance of ShowManagementController.
+     * @param {ICreateShowUseCase} createShowUseCase - Use case for creating a new show.
+     * @param {IUpdateShowUseCase} updateShowUseCase - Use case for updating an existing show.
+     * @param {IUpdateShowStatusUseCase} updateShowStatusUseCase - Use case for updating a show's status.
+     * @param {IDeleteShowUseCase} deleteShowUseCase - Use case for deleting a show.
+     * @param {IFindShowByIdUseCase} findShowByIdUseCase - Use case for finding a show by ID.
+     * @param {IFindAllShowsUseCase} findAllShowsUseCase - Use case for fetching all shows (admin view).
+     * @param {IFindShowsByVendorUseCase} findShowsByVendorUseCase - Use case for fetching shows by a specific vendor.
+     * @param {IFetchShowSelectionUseCase} fetchShowSelectionUseCase - Use case for fetching show selection options for users.
+     * @param {ICreateRecurringShowUseCase} createRecurringShowUseCase - Use case for creating recurring shows.
+     * @param {ShowJobService} showJobService - Service for scheduling and canceling show-related jobs.
+     */
     constructor(createShowUseCase, updateShowUseCase, updateShowStatusUseCase, deleteShowUseCase, findShowByIdUseCase, findAllShowsUseCase, findShowsByVendorUseCase, fetchShowSelectionUseCase, createRecurringShowUseCase, showJobService) {
         this.createShowUseCase = createShowUseCase;
         this.updateShowUseCase = updateShowUseCase;
@@ -37,6 +54,13 @@ let ShowManagementController = class ShowManagementController {
         this.createRecurringShowUseCase = createRecurringShowUseCase;
         this.showJobService = showJobService;
     }
+    /**
+     * Handles the creation of one or more new shows. Schedules related jobs upon successful creation.
+     * @param {Request} req - The Express request object, containing show details in the body. Requires `req.decoded.userId` for the vendor ID.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async createShow(req, res, next) {
         try {
             const vendorId = req.decoded?.userId;
@@ -58,6 +82,13 @@ let ShowManagementController = class ShowManagementController {
             next(error);
         }
     }
+    /**
+     * Handles the update of an existing show. Reschedules related jobs upon successful update.
+     * @param {Request} req - The Express request object, containing show ID in `req.params.id` and updated show details in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async updateShow(req, res, next) {
         const { id } = req.params;
         try {
@@ -74,6 +105,13 @@ let ShowManagementController = class ShowManagementController {
             next(error);
         }
     }
+    /**
+     * Updates the status of a specific show (e.g., 'active', 'cancelled').
+     * @param {Request} req - The Express request object, containing show ID in `req.params.id` and new status in `req.body.status`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async updateShowStatus(req, res, next) {
         const { id } = req.params;
         const { status } = req.body;
@@ -86,6 +124,13 @@ let ShowManagementController = class ShowManagementController {
             next(error);
         }
     }
+    /**
+     * Deletes a show by its ID. Cancels related jobs upon successful deletion.
+     * @param {Request} req - The Express request object, containing show ID in `req.params.id`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async deleteShow(req, res, next) {
         const { id } = req.params;
         try {
@@ -104,6 +149,13 @@ let ShowManagementController = class ShowManagementController {
             next(error);
         }
     }
+    /**
+     * Retrieves a single show by its ID.
+     * @param {Request} req - The Express request object, containing show ID in `req.params.id`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getShowById(req, res, next) {
         const { id } = req.params;
         try {
@@ -117,6 +169,13 @@ let ShowManagementController = class ShowManagementController {
             next(error);
         }
     }
+    /**
+     * Fetches all shows with pagination, search, and filtering options (typically for admin or general listing).
+     * @param {Request} req - The Express request object, containing various query parameters for filtering.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getAllShows(req, res, next) {
         try {
             const { page, limit, search, theaterId, movieId, screenId, status, sortBy, sortOrder } = req.query;
@@ -138,6 +197,13 @@ let ShowManagementController = class ShowManagementController {
             next(error);
         }
     }
+    /**
+     * Fetches shows belonging to a specific vendor with pagination and filtering.
+     * @param {Request} req - The Express request object. Requires `req.decoded.userId` for the vendor ID and optional query parameters for filtering.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getShowsOfVendor(req, res, next) {
         try {
             const { page, limit, search, status, sortBy, sortOrder } = req.query;
@@ -161,6 +227,13 @@ let ShowManagementController = class ShowManagementController {
             next(error);
         }
     }
+    /**
+     * Fetches show selection options for a given movie, considering user's location and various filters.
+     * @param {Request} req - The Express request object. Contains `movieId` in `req.params`, and optional query parameters for `date`, `priceRanges`, `timeSlots`, `facilities`. Also uses `latitude`, `longitude`, and `selectedLocation` from `req.cookies`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getShowSelection(req, res, next) {
         try {
             const { movieId } = req.params;
@@ -195,6 +268,13 @@ let ShowManagementController = class ShowManagementController {
             next(error);
         }
     }
+    /**
+     * Creates recurring shows based on an existing show. Schedules jobs for each newly created show.
+     * @param {Request} req - The Express request object, containing `showId`, `startDate`, and `endDate` in the body. Requires `req.decoded.userId` for the vendor ID.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async createRecurringShow(req, res, next) {
         try {
             const { showId, startDate, endDate } = req.body;

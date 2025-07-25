@@ -26,7 +26,17 @@ const notification_entity_1 = require("../../domain/entities/notification.entity
 const booking_model_1 = __importDefault(require("../../infrastructure/database/booking.model"));
 const socket_service_1 = require("../../infrastructure/services/socket.service");
 const commonSuccessMsg_constants_1 = require("../../utils/constants/commonSuccessMsg.constants");
+/**
+ * Controller for handling Stripe webhooks related to booking payments.
+ */
 let BookingStripeWebhookController = class BookingStripeWebhookController {
+    /**
+     * Constructs an instance of BookingStripeWebhookController.
+     * @param {INotificationRepository} notificationRepository - Repository for notification data.
+     * @param {ISeatRepository} seatRepository - Repository for seat data.
+     * @param {IShowRepository} showRepository - Repository for show data.
+     * @param {IUserRepository} userRepository - Repository for user data.
+     */
     constructor(notificationRepository, seatRepository, showRepository, userRepository) {
         this.notificationRepository = notificationRepository;
         this.seatRepository = seatRepository;
@@ -34,6 +44,15 @@ let BookingStripeWebhookController = class BookingStripeWebhookController {
         this.userRepository = userRepository;
         this.stripe = new stripe_1.default(env_config_1.env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
     }
+    /**
+     * Handles incoming Stripe webhook events.
+     * Processes 'checkout.session.completed' events to confirm bookings, update seat statuses,
+     * increment loyalty points, and create/emit notifications for users, vendors, and admins.
+     * @param {Request} req - The Express request object containing the Stripe event.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async handleWebhook(req, res, next) {
         const sig = req.headers['stripe-signature'];
         let event;
@@ -94,7 +113,7 @@ let BookingStripeWebhookController = class BookingStripeWebhookController {
                     updatedAt: savedUserNotification.updatedAt,
                     isRead: savedUserNotification.isRead,
                     isGlobal: savedUserNotification.isGlobal,
-                    readedUsers: savedUserNotification.readedUsers
+                    readedUsers: savedUserNotification.readedUsers,
                 };
                 console.log(`Emitting user notification to user-${userId}:`, userNotificationPayload);
                 socket_service_1.socketService.emitNotification(`user-${userId}`, userNotificationPayload);
@@ -109,7 +128,7 @@ let BookingStripeWebhookController = class BookingStripeWebhookController {
                     updatedAt: savedVendorNotification.updatedAt,
                     isRead: savedVendorNotification.isRead,
                     isGlobal: savedVendorNotification.isGlobal,
-                    readedUsers: savedUserNotification.readedUsers
+                    readedUsers: savedUserNotification.readedUsers,
                 };
                 console.log(`Emitting vendor notification to vendor-${show.vendorId}:`, vendorNotificationPayload);
                 socket_service_1.socketService.emitNotification(`vendor-${show.vendorId}`, vendorNotificationPayload);
@@ -124,7 +143,7 @@ let BookingStripeWebhookController = class BookingStripeWebhookController {
                     updatedAt: savedAdminNotification.updatedAt,
                     isRead: savedAdminNotification.isRead,
                     isGlobal: savedAdminNotification.isGlobal,
-                    readedUsers: savedUserNotification.readedUsers
+                    readedUsers: savedUserNotification.readedUsers,
                 };
                 console.log(`Emitting admin notification to admin-global:`, adminNotificationPayload);
                 socket_service_1.socketService.emitNotification('admin-global', adminNotificationPayload);

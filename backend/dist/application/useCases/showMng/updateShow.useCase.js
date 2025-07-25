@@ -30,7 +30,6 @@ let UpdateShowUseCase = class UpdateShowUseCase {
         this.theaterRepository = theaterRepository;
     }
     async execute(dto) {
-        console.log('🚀 ~ UpdateShowUseCase ~ execute ~ dto:', dto);
         try {
             const existingShow = await this.showRepository.findById(dto.id);
             if (!existingShow) {
