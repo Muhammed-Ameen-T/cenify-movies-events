@@ -21,29 +21,29 @@ export class ProcessVendorPayoutUseCase implements IProcessVendorPayout {
       {
         $match: {
           status: 'confirmed',
-          'payment.status': 'completed'
-        }
+          'payment.status': 'completed',
+        },
       },
       {
         $lookup: {
           from: 'shows',
           localField: 'showId',
           foreignField: '_id',
-          as: 'showDetails'
-        }
+          as: 'showDetails',
+        },
       },
       { $unwind: '$showDetails' },
       {
         $match: {
-          'showDetails.status': { $in: ['Running', 'Completed'] }
-        }
+          'showDetails.status': { $in: ['Running', 'Completed'] },
+        },
       },
       {
         $group: {
           _id: '$showDetails.vendorId',
-          totalRevenue: { $sum: '$payment.amount' }
-        }
-      }
+          totalRevenue: { $sum: '$payment.amount' },
+        },
+      },
     ]);
 
     const result: { vendorId: string; gross: number; net: number }[] = [];
@@ -53,26 +53,23 @@ export class ProcessVendorPayoutUseCase implements IProcessVendorPayout {
       const gross = vendor.totalRevenue;
       const net = gross * (1 - this.ADMIN_COMMISSION);
 
-
       await this.walletRepository.pushTransactionAndUpdateBalance(vendor._id, {
         amount: net,
         type: 'credit',
         source: 'booking',
         remark: `Monthly payout after ${this.ADMIN_COMMISSION * 100}% commission`,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
       const targetUserId = process.env.ADMIN_USER_ID || '681a66250869b998bbad2545';
-
 
       await this.walletRepository.pushTransactionAndUpdateBalance(targetUserId, {
         amount: net,
         type: 'debit',
         source: 'booking',
         remark: `Monthly payout transferred to vendor ${vendor._id}, credited ₹${net}`,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
-      
 
       result.push({ vendorId, gross, net });
     }

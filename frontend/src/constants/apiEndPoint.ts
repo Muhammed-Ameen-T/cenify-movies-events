@@ -37,6 +37,7 @@ export const USER_ENDPOINTS = {
   verifyOtpPhone: '/profile/verify-otp-phone',
   sendOtpPhone: '/profile/send-otp-phone',
   redeemPoints: '/profile/redeem-points',
+  walletWithdraw: '/profile/wallet-withdraw',
   getMoviePassHistory: 'movie-pass/history'
 };
 
@@ -76,6 +77,7 @@ export const VENDOR_ENDPOINTS = {
   createTheater:`/vendor/create-theater`,
   fetchTheater:`/theater/fetch-vendor`,
   updateTheater:`/theater/update-theater`,
+  findTheater:`/theater/find/`,
   createLayout:`/vendor/create-seat-layout`,
   fetchSeatLayouts: `/vendor/fetch-seats`,
   findSeatLayouts: `/vendor/find-seats`,
@@ -96,7 +98,6 @@ export const VENDOR_ENDPOINTS = {
   getDashboard: `/dashboard/vendor`,
 };
 
-// src/constants/apiEndPoint.ts
 export const NOTIFICATION_ENDPOINTS = {
   global: '/notifications/global',
   user: '/notifications/user',

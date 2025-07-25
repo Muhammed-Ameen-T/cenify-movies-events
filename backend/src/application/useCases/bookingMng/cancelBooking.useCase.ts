@@ -68,7 +68,6 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     );
     await this.notificationRepository.createNotification(notification);
     socketService.emitNotification(`user-${existingBooking.userId._id.toString()}`, notification);
-    
 
     if (updatedBooking.payment.status === 'completed') {
       const cancellationFeePercentage = 15;

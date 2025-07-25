@@ -316,10 +316,7 @@ export const env = {
 
   get TWILIO_PHONE(): string {
     if (!process.env.TWILIO_PHONE) {
-      throw new CustomError(
-        EnvErrMsg.TWILIO_PHONE_UNDEFINED,
-        HttpResCode.INTERNAL_SERVER_ERROR,
-      );
+      throw new CustomError(EnvErrMsg.TWILIO_PHONE_UNDEFINED, HttpResCode.INTERNAL_SERVER_ERROR);
     }
     return process.env.TWILIO_PHONE;
   },

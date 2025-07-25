@@ -18,8 +18,25 @@ import { ShowJobService } from '../../infrastructure/services/showAgenda.service
 import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 import mongoose from 'mongoose';
 
+/**
+ * Controller for managing movie shows, including creation, updates, deletion, and fetching for both vendors and users.
+ * @implements {IShowManagementController}
+ */
 @injectable()
 export class ShowManagementController implements IShowManagementController {
+  /**
+   * Constructs an instance of ShowManagementController.
+   * @param {ICreateShowUseCase} createShowUseCase - Use case for creating a new show.
+   * @param {IUpdateShowUseCase} updateShowUseCase - Use case for updating an existing show.
+   * @param {IUpdateShowStatusUseCase} updateShowStatusUseCase - Use case for updating a show's status.
+   * @param {IDeleteShowUseCase} deleteShowUseCase - Use case for deleting a show.
+   * @param {IFindShowByIdUseCase} findShowByIdUseCase - Use case for finding a show by ID.
+   * @param {IFindAllShowsUseCase} findAllShowsUseCase - Use case for fetching all shows (admin view).
+   * @param {IFindShowsByVendorUseCase} findShowsByVendorUseCase - Use case for fetching shows by a specific vendor.
+   * @param {IFetchShowSelectionUseCase} fetchShowSelectionUseCase - Use case for fetching show selection options for users.
+   * @param {ICreateRecurringShowUseCase} createRecurringShowUseCase - Use case for creating recurring shows.
+   * @param {ShowJobService} showJobService - Service for scheduling and canceling show-related jobs.
+   */
   constructor(
     @inject('CreateShowUseCase') private createShowUseCase: ICreateShowUseCase,
     @inject('UpdateShowUseCase') private updateShowUseCase: IUpdateShowUseCase,
@@ -35,7 +52,14 @@ export class ShowManagementController implements IShowManagementController {
     @inject('ShowJobService') private showJobService: ShowJobService,
   ) {}
 
-  async createShow(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Handles the creation of one or more new shows. Schedules related jobs upon successful creation.
+   * @param {Request} req - The Express request object, containing show details in the body. Requires `req.decoded.userId` for the vendor ID.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async createShow(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
       if (!vendorId) {
@@ -58,11 +82,18 @@ export class ShowManagementController implements IShowManagementController {
       }
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, shows);
     } catch (error) {
-     next(error)
+      next(error);
     }
   }
 
-  async updateShow(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Handles the update of an existing show. Reschedules related jobs upon successful update.
+   * @param {Request} req - The Express request object, containing show ID in `req.params.id` and updated show details in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async updateShow(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
@@ -78,11 +109,18 @@ export class ShowManagementController implements IShowManagementController {
       }
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async updateShowStatus(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Updates the status of a specific show (e.g., 'active', 'cancelled').
+   * @param {Request} req - The Express request object, containing show ID in `req.params.id` and new status in `req.body.status`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async updateShowStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
     const { status } = req.body;
 
@@ -91,10 +129,18 @@ export class ShowManagementController implements IShowManagementController {
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
     } catch (error) {
       console.error('❌ ~ ShowManagementController ~ updateShowStatus ~ Error:', error);
-next(error)    }
+      next(error);
+    }
   }
 
-  async deleteShow(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Deletes a show by its ID. Cancels related jobs upon successful deletion.
+   * @param {Request} req - The Express request object, containing show ID in `req.params.id`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async deleteShow(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
@@ -112,11 +158,18 @@ next(error)    }
         message: 'Show deleted successfully',
       });
     } catch (error) {
-   next(error)
+      next(error);
     }
   }
 
-  async getShowById(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Retrieves a single show by its ID.
+   * @param {Request} req - The Express request object, containing show ID in `req.params.id`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async getShowById(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { id } = req.params;
 
     try {
@@ -126,11 +179,18 @@ next(error)    }
       }
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
     } catch (error) {
-   next(error)
+      next(error);
     }
   }
 
-  async getAllShows(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Fetches all shows with pagination, search, and filtering options (typically for admin or general listing).
+   * @param {Request} req - The Express request object, containing various query parameters for filtering.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async getAllShows(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, theaterId, movieId, screenId, status, sortBy, sortOrder } =
         req.query;
@@ -150,11 +210,18 @@ next(error)    }
       const result = await this.findAllShowsUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-next(error)
+      next(error);
     }
   }
 
-  async getShowsOfVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Fetches shows belonging to a specific vendor with pagination and filtering.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId` for the vendor ID and optional query parameters for filtering.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async getShowsOfVendor(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, sortBy, sortOrder } = req.query;
       const vendorId = req.decoded?.userId;
@@ -176,11 +243,18 @@ next(error)
       const result = await this.findShowsByVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
- next(error)
+      next(error);
     }
   }
 
-  async getShowSelection(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Fetches show selection options for a given movie, considering user's location and various filters.
+   * @param {Request} req - The Express request object. Contains `movieId` in `req.params`, and optional query parameters for `date`, `priceRanges`, `timeSlots`, `facilities`. Also uses `latitude`, `longitude`, and `selectedLocation` from `req.cookies`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async getShowSelection(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { movieId } = req.params;
       const { date, priceRanges, timeSlots, facilities } = req.query;
@@ -227,11 +301,18 @@ next(error)
       const result = await this.fetchShowSelectionUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-   next(error)
+      next(error);
     }
   }
 
-  async createRecurringShow(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Creates recurring shows based on an existing show. Schedules jobs for each newly created show.
+   * @param {Request} req - The Express request object, containing `showId`, `startDate`, and `endDate` in the body. Requires `req.decoded.userId` for the vendor ID.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async createRecurringShow(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { showId, startDate, endDate } = req.body;
       const vendorId = req.decoded?.userId;
@@ -263,7 +344,7 @@ next(error)
 
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, shows);
     } catch (error) {
-   next(error)
+      next(error);
     }
   }
 }

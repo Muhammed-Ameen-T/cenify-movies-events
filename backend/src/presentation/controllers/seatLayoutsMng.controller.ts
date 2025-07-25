@@ -11,8 +11,19 @@ import { IFindSeatLayoutsByVendorUseCase } from '../../domain/interfaces/useCase
 import { IUpdateSeatLayoutUseCase } from '../../domain/interfaces/useCases/Vendor/updateSeatLayoutUseCase';
 import { IFindSeatLayoutByIdUseCase } from '../../domain/interfaces/useCases/Vendor/findSeatLayoutById.interface';
 
+/**
+ * Controller for managing seat layout operations, primarily for vendors.
+ * @implements {ISeatLayoutController}
+ */
 @injectable()
 export class SeatLayoutController implements ISeatLayoutController {
+  /**
+   * Constructs an instance of SeatLayoutController.
+   * @param {ICreateSeatLayoutUseCase} createSeatLayoutUseCase - Use case for creating a new seat layout.
+   * @param {IUpdateSeatLayoutUseCase} updateSeatLayoutUseCase - Use case for updating an existing seat layout.
+   * @param {IFindSeatLayoutsByVendorUseCase} findSeatLayoutsByVendorUseCase - Use case for fetching seat layouts belonging to a specific vendor.
+   * @param {IFindSeatLayoutByIdUseCase} findSeatLayoutByIdUseCase - Use case for finding a seat layout by its ID.
+   */
   constructor(
     @inject('CreateSeatLayoutUseCase') private createSeatLayoutUseCase: ICreateSeatLayoutUseCase,
     @inject('UpdateSeatLayoutUseCase') private updateSeatLayoutUseCase: IUpdateSeatLayoutUseCase,
@@ -22,7 +33,14 @@ export class SeatLayoutController implements ISeatLayoutController {
     private findSeatLayoutByIdUseCase: IFindSeatLayoutByIdUseCase,
   ) {}
 
-  async createSeatLayout(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Handles the creation of a new seat layout.
+   * @param {Request} req - The Express request object, containing seat layout details in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async createSeatLayout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { uuid, vendorId, layoutName, seatPrice, rowCount, columnCount, seats, capacity } =
         req.body;
@@ -44,7 +62,14 @@ export class SeatLayoutController implements ISeatLayoutController {
     }
   }
 
-  async updateSeatLayout(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Handles the update of an existing seat layout.
+   * @param {Request} req - The Express request object, containing seat layout ID in `req.params.id` and updated details in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async updateSeatLayout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { uuid, layoutName, seatPrice, rowCount, columnCount, seats, capacity } = req.body;
       const layoutId = req.params.id;
@@ -66,7 +91,14 @@ export class SeatLayoutController implements ISeatLayoutController {
     }
   }
 
-  async findSeatLayoutsByVendor(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Finds seat layouts belonging to a specific vendor with pagination and filtering.
+   * @param {Request} req - The Express request object. Requires `req.decoded.userId` for the vendor ID and optional query parameters.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async findSeatLayoutsByVendor(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const vendorId = req.decoded?.userId;
       if (!vendorId) {
@@ -99,7 +131,14 @@ export class SeatLayoutController implements ISeatLayoutController {
     }
   }
 
-  async findSeatLayoutById(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Finds a seat layout by its ID.
+   * @param {Request} req - The Express request object, containing the seat layout ID in `req.params.id`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async findSeatLayoutById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const layoutId = req.params.id;
       if (!layoutId) {

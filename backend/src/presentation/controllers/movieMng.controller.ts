@@ -24,10 +24,27 @@ import { SuccessMsg } from '../../utils/constants/commonSuccessMsg.constants';
 import mongoose from 'mongoose';
 import { IFetchMoviesUserUseCase } from '../../domain/interfaces/useCases/User/fetchMovieUser.interface';
 import { IRateMovieUseCase } from '../../domain/interfaces/useCases/User/rateMovie.interface';
-import { IMovieRepository } from '../../domain/interfaces/repositories/movie.repository';
+import { IIsMovieLikedUseCase } from '../../domain/interfaces/useCases/User/isMovieLiked.interface';
+import { ILikeOrUnlikeMovieUseCase } from '../../domain/interfaces/useCases/User/likeOrUnlikeMovie.interface';
 
+/**
+ * Controller for managing movie-related operations, accessible by both admins and users.
+ * @implements {IMovieMngController}
+ */
 @injectable()
 export class MovieMngController implements IMovieMngController {
+  /**
+   * Constructs an instance of MovieMngController.
+   * @param {ICreateMovieUseCase} createMovieUseCase - Use case for creating a new movie.
+   * @param {IFetchMoviesUseCase} fetchMoviesUseCase - Use case for fetching movies (admin view).
+   * @param {IUpdateMovieStatusUseCase} updateMovieStatusUseCase - Use case for updating a movie's status.
+   * @param {IUpdateMovieUseCase} updateMovieUseCase - Use case for updating movie details.
+   * @param {IFindMovieByIdUseCase} findMovieByIdUseCase - Use case for finding a movie by ID.
+   * @param {IFetchMoviesUserUseCase} fetchMoviesUserUseCase - Use case for fetching movies (user view).
+   * @param {IRateMovieUseCase} rateMovieUseCase - Use case for submitting movie and theater ratings.
+   * @param {IIsMovieLikedUseCase} isMovieLikedUseCase - Use case for checking if a movie is liked by a user.
+   * @param {ILikeOrUnlikeMovieUseCase} likeOrUnlikeMovieUseCase - Use case for liking or unliking a movie.
+   */
   constructor(
     @inject('CreateMovieUseCase') private createMovieUseCase: ICreateMovieUseCase,
     @inject('FetchMoviesUseCase') private fetchMoviesUseCase: IFetchMoviesUseCase,
@@ -36,10 +53,18 @@ export class MovieMngController implements IMovieMngController {
     @inject('FindMovieByIdUseCase') private findMovieByIdUseCase: IFindMovieByIdUseCase,
     @inject('FetchMoviesUserUseCase') private fetchMoviesUserUseCase: IFetchMoviesUserUseCase,
     @inject('RateMovieUseCase') private rateMovieUseCase: IRateMovieUseCase,
-    @inject('MovieRepository') private movieRepository: IMovieRepository,
+    @inject('IsMovieLikedUseCase') private isMovieLikedUseCase: IIsMovieLikedUseCase,
+    @inject('LikeOrUnlikeMovieUseCase') private likeOrUnlikeMovieUseCase: ILikeOrUnlikeMovieUseCase,
   ) {}
 
-  async createMovie(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Handles the creation of a new movie by an admin.
+   * @param {Request} req - The Express request object, containing movie details in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async createMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
         name,
@@ -71,11 +96,18 @@ export class MovieMngController implements IMovieMngController {
       const movie = await this.createMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_ADDED, movie);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async fetchMovies(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Fetches a list of movies with pagination, search, and filtering options for admin view.
+   * @param {Request} req - The Express request object, containing query parameters for filtering.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async fetchMovies(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, genre, sortBy, sortOrder } = req.query;
 
@@ -109,11 +141,18 @@ export class MovieMngController implements IMovieMngController {
       const result = await this.fetchMoviesUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async updateMovieStatus(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Updates the status of a movie.
+   * @param {Request} req - The Express request object, containing movie ID and new status in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async updateMovieStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id, status } = req.body;
       const dto = new UpdateMovieStatusDTO(id, status);
@@ -126,7 +165,14 @@ export class MovieMngController implements IMovieMngController {
     }
   }
 
-  async updateMovie(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Updates the details of an existing movie.
+   * @param {Request} req - The Express request object, containing updated movie details in the body.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async updateMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
         id,
@@ -161,11 +207,18 @@ export class MovieMngController implements IMovieMngController {
       const movie = await this.updateMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_UPDATED, movie);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async findMovieById(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Finds a movie by its ID.
+   * @param {Request} req - The Express request object, containing the movie ID in `req.params.id`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async findMovieById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -177,11 +230,19 @@ export class MovieMngController implements IMovieMngController {
       const movie = await this.findMovieByIdUseCase.execute(id);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, movie);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async fetchMoviesUser(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Fetches a list of movies with pagination, search, filtering, and location-based relevance for user view.
+   * Uses latitude and longitude from cookies for location awareness, defaulting to "Calicut" if not present.
+   * @param {Request} req - The Express request object, containing query parameters and potentially cookies for location.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async fetchMoviesUser(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { page, limit, search, status, genre, sortBy, sortOrder } = req.query;
       let { latitude, longitude, selectedLocation } = req.cookies;
@@ -227,18 +288,25 @@ export class MovieMngController implements IMovieMngController {
       const result = await this.fetchMoviesUserUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async submitRating(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Submits a rating for a movie and a theater by a user.
+   * @param {Request} req - The Express request object, containing `movieId`, `theaterId`, `movieRating`, `theaterRating`, and `review` in the body. User ID is from `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async submitRating(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { movieId, theaterId, movieRating, theaterRating, review } = req.body;
 
       const userId = req.decoded?.userId;
 
       if (!movieId || !theaterId || !userId) {
-        throw new CustomError('Missing required fields', HttpResCode.BAD_REQUEST);
+        throw new CustomError(ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS, HttpResCode.BAD_REQUEST);
       }
 
       const dto = new SubmitRatingDTO(
@@ -253,50 +321,51 @@ export class MovieMngController implements IMovieMngController {
       const result = await this.rateMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, 'Rating submitted successfully', result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async likeOrUnlikeMovie(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Handles liking or unliking a movie by a user.
+   * @param {Request} req - The Express request object, containing `movieId` and `isLike` (boolean) in the body. User ID is from `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async likeOrUnlikeMovie(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.decoded?.userId;
+      if (!userId) {
+        throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
+      }
       const { movieId, isLike } = req.body;
-      const userId = req.decoded?.userId;
 
-      if (!movieId || typeof isLike !== 'boolean' || !userId) {
-        throw new CustomError(
-          ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
-          HttpResCode.BAD_REQUEST,
-        );
-      }
+      const response = await this.likeOrUnlikeMovieUseCase.execute(movieId, userId, isLike);
 
-      const updatedMovie = await this.movieRepository.likeMovie(movieId, userId, isLike);
-
-      if (!updatedMovie) {
-        throw new CustomError(ERROR_MESSAGES.GENERAL.MOVIE_NOT_UPDATED, HttpResCode.NOT_FOUND);
-      }
-
-      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_UPDATED, updatedMovie);
+      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_UPDATED, response);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 
-  async isMovieLiked(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Checks if a user has liked a specific movie.
+   * @param {Request} req - The Express request object, containing `movieId` in `req.params.id`. User ID is from `req.decoded.userId`.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async isMovieLiked(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { movieId } = req.params;
       const userId = req.decoded?.userId;
-
-      if (!movieId || !userId) {
-        throw new CustomError(
-          ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
-          HttpResCode.BAD_REQUEST,
-        );
+      if (!userId) {
+        throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
-
-      const isLiked = await this.movieRepository.hasUserLikedMovie(movieId, userId);
-      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_FETCHED, { isLiked });
+      const { movieId } = req.params;
+      const response = await this.isMovieLikedUseCase.execute(movieId, userId);
+      sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_FETCHED, response);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

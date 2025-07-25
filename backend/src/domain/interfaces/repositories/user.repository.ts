@@ -28,5 +28,5 @@ export interface IUserRepository {
   updateBlockStatus(id: string, isBlocked: boolean): Promise<void>;
   updatePasswordById(userId: string, password: string): Promise<User>;
   incrementLoyalityPoints(userId: string, seatCount: number): Promise<User>;
-  findByPhone(phone:number): Promise<User | null>;
+  findByPhone(phone: number): Promise<User | null>;
 }

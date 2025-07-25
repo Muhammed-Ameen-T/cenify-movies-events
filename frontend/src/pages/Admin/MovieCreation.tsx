@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Upload, Info, CheckCircle2, Plus, ChevronDown } from 'lucide-react';
 import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
@@ -97,7 +97,7 @@ const MovieCreationForm: React.FC = () => {
       poster: '',
     },
   });
-
+  const queryClient = useQueryClient(); // Add queryClient
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterPreview, setPosterPreview] = useState<string | null>(null);
   const [cropImage, setCropImage] = useState<string | null>(null);
@@ -180,7 +180,7 @@ const MovieCreationForm: React.FC = () => {
     setNewCrewRole(CREW_ROLES[0]);
     setNewCastName('');
     setNewCastCharacter('');
-    navigate('/admin/movies');
+    setTimeout(() => navigate('/admin/movies'), 100); 
   };
 
   const validateImageFile = (file: File): boolean => {
@@ -334,10 +334,14 @@ const MovieCreationForm: React.FC = () => {
 
   const createMovieMutation = useMutation({
     mutationFn: movieService.createMovie,
-    onSuccess: () => {
+    onSuccess: async () => {
       setFormSubmitted(true);
       localStorage.setItem(MOVIE_SUBMITTED_KEY, 'true');
       toast.success('Movie created successfully!');
+      await queryClient.invalidateQueries({ 
+        queryKey: ['movies'],
+        refetchType: 'active', 
+      });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to create movie');

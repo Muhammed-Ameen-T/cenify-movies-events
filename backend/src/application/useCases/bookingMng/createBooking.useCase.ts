@@ -131,7 +131,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         false,
         [],
       );
-      
+
       // Send to vendor
       const show = await this.showRepository.findById(savedBooking.showId._id.toString());
       if (!show) {
@@ -153,7 +153,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         false,
         [],
       );
-      
+
       const adminNotification = new Notification(
         null as any,
         null,
@@ -167,15 +167,14 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         true,
         [],
       );
-      
+
       await this.notificationRepository.createNotification(userNotification);
       await this.notificationRepository.createNotification(vendorNotification);
       await this.notificationRepository.createGlobalNotification(adminNotification);
       socketService.emitNotification(`vendor-${show.vendorId}`, vendorNotification);
       socketService.emitNotification('admin-global', adminNotification);
       socketService.emitNotification(`user-${dto.userId}`, userNotification);
-      
-   
+
       await this.userRepository.incrementLoyalityPoints(
         dto.userId,
         savedBooking.bookedSeatsId.length,

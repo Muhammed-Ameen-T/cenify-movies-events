@@ -5,8 +5,9 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { debounce } from 'lodash';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
-import { useDispatch } from 'react-redux'; // Import useDispatch
-import { setSelectedLocation } from '../../store/slices/locationSlice'; // Import Redux action
+import { setAppCookie } from '../../utils/setCookie';
+import { useDispatch } from 'react-redux'; 
+import { setSelectedLocation } from '../../store/slices/locationSlice';
 
 // Load Google Maps API key from environment variable
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_REACT_APP_GOOGLE_MAPS_API_KEY || '';
@@ -151,9 +152,9 @@ const CitySelectionModal: React.FC<CitySelectionModalProps> = ({
         return;
       }
 
-      Cookies.set('selectedLocation', city, { expires: 7, secure: true, sameSite: 'Lax', domain: '.muhammedameen.site' });
-      Cookies.set('latitude', lat.toString(), { expires: 7, secure: true, sameSite: 'Lax', domain: '.muhammedameen.site' });
-      Cookies.set('longitude', lng.toString(), { expires: 7, secure: true, sameSite: 'Lax', domain: '.muhammedameen.site' });
+      setAppCookie('selectedLocation', city);
+      setAppCookie('latitude', lat.toString());
+      setAppCookie('longitude', lng.toString());
 
       dispatch(setSelectedLocation(city)); // Dispatch Redux action
       setIsCityModalOpen(false);
@@ -231,9 +232,9 @@ const CitySelectionModal: React.FC<CitySelectionModalProps> = ({
           }
 
           // Store address, latitude, and longitude in cookies
-          Cookies.set('selectedLocation', address, { expires: 7, secure: true, sameSite: 'Lax', domain: '.muhammedameen.site' });
-          Cookies.set('latitude', latitude.toString(), { expires: 7, secure: true, sameSite: 'Lax', domain: '.muhammedameen.site' });
-          Cookies.set('longitude', longitude.toString(), { expires: 7, secure: true, sameSite: 'Lax', domain: '.muhammedameen.site' });
+          setAppCookie('selectedLocation', address);
+          setAppCookie('latitude', latitude.toString());
+          setAppCookie('longitude', longitude.toString());
 
           dispatch(setSelectedLocation(address)); // Dispatch Redux action
           setIsCityModalOpen(false);

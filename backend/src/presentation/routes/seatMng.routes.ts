@@ -9,16 +9,19 @@ const seatLayoutController = container.resolve<ISeatLayoutController>('SeatLayou
 
 const router = Router();
 
-router.post('/create-seat-layout', verifyAccessToken, authorizeRoles(['vendor']),(req, res, next) =>
-  seatLayoutController.createSeatLayout(req, res, next),
+router.post(
+  '/create-seat-layout',
+  verifyAccessToken,
+  authorizeRoles(['vendor']),
+  (req, res, next) => seatLayoutController.createSeatLayout(req, res, next),
 );
-router.get('/fetch-seats', verifyAccessToken, authorizeRoles(['vendor']),(req, res, next) =>
+router.get('/fetch-seats', verifyAccessToken, authorizeRoles(['vendor']), (req, res, next) =>
   seatLayoutController.findSeatLayoutsByVendor(req, res, next),
 );
-router.put('/update-seats/:id', verifyAccessToken, authorizeRoles(['vendor']),(req, res, next) =>
+router.put('/update-seats/:id', verifyAccessToken, authorizeRoles(['vendor']), (req, res, next) =>
   seatLayoutController.updateSeatLayout(req, res, next),
 );
-router.get('/find-seats/:id', verifyAccessToken, authorizeRoles(['vendor']),(req, res, next) =>
+router.get('/find-seats/:id', verifyAccessToken, authorizeRoles(['vendor']), (req, res, next) =>
   seatLayoutController.findSeatLayoutById(req, res, next),
 );
 export default router;

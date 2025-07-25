@@ -24,7 +24,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { movieService } from '../../services/Admin/movieApi';
-import { IMovie, ICast, ICrew, IDuration } from '../../types/movie';
+import { IMovie, IDuration } from '../../types/movie';
 
 // Default fallback images
 const DEFAULT_IMAGE = 'https://via.placeholder.com/1402x2048?text=No+Image';
@@ -130,6 +130,7 @@ const Movies: React.FC = () => {
         sortBy: filters.releaseDate ? 'releaseDate' : undefined,
         sortOrder: filters.releaseDate === 'newest' ? 'desc' : filters.releaseDate === 'oldest' ? 'asc' : undefined,
       }),
+      staleTime: 0,
   });
 
   const movies = data?.movies || [];

@@ -2,8 +2,6 @@ import mongoose, { Types } from 'mongoose';
 import BookingModel from '../database/booking.model';
 import ShowModel from '../database/show.model';
 import { TheaterModel } from '../database/theater.model';
-import ScreenModel from '../database/screen.model';
-import SeatLayoutModel from '../database/seatLayout.model';
 import {
   DashboardQueryParams,
   VendorStatistics,
@@ -43,13 +41,11 @@ export class DashboardRepository implements IDashboardRepository {
       if (location) theaterMatch['location.city'] = new RegExp(location, 'i');
       const theaters = await TheaterModel.find(theaterMatch).select('_id').lean();
       const theaterIds = theaters.map((t) => new mongoose.Types.ObjectId(t._id));
-      console.log('Theater IDs:', theaterIds); // Debug log
 
       // Get vendor's show IDs
       const showMatch: any = { vendorId: vendorObjectId, theaterId: { $in: theaterIds } };
       const shows = await ShowModel.find(showMatch).select('_id').lean();
       const showIds = shows.map((s) => s._id);
-      console.log('Show IDs:', showIds); // Debug log
 
       // Base booking match
       const bookingMatch: any = {
@@ -59,7 +55,6 @@ export class DashboardRepository implements IDashboardRepository {
       };
       if (startDate) bookingMatch.createdAt = { $gte: new Date(startDate) };
       if (endDate) bookingMatch.createdAt = { ...bookingMatch.createdAt, $lte: new Date(endDate) };
-      console.log('Booking Match:', bookingMatch); // Debug log
 
       // Fetch all data in parallel
       const [statistics, monthlyRevenue, occupancyRate, topSellingShows, topTheaters] =
@@ -292,6 +287,7 @@ export class DashboardRepository implements IDashboardRepository {
           title: { $first: '$movie.name' },
           tickets: { $sum: { $size: '$bookedSeatsId' } },
           revenue: { $sum: '$totalAmount' },
+          startTime: { $first: '$show.startTime' },
         },
       },
       { $sort: { tickets: -1 } },
@@ -302,6 +298,7 @@ export class DashboardRepository implements IDashboardRepository {
           title: 1,
           tickets: 1,
           revenue: 1,
+          showTime: '$startTime',
         },
       },
     ]);

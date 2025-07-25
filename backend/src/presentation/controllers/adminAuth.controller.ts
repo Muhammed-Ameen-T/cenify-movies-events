@@ -7,11 +7,26 @@ import { LoginAdminDTO } from '../../application/dtos/auth.dto';
 import { IAdminAuthController } from './interface/adminAuth.controller.interface';
 import { ILoginAdminUseCase } from '../../domain/interfaces/useCases/Admin/adminLogin.interface';
 
+/**
+ * Controller for handling admin authentication related requests.
+ * @implements {IAdminAuthController}
+ */
 @injectable()
 export class AdminAuthController implements IAdminAuthController {
+  /**
+   * Creates an instance of AdminAuthController.
+   * @param {ILoginAdminUseCase} loginAdminUseCase - The use case for admin login.
+   */
   constructor(@inject('LoginAdminUseCase') private loginAdminUseCase: ILoginAdminUseCase) {}
 
-  async login(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Handles the admin login request.
+   * @param {Request} req - The express request object.
+   * @param {Response} res - The express response object.
+   * @param {NextFunction} next - The express next middleware function.
+   * @returns {Promise<void>}
+   */
+  async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password } = req.body;
 
@@ -24,7 +39,7 @@ export class AdminAuthController implements IAdminAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: parseInt(process.env.ADMIN_MAX_AGE || '0', 10),
       });
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.CREATED, {
@@ -32,7 +47,7 @@ export class AdminAuthController implements IAdminAuthController {
         user: result.user,
       });
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

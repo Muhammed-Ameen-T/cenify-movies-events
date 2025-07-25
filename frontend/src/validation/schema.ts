@@ -43,6 +43,32 @@ export const registerSchema = z
       .max(5, 'Maximum 5 images allowed'),
   });
 
+
+
+export const theaterDetailsUpdateSchema = z.object({
+  name: z.string().min(1, 'Theater name is required'),
+  description: z.string().min(1, 'Description is required'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  facilities: z.object({
+    foodCourt: z.boolean(),
+    lounges: z.boolean(),
+    mTicket: z.boolean(),
+    parking: z.boolean(),
+    freeCancellation: z.boolean(),
+  }),
+  intervalTime: z.string().min(1, 'Interval time is required'),
+  location: z.object({
+    city: z.string().min(1, 'City is required'),
+    coordinates: z.array(z.number()).length(2, 'Coordinates must contain latitude and longitude'),
+    type: z.string().min(1, 'Location type is required'),
+  }),
+  gallery: z
+    .array(z.string().url('Invalid URL').min(1, 'Image URL cannot be empty'))
+    .min(4, 'At least 4 images are required (1 certificate + 3 theater images)')
+    .max(5, 'Maximum 5 images allowed'),
+});
+
 export const loginSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(6, 'Password must be at least 6 characters'),

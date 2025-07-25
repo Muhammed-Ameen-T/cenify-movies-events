@@ -22,6 +22,7 @@ export interface TopSellingShow {
   title: string;
   tickets: number;
   revenue: number;
+  showTime: Date;
 }
 
 export interface TopTheater {

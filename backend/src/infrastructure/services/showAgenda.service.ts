@@ -75,7 +75,6 @@ export class ShowJobService {
       const { showId } = job.attrs.data;
 
       try {
-
         await this.showRepository.pullExpiredSeats(showId);
 
         console.log(`✅ Expired pending seats removed for showId: ${showId}`);

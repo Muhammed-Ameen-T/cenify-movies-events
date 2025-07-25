@@ -202,6 +202,20 @@ import { ISendOtpPhoneUseCase } from '../domain/interfaces/useCases/User/sendOtp
 import { IVerifyOtpPhoneUseCase } from '../domain/interfaces/useCases/User/verifyOtpPhone.interface';
 import { IProcessVendorPayout } from '../domain/interfaces/useCases/User/ProcessVendorPayoutUseCase.interface';
 import { ProcessVendorPayoutUseCase } from '../application/useCases/bookingMng/ProcessVendorPayout';
+import { FindTheaterByIdUseCase } from '../application/useCases/theaterMng/findTheaterById.useCase';
+import { IFindTheaterByIdUseCase } from '../domain/interfaces/useCases/Vendor/findTheaterById.interface';
+import { IFindProfileContentsUseCase } from '../domain/interfaces/useCases/User/findProfileContents.interface';
+import { FindProfileContentsUseCase } from '../application/useCases/userProfile/getProfileContents.useCase';
+import { ICheckPaymentOptionsUseCase } from '../domain/interfaces/useCases/User/checkPaymentOptions.interface';
+import { CheckPaymentOptionsUseCase } from '../application/useCases/bookingMng/checkPaymentOptions.useCase';
+import { ILikeOrUnlikeMovieUseCase } from '../domain/interfaces/useCases/User/likeOrUnlikeMovie.interface';
+import { LikeOrUnlikeMovieUseCase } from '../application/useCases/movieMng/likeOrUnlikeMovie.useCase';
+import { IsMovieLikedUseCase } from '../application/useCases/movieMng/isMovieLiked.useCase';
+import { IIsMovieLikedUseCase } from '../domain/interfaces/useCases/User/isMovieLiked.interface';
+import { IRefreshTokenUseCase } from '../domain/interfaces/useCases/User/refreshToken.interface';
+import { RefreshTokenUseCase } from '../application/useCases/userAuth/refreshToken.useCase';
+import { IWithdrawFundsUseCase } from '../domain/interfaces/useCases/Vendor/withdrawFunds.interface';
+import { WithdrawFundsUseCase } from '../application/useCases/userProfile/withdrawFunds.usecase';
 // import { VendorPayoutJobService } from './services/scheduleVendorPayouts.service';
 
 //Controller Registration
@@ -238,6 +252,7 @@ container.register<IVerifyOtpVendorUseCase>('VerifyOtpVendorUseCase', {
   useClass: VerifyOtpVendorUseCase,
 });
 container.register<ILoginVendorUseCase>('LoginVendorUseCase', { useClass: LoginVendorUseCase });
+container.register<IRefreshTokenUseCase>('RefreshTokenUseCase', { useClass: RefreshTokenUseCase });
 
 // Repository Registration
 container.register<IAuthRepository>('AuthRepository', { useClass: AuthRepository });
@@ -269,6 +284,12 @@ container.register<IFetchMoviesUserUseCase>('FetchMoviesUserUseCase', {
 container.register<IRateMovieUseCase>('RateMovieUseCase', {
   useClass: RateMovieUseCase,
 });
+container.register<ILikeOrUnlikeMovieUseCase>('LikeOrUnlikeMovieUseCase', {
+  useClass: LikeOrUnlikeMovieUseCase,
+});
+container.register<IIsMovieLikedUseCase>('IsMovieLikedUseCase', {
+  useClass: IsMovieLikedUseCase,
+});
 
 // User Management UseCases and Controller Registration
 container.register<IFetchUsersUseCase>('FetchUsersUseCase', { useClass: FetchUsersUseCase });
@@ -298,6 +319,9 @@ container.register<IFetchTheaterOfVendorUseCase>('FetchTheaterOfVendorUseCase', 
 });
 container.register<IFetchAdminTheatersUseCase>('FetchAdminTheatersUseCase', {
   useClass: FetchAdminTheatersUseCase,
+});
+container.register<IFindTheaterByIdUseCase>('FindTheaterByIdUseCase', {
+  useClass: FindTheaterByIdUseCase,
 });
 
 // Seat Layout UseCases and Controller Registration
@@ -330,6 +354,9 @@ container.register<IChangePasswordUseCase>('ChangePasswordUseCase', {
 container.register<IgetUserDetailsUseCase>('GetUserDetailsUseCase', {
   useClass: getUserDetailsUseCase,
 });
+container.register<IFindProfileContentsUseCase>('FindProfileContentsUseCase', {
+  useClass: FindProfileContentsUseCase,
+});
 container.register<IRedeemLoyalityToWalletUseCase>('RedeemLoyalityToWalletUseCase', {
   useClass: RedeemLoyalityToWalletUseCase,
 });
@@ -338,7 +365,12 @@ container.register<IUserProfileController>('UserProfileController', {
 });
 container.register('SmsService', { useClass: SmsService });
 container.register<ISendOtpPhoneUseCase>('SendOtpPhoneUseCase', { useClass: SendOtpPhoneUseCase });
-container.register<IVerifyOtpPhoneUseCase>('VerifyOtpPhoneUseCase', { useClass: VerifyOtpPhoneUseCase });
+container.register<IVerifyOtpPhoneUseCase>('VerifyOtpPhoneUseCase', {
+  useClass: VerifyOtpPhoneUseCase,
+});
+container.register<IWithdrawFundsUseCase>('WithdrawFundsUseCase', {
+  useClass: WithdrawFundsUseCase,
+});
 
 // Screen Management UseCase, Controller, Repository Registration
 container.register<IScreenRepository>('ScreenRepository', { useClass: ScreenRepository });
@@ -442,16 +474,18 @@ container.register<ICancelBookingUseCase>('CancelBookingUseCase', {
 container.register<IFindBookingsOfVendorUseCase>('FindBookingsOfVendorUseCase', {
   useClass: FindBookingsOfVendorUseCase,
 });
+container.register<ICheckPaymentOptionsUseCase>('CheckPaymentOptionsUseCase', {
+  useClass: CheckPaymentOptionsUseCase,
+});
 container.register<IBookingMngController>('BookingMngController', {
   useClass: BookingMngController,
 });
 container.register('PaymentService', { useClass: PaymentService });
 container.register('CloudinaryService', { useClass: CloudinaryService });
 container.register('BookingStripeWebhookController', { useClass: BookingStripeWebhookController });
-container.register<IProcessVendorPayout>(
-  'IProcessVendorPayout',
-  { useClass: ProcessVendorPayoutUseCase }
-);
+container.register<IProcessVendorPayout>('IProcessVendorPayout', {
+  useClass: ProcessVendorPayoutUseCase,
+});
 
 // Notification Service Registration
 container.register('NotificationService', { useClass: NotificationService });

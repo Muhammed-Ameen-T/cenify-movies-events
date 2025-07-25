@@ -8,17 +8,35 @@ import { CustomError } from '../../utils/errors/custom.error';
 import { ICreateMoviePassUseCase } from '../../domain/interfaces/useCases/User/moviePass.interface';
 import { IStripeWebhookController } from './interface/stripeWebhook.controller.interface';
 
+/**
+ * Controller for handling Stripe webhook events, specifically for processing `checkout.session.completed` events
+ * to create a Movie Pass for the user.
+ * @implements {IStripeWebhookController}
+ */
 @injectable()
 export class StripeWebhookController implements IStripeWebhookController {
   private stripe: Stripe;
 
+  /**
+   * Constructs an instance of StripeWebhookController.
+   * @param {ICreateMoviePassUseCase} createMoviePassUseCase - The use case for creating a movie pass.
+   */
   constructor(
     @inject('CreateMoviePassUseCase') private createMoviePassUseCase: ICreateMoviePassUseCase,
   ) {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
-  async handleWebhook(req: Request, res: Response, next:NextFunction): Promise<void> {
+  /**
+   * Handles incoming Stripe webhook events.
+   * Verifies the webhook signature and processes `checkout.session.completed` events
+   * to create a movie pass for the associated user.
+   * @param {Request} req - The Express request object containing the Stripe event.
+   * @param {Response} res - The Express response object.
+   * @param {NextFunction} next - The Express next middleware function (not used directly for sending response in this case, but good for error propagation if needed).
+   * @returns {Promise<void>}
+   */
+  async handleWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
     const sig = req.headers['stripe-signature'] as string;
     let event: Stripe.Event;
 

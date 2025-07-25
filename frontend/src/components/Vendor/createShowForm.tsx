@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle2, X, Clock, Info, Plus, Trash2 } from 'lucide-react';
-import { useMutation, useInfiniteQuery } from '@tanstack/react-query';
+import { useMutation, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { debounce } from 'lodash';
 import DatePicker from 'react-datepicker';
@@ -101,6 +101,7 @@ const boxVariants = {
 
 const CreateShowForm: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // Add queryClient
   const [formSubmitted, setFormSubmitted] = useState<boolean>(() =>
     localStorage.getItem('showDetailsSubmitted') === 'true'
   );
@@ -269,15 +270,23 @@ const CreateShowForm: React.FC = () => {
   // Create show mutation
   const createShowMutation = useMutation({
     mutationFn: createShow,
-    onSuccess: () => {
+    onSuccess: async () => {
       setFormSubmitted(true);
       localStorage.setItem('showDetailsSubmitted', 'true');
       toast.success('Show created successfully!');
+      await queryClient.invalidateQueries({ 
+        queryKey: ['shows'],
+        refetchType: 'active', 
+      });
       setTimeout(() => {
         setFormSubmitted(true);
         setValue('showTimes', []);
         setTimeConflictError(null);
         setNewStartTime(null);
+        setSelectedMovie(null); 
+        setSelectedTheater(null);
+        setSelectedScreen(null); 
+        setMovieSearch('');
       }, 2000);
     },
     onError: (error: any) => {
@@ -288,8 +297,8 @@ const CreateShowForm: React.FC = () => {
   const handleClearForm = () => {
     localStorage.removeItem('showDetailsSubmitted');
     setFormSubmitted(false);
-    navigate('/vendor/shows');
-  };
+    setTimeout(() => navigate('/vendor/shows'), 100); // Small delay to allow refetch
+    };
 
   const handleTheaterSelect = (theaterId: string) => {
     setSelectedTheater(theaterId);

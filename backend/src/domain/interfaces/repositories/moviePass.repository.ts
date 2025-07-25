@@ -4,7 +4,7 @@ export interface IMoviePassRepository {
   create(moviePass: MoviePass): Promise<MoviePass>;
   findByUserId(userId: string): Promise<MoviePass | null>;
   updateStatus(userId: string, status: 'Active' | 'Inactive'): Promise<MoviePass | null>;
-  update(userId: string, updates: Partial<MoviePass>): Promise<MoviePass | null>;
+  update(userId: string, updates: MoviePass): Promise<MoviePass | null>;
   incrementMovieStats(userId: string, newSaving: number): Promise<MoviePass | null>;
   findHistoryByUserId(
     userId: string,

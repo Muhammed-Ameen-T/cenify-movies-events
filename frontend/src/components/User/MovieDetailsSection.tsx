@@ -170,39 +170,140 @@ const MovieDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-50">
-      {/* Hero Section */}
-      <div className="relative h-[70vh] overflow-hidden">
+      {/* Hero Section - Enhanced Mobile Responsive */}
+      <div className="relative h-[50vh] xs:h-[55vh] sm:h-[65vh] md:h-[70vh] overflow-hidden">
         <div className="absolute inset-0">
           <img
             src={movie.poster || 'https://via.placeholder.com/1200x675'}
             alt={movie.name || 'Movie'}
             className="w-full h-full object-cover filter brightness-50"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-sm"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 backdrop-blur-sm"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent"></div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-8">
+        
+        <div className="absolute bottom-0 left-0 right-0 p-3 xs:p-4 sm:p-6 md:p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row gap-8 items-end">
+            {/* Mobile Layout (< sm) */}
+            <div className="block sm:hidden space-y-3">
+              {/* Mobile Poster and Title Container */}
+              <div className="flex items-end gap-3 mb-3">
+                {/* Small Mobile Poster */}
+                <div className="flex-shrink-0">
+                  <img
+                    src={movie.poster || 'https://via.placeholder.com/300x450'}
+                    alt={movie.name || 'Movie'}
+                    className="w-42 xs:w-32 h-58 xs:h-40 object-cover rounded-lg shadow-xl border-2 border-white/20"
+                  />
+                </div>
+                
+                {/* Mobile Movie Info */}
+                <div className="flex-1 text-white space-y-2">
+                  {/* Status and Rating */}
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-2 py-1 rounded-full font-bold text-xs">
+                      {movie.status === 'released' ? 'NOW PLAYING' : movie.status?.toUpperCase() || 'N/A'}
+                    </div>
+                    <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                      <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                      <span className="font-bold text-xs">{movie.rating || '0'}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Mobile Title */}
+                  <h1 className="text-4xl xs:text-2xl font-black leading-tight line-clamp-2">
+                    {movie.name || 'Untitled'}
+                  </h1>
+                </div>
+              </div>
+
+              {/* Mobile Movie Details */}
+              <div className="space-y-2 text-white">
+                {/* Genre */}
+                <p className="text-gray-300 text-sm line-clamp-1">
+                  {movie.genre?.join(' • ') || 'N/A'}
+                </p>
+                
+                {/* Movie Meta Info */}
+                <div className="flex flex-wrap items-center gap-3 text-xs">
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    <span>{formatDuration(movie.duration)}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>{new Date(movie.releaseDate || '').getFullYear()}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Earth className="w-3 h-3" />
+                    <span>{movie.language || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile Action Buttons */}
+              <div className="flex gap-2 pt-2">
+                {trailerId && (
+                  <button
+                    onClick={() => setShowTrailer(true)}
+                    className="flex-1 flex items-center justify-center gap-2 bg-white text-black font-bold px-4 py-2.5 rounded-lg hover:bg-gray-100 transition-all duration-300 text-sm"
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Trailer</span>
+                  </button>
+                )}
+                <button
+                  onClick={handleLike}
+                  disabled={isLiking}
+                  className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all duration-300 text-sm min-w-[80px] ${
+                    isLiked ? 'bg-red-500 border-red-500 text-white' : 'bg-white/10 border-white/30 text-white hover:bg-white/20'
+                  } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isLiking ? (
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z"></path>
+                    </svg>
+                  ) : (
+                    <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+                  )}
+                  <span className="hidden xs:inline">{likes.toLocaleString()}</span>
+                  <span className="xs:hidden">{likes > 999 ? `${(likes/1000).toFixed(1)}k` : likes}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop/Tablet Layout (sm+) - Keep existing layout */}
+            <div className="hidden sm:flex gap-6 md:gap-8 items-end">
+              {/* Movie Poster */}
               <div className="flex-shrink-0">
                 <img
                   src={movie.poster || 'https://via.placeholder.com/300x450'}
                   alt={movie.name || 'Movie'}
-                  className="w-80 h-[28rem] object-cover rounded-3xl shadow-2xl border-4 border-white/20"
+                  className="w-56 h-80 md:w-64 md:h-96 lg:w-80 lg:h-[28rem] object-cover rounded-2xl sm:rounded-3xl shadow-2xl border-4 border-white/20"
                 />
               </div>
-              <div className="flex-1 text-white space-y-4">
-                <div className="flex items-center gap-4 mb-2">
+              
+              {/* Movie Details */}
+              <div className="flex-1 text-white space-y-3 md:space-y-4">
+                {/* Status and Rating badges */}
+                <div className="flex items-center gap-3 md:gap-4 mb-2">
                   <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-3 py-1 rounded-full font-bold text-sm">
                     {movie.status === 'released' ? 'NOW PLAYING' : movie.status?.toUpperCase() || 'N/A'}
                   </div>
                   <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
                     <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="font-bold">{movie.rating || '0'}</span>
+                    <span className="font-bold text-sm">{movie.rating || '0'}</span>
                   </div>
                 </div>
-                <h1 className="text-6xl font-black mb-4">{movie.name || 'Untitled'}</h1>
-                <div className="flex items-center gap-6 text-lg">
+                
+                {/* Movie Title */}
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-3 md:mb-4 leading-tight">
+                  {movie.name || 'Untitled'}
+                </h1>
+                
+                {/* Movie Info */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 md:gap-6 text-base md:text-lg">
                   <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5" />
                     <span>{formatDuration(movie.duration)}</span>
@@ -216,31 +317,37 @@ const MovieDetailPage: React.FC = () => {
                     <span>{movie.language || 'N/A'}</span>
                   </div>
                 </div>
-                <p className="text-gray-300 text-lg">{movie.genre?.join(' • ') || 'N/A'}</p>
-                <div className="flex items-center gap-4 pt-4">
+                
+                {/* Genre */}
+                <p className="text-gray-300 text-base md:text-lg">
+                  {movie.genre?.join(' • ') || 'N/A'}
+                </p>
+                
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 pt-3 md:pt-4">
                   {trailerId && (
                     <button
                       onClick={() => setShowTrailer(true)}
-                      className="flex items-center gap-3 bg-white text-black font-bold px-8 py-4 rounded-xl hover:bg-gray-100 transition-all duration-300 transform hover:scale-105"
+                      className="flex items-center gap-3 bg-white text-black font-bold px-6 py-3 md:px-8 md:py-4 rounded-xl hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 text-base w-full sm:w-auto justify-center sm:justify-start"
                     >
-                      <Play className="w-6 h-6" />
+                      <Play className="w-5 h-5 md:w-6 md:h-6" />
                       <span>Watch Trailer</span>
                     </button>
                   )}
                   <button
                     onClick={handleLike}
                     disabled={isLiking}
-                    className={`flex items-center gap-2 px-6 py-4 rounded-xl border-2 transition-all duration-300 ${
+                    className={`flex items-center gap-2 px-5 py-3 md:px-6 md:py-4 rounded-xl border-2 transition-all duration-300 text-base w-full sm:w-auto justify-center sm:justify-start ${
                       isLiked ? 'bg-red-500 border-red-500 text-white' : 'bg-white/10 border-white/30 text-white hover:bg-white/20'
                     } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {isLiking ? (
-                      <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 md:w-6 md:h-6 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z"></path>
                       </svg>
                     ) : (
-                      <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
+                      <Heart className={`w-5 h-5 md:w-6 md:h-6 ${isLiked ? 'fill-current' : ''}`} />
                     )}
                     <span>{likes.toLocaleString()}</span>
                   </button>
@@ -405,10 +512,6 @@ const MovieDetailPage: React.FC = () => {
                               </div>
                             </div>
                             <p className="text-gray-700 mb-0">{review.comment || 'No comment'}</p>
-                            {/* <button className="flex items-center gap-2 text-gray-500 hover:text-yellow-500 transition-colors">
-                              <ThumbsUp className="w-4 h-4" />
-                              <span>{review.likes || 0}</span>
-                            </button> */}
                           </div>
                         </div>
                       </div>

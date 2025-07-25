@@ -21,7 +21,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { loadStripe } from '@stripe/stripe-js';
-import { getMoviePass, createCheckoutSession, getMoviePassHistory, MoviePassData, MoviePassHistoryResponse } from '../../services/User/moviePassApi';
+import { getMoviePass, createCheckoutSession, getMoviePassHistory, MoviePassData } from '../../services/User/moviePassApi';
 import { formatRelativeTime } from '../../utils/timeFormator';
 
 // Initialize Stripe with test mode publishable key

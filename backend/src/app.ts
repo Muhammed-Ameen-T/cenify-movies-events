@@ -30,7 +30,7 @@ app.use(
       'https://your-image-server.com',
       'https://lh3.googleusercontent.com',
       'https://res.cloudinary.com',
-      env.CLIENT_ORIGIN
+      env.CLIENT_ORIGIN,
     ],
     credentials: true,
   }),
@@ -38,7 +38,6 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.json());
-
 
 // 🔹 Routes
 import vendorRoutes from './presentation/routes/vendorAuth.routes';

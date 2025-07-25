@@ -1,25 +1,25 @@
 import React, { useState, useMemo, useCallback, memo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ToastContainer, toast } from 'react-toastify';
-import { Search, Filter, Edit, Eye} from 'lucide-react';
+import { useQuery} from '@tanstack/react-query';
+import { Search, Filter, Edit, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import BackButton from '../../components/Buttons/BackButton';
-import { fetchTheatersByVendor, updateTheater } from '../../services/Vendor/theaterApi';
-import { ITheater, Theater, TheaterUpdateFormData } from '../../types/theater';
+import { fetchTheatersByVendor } from '../../services/Vendor/theaterApi';
+import { Theater, ITheater } from '../../types/theater';
 import { useNavigate } from 'react-router-dom';
-
-import 'react-toastify/dist/ReactToastify.css';
 import { debounce } from 'lodash';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 
-// Lazy-loaded modals to reduce initial load
+// Lazy-loaded modal
 const ViewTheaterModal = React.lazy(() => import('../../components/Vendor/ViewTheaterModal'));
-const UpdateTheaterModal = React.lazy(() => import('../../components/Vendor/UpdateTheaterModal'));
 
 const TheaterManagement: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const vendorId = user?.id;
   const [filters, setFilters] = useState({
     search: '',
     status: [] as string[],
@@ -30,10 +30,6 @@ const TheaterManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [editingTheater, setEditingTheater] = useState<Theater | null>(null);
-
-  // const vendorId = '68136be091d98d82eb9e9947';
 
   // Debounced search handler
   const debouncedSetSearch = useMemo(
@@ -53,7 +49,7 @@ const TheaterManagement: React.FC = () => {
 
   // Fetch theaters
   const { data, isLoading, error } = useQuery<TheatersQueryResponse>({
-    queryKey: ['theaters', currentPage, pageSize, filters],
+    queryKey: ['theaters', vendorId, currentPage, pageSize, filters],
     queryFn: () =>
       fetchTheatersByVendor({
         page: currentPage,
@@ -66,18 +62,7 @@ const TheaterManagement: React.FC = () => {
       }),
     keepPreviousData: true,
     retry: 2,
-  });
-
-  // Update theater mutation
-  const updateTheaterMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: TheaterUpdateFormData }) => updateTheater(id, data),
-    onSuccess: () => {
-      toast.success('Theater updated successfully!');
-      queryClient.invalidateQueries({ queryKey: ['theaters'] });
-      setIsUpdateModalOpen(false);
-      setEditingTheater(null);
-    },
-    onError: (error: any) => toast.error(error.response?.data?.message || 'Failed to update theater'),
+    staleTime: 0,
   });
 
   const handleFilterChange = useCallback(
@@ -97,16 +82,6 @@ const TheaterManagement: React.FC = () => {
     [debouncedSetSearch]
   );
 
-  // const handleStatusChange = useCallback(
-  //   (status: string) => {
-  //     const newStatuses = filters.status.includes(status)
-  //       ? filters.status.filter((s) => s !== status)
-  //       : [...filters.status, status];
-  //     handleFilterChange({ name: 'status', value: newStatuses });
-  //   },
-  //   [filters.status, handleFilterChange]
-  // );
-
   const handleSortChange = useCallback(
     (sortBy: string) => {
       setFilters((prev) => ({
@@ -124,9 +99,9 @@ const TheaterManagement: React.FC = () => {
   }, []);
 
   const handleEdit = useCallback((theater: Theater) => {
-    setEditingTheater(theater);
-    setIsUpdateModalOpen(true);
-  }, []);
+    navigate(`/vendor/update-theater/${theater._id}`);
+    console.log('Editing theater:', theater);
+  }, [navigate]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -149,8 +124,6 @@ const TheaterManagement: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSelectedTheater(null);
-        setIsUpdateModalOpen(false);
-        setEditingTheater(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -159,7 +132,6 @@ const TheaterManagement: React.FC = () => {
 
   return (
     <div className="p-6 bg-transparent min-h-screen">
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       <BackButton />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-white">Theater Management</h1>
@@ -224,7 +196,29 @@ const TheaterManagement: React.FC = () => {
       {/* Theater Table */}
       <Card className="p-6 bg-gray-900/90 backdrop-blur-xl border border-gray-700/30 rounded-2xl shadow-xl">
         {isLoading ? (
-          <div className="text-center text-gray-400 py-6">Loading theaters...</div>
+          <div className="flex flex-col items-center justify-center py-6 text-center text-gray-400">
+            <svg
+              className="animate-spin h-8 w-8 text-blue-500 mb-3"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4l5-5-5-5v4a10 10 0 00-10 10h4z"
+              ></path>
+            </svg>
+            <p className="text-sm">Loading theaters...</p>
+          </div>
         ) : error ? (
           <div className="text-center text-red-400 py-6">
             Failed to load theaters: {(error as any).message || 'An error occurred'}
@@ -245,7 +239,7 @@ const TheaterManagement: React.FC = () => {
                 </thead>
                 <tbody>
                   <AnimatePresence>
-                    {theaters.map((theater:Theater, index:number) => (
+                    {theaters.map((theater: Theater, index: number) => (
                       <motion.tr
                         key={theater._id}
                         initial={{ opacity: 0, y: 10 }}
@@ -358,26 +352,13 @@ const TheaterManagement: React.FC = () => {
         )}
       </Card>
 
-      {/* Modals */}
+      {/* View Modal */}
       <React.Suspense fallback={<div className="text-center text-gray-400">Loading...</div>}>
         <AnimatePresence>
           {selectedTheater && (
             <ViewTheaterModal
               theater={selectedTheater}
               onClose={() => setSelectedTheater(null)}
-            />
-          )}
-          {isUpdateModalOpen && editingTheater && (
-            <UpdateTheaterModal
-              theater={editingTheater}
-              onClose={() => {
-                setIsUpdateModalOpen(false);
-                setEditingTheater(null);
-              }}
-              onSubmit={(data) =>
-                updateTheaterMutation.mutate({ id: editingTheater._id, data })
-              }
-              isLoading={updateTheaterMutation.isPending}
             />
           )}
         </AnimatePresence>

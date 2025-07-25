@@ -14,7 +14,7 @@ const router = Router();
 router.get(
   '/fetchAll',
   verifyAccessToken,
-  authorizeRoles(['user','admin','vendor']),
+  authorizeRoles(['user', 'admin', 'vendor']),
   TheaterMngController.getTheaters.bind(TheaterMngController),
 );
 router.get(
@@ -32,14 +32,20 @@ router.get(
 router.patch(
   '/update-theater-status/:id',
   verifyAccessToken,
-  authorizeRoles(['vendor','admin']),
+  authorizeRoles(['vendor', 'admin']),
   TheaterMngController.updateTheaterStatus.bind(TheaterMngController),
 );
 router.patch(
   '/update-theater/:id',
   verifyAccessToken,
-  authorizeRoles(['vendor','admin']),
+  authorizeRoles(['vendor', 'admin']),
   TheaterMngController.updateTheater.bind(TheaterMngController),
+);
+router.get(
+  '/find/:id',
+  verifyAccessToken,
+  authorizeRoles(['vendor']),
+  TheaterMngController.findTheaterById.bind(TheaterMngController),
 );
 
 export default router;

@@ -44,6 +44,7 @@ export class DashboardData {
         title: s.title,
         tickets: s.tickets,
         revenue: Number(s.revenue.toFixed(2)),
+        showTime: new Date(s.showTime),
       })),
       data.topTheaters.map((t) => ({
         id: new Types.ObjectId(t.id),

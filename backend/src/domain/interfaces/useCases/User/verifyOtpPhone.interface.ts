@@ -1,5 +1,5 @@
-import { VerifyOtpPhoneRequestDTO } from "../../../../application/dtos/profile.dto";
+import { VerifyOtpPhoneRequestDTO } from '../../../../application/dtos/profile.dto';
 
 export interface IVerifyOtpPhoneUseCase {
-  execute(dto:VerifyOtpPhoneRequestDTO): Promise<void>;
+  execute(dto: VerifyOtpPhoneRequestDTO): Promise<void>;
 }
