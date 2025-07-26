@@ -21,7 +21,7 @@ export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
   ) {}
 
   async execute(dto: CreateMoviePassDTO): Promise<MoviePass> {
-    console.log("🚀 ~ CreateMoviePassUseCase ~ execute ~ dto:", dto)
+    console.log('🚀 ~ CreateMoviePassUseCase ~ execute ~ dto:', dto);
     // Check if user exists
     const user = await this.userRepository.findById(dto.userId);
     if (!user) {
@@ -40,10 +40,10 @@ export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
         dto.purchaseDate,
         dto.expireDate,
         moviePass.moneySaved,
-        moviePass.totalMovies
+        moviePass.totalMovies,
       );
       moviePass = await this.moviePassRepository.update(moviePass._id!, updateMoviePass);
-      console.log("🚀 ~ CreateMoviePassUseCase ~ execute ~ moviePass:", moviePass)
+      console.log('🚀 ~ CreateMoviePassUseCase ~ execute ~ moviePass:', moviePass);
       if (!moviePass) {
         throw new CustomError('Failed to update Movie Pass', HttpResCode.INTERNAL_SERVER_ERROR);
       }

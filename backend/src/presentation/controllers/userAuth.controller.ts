@@ -47,7 +47,8 @@ export class UserAuthController implements IUserAuthController {
     @inject('LoginUserUseCase') private loginUserUseCase: ILoginUserUseCase,
     @inject('ForgotPassSendOtp') private forgotPassSendOtpUseCase: IForgotPasswordSendOtpUseCase,
     @inject('ForgotPassUpdate') private forgotPassUpdatePassUseCase: IForgotPasswordUpdateUseCase,
-    @inject('ForgotPassVerifyOtp') private forgotPassVerifyOtpUseCase: IForgotPasswordVerifyOtpUseCase,
+    @inject('ForgotPassVerifyOtp')
+    private forgotPassVerifyOtpUseCase: IForgotPasswordVerifyOtpUseCase,
     @inject('RefreshTokenUseCase') private refreshTokenUseCase: IRefreshTokenUseCase,
   ) {}
 
@@ -65,7 +66,7 @@ export class UserAuthController implements IUserAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: parseInt(process.env.MAX_AGE || '0', 10)
+        maxAge: parseInt(process.env.MAX_AGE || '0', 10),
       });
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
         accessToken: result.accessToken,
@@ -171,7 +172,7 @@ export class UserAuthController implements IUserAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: parseInt(process.env.MAX_AGE || '0', 10)
+        maxAge: parseInt(process.env.MAX_AGE || '0', 10),
       });
       sendResponse(res, HttpResCode.OK, SuccessMsg.USER_REGISTERED, {
         accessToken: result.accessToken,
@@ -200,7 +201,7 @@ export class UserAuthController implements IUserAuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: parseInt(process.env.MAX_AGE || '0', 10)
+        maxAge: parseInt(process.env.MAX_AGE || '0', 10),
       });
 
       sendResponse(res, HttpResCode.OK, SuccessMsg.USER_LOGGED_IN, {

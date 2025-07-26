@@ -40,7 +40,8 @@ export class BookingMngController implements IBookingMngController {
     private findBookingsOfUserUseCase: IFindBookingsOfUserUseCase,
     @inject('FindBookingsOfVendorUseCase')
     private findBookingsOfVendorUseCase: IFindBookingsOfVendorUseCase,
-    @inject('CheckPaymentOptionsUseCase') private checkPaymentOptionsUseCase: ICheckPaymentOptionsUseCase,
+    @inject('CheckPaymentOptionsUseCase')
+    private checkPaymentOptionsUseCase: ICheckPaymentOptionsUseCase,
   ) {}
 
   /**
@@ -95,7 +96,10 @@ export class BookingMngController implements IBookingMngController {
 
       const totalAmount = parseFloat(req.query.totalAmount as string);
       if (isNaN(totalAmount)) {
-        throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_TOTAL_AMOUNT, HttpResCode.BAD_REQUEST);
+        throw new CustomError(
+          ERROR_MESSAGES.VALIDATION.INVALID_TOTAL_AMOUNT,
+          HttpResCode.BAD_REQUEST,
+        );
       }
 
       const response = await this.checkPaymentOptionsUseCase.execute(userId, totalAmount);

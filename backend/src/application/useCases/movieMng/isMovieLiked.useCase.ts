@@ -8,15 +8,13 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class IsMovieLikedUseCase implements IIsMovieLikedUseCase {
-  constructor(
-    @inject('MovieRepository') private movieRepository: IMovieRepository
-  ) {}
+  constructor(@inject('MovieRepository') private movieRepository: IMovieRepository) {}
 
   async execute(movieId: string, userId: string): Promise<{ isLiked: boolean }> {
     if (!movieId || !userId) {
       throw new CustomError(
         ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
-        HttpResCode.BAD_REQUEST
+        HttpResCode.BAD_REQUEST,
       );
     }
 

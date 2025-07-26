@@ -3,6 +3,5 @@
 .env.production
 /logging
 /.vscode
-/dist
 docker-compose.dev.yml
 .env.production

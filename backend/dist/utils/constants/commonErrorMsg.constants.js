@@ -67,7 +67,8 @@ const ERROR_MESSAGES = {
         PHONE_ALREADY_EXISTS: 'User with this phone already exist.',
         TWILIO_CONFIG_MISSING: 'Twilio configuration missing: ACCOUNT_SID or AUTH_TOKEN not set',
         TWILIO_PHONE_MISSING: 'Twilio phone number not configured',
-        PHONE_UNCHANGED: 'Phone number unchanged.,'
+        PHONE_UNCHANGED: 'Phone number unchanged.,',
+        INVALID_TOTAL_AMOUNT: 'Invalid total amount.',
     },
     DATABASE: {
         CONNECTION_FAILED: 'Database connection failed.',
@@ -140,7 +141,7 @@ const ERROR_MESSAGES = {
         FAILED_REDEEMING_POINTS: 'Failed to redeeming points.',
         SEATS_ALREADY_FILLED: 'Selected seats are already booked or unavailable.',
         INVALID_SEAT_SELECTION: 'Invalid Seat Selection.',
-        FAILE_SENDING_SMS: 'Failed Sending SMS.'
+        FAILE_SENDING_SMS: 'Failed Sending SMS.',
     },
     SECURITY: {
         ACCESS_DENIED: 'Access denied due to security restrictions.',

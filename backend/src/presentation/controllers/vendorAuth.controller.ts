@@ -57,12 +57,12 @@ export class VendorAuthController implements IVendorAuthController {
     try {
       const { email, password } = req.body;
       const dto = new LoginVendorDTO(email, password);
-      const result = await this.loginVendorUseCase.execute(dto);                                                                                                        
+      const result = await this.loginVendorUseCase.execute(dto);
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: parseInt(process.env.ADMIN_MAX_AGE || '0', 10)     
+        maxAge: parseInt(process.env.ADMIN_MAX_AGE || '0', 10),
       });
       sendResponse(res, HttpResCode.OK, SuccessMsg.USER_LOGGED_IN, {
         accessToken: result.accessToken,

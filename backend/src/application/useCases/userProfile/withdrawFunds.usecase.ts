@@ -15,14 +15,21 @@ export class WithdrawFundsUseCase implements IWithdrawFundsUseCase {
     @inject('WalletRepository') private walletRepository: IWalletRepository,
   ) {}
 
-  async execute(userId: string, amount: number, stripeAccountId: string): Promise<{ success: boolean; balance: number }> {
+  async execute(
+    userId: string,
+    amount: number,
+    stripeAccountId: string,
+  ): Promise<{ success: boolean; balance: number }> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
 
     if (!stripeAccountId) {
-      throw new CustomError(ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS, HttpResCode.BAD_REQUEST);
+      throw new CustomError(
+        ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
+        HttpResCode.BAD_REQUEST,
+      );
     }
 
     const wallet = await this.walletRepository.findByUserId(userId);
@@ -33,14 +40,17 @@ export class WithdrawFundsUseCase implements IWithdrawFundsUseCase {
     await StripeWithdrawService(stripeAccountId, amount);
 
     const updatedWallet = await this.walletRepository.pushTransactionAndUpdateBalance(userId, {
-        amount: amount,
-        remark: `₹${amount} withdrawn to Stripe Account: ${stripeAccountId}.`,
-        type: 'debit',
-        source: 'topup',
-        createdAt: new Date(),
+      amount: amount,
+      remark: `₹${amount} withdrawn to Stripe Account: ${stripeAccountId}.`,
+      type: 'debit',
+      source: 'topup',
+      createdAt: new Date(),
     });
     if (!updatedWallet) {
-      throw new CustomError(ERROR_MESSAGES.GENERAL.FAILED_UPDATING_WALLET, HttpResCode.INTERNAL_SERVER_ERROR);
+      throw new CustomError(
+        ERROR_MESSAGES.GENERAL.FAILED_UPDATING_WALLET,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
     }
 
     return {

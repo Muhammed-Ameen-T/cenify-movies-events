@@ -29,11 +29,11 @@ let RateMovieUseCase = class RateMovieUseCase {
         if (dto.movieRating < 1 || dto.movieRating > 5) {
             throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.RATING_MUST_BETWEEN, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
         }
+        const existingReview = await this.movieRepository.findReviewByUserId(dto.movieId, dto.userId);
+        if (existingReview) {
+            throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.REVIEW_ALREADY_EXISTS, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
+        }
         try {
-            const existingReview = await this.movieRepository.findReviewByUserId(dto.movieId, dto.userId);
-            if (existingReview) {
-                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.REVIEW_ALREADY_EXISTS, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
-            }
             const updatedMovie = await this.movieRepository.addReviewAndUpdateRating(dto.movieId, {
                 comment: dto.movieReview,
                 rating: dto.movieRating.toString(),

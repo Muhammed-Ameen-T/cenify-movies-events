@@ -11,4 +11,5 @@ router.get('/fetch-vendor', verifyToken_middleware_1.verifyAccessToken, (0, rbac
 router.get('/fetch-admin', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['admin']), TheaterMngController.fetchTheatersByAdmin.bind(TheaterMngController));
 router.patch('/update-theater-status/:id', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['vendor', 'admin']), TheaterMngController.updateTheaterStatus.bind(TheaterMngController));
 router.patch('/update-theater/:id', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['vendor', 'admin']), TheaterMngController.updateTheater.bind(TheaterMngController));
+router.get('/find/:id', verifyToken_middleware_1.verifyAccessToken, (0, rbac_middleware_1.authorizeRoles)(['vendor']), TheaterMngController.findTheaterById.bind(TheaterMngController));
 exports.default = router;

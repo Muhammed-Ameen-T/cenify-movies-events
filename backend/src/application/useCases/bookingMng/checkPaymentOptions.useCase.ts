@@ -14,12 +14,18 @@ export class CheckPaymentOptionsUseCase implements ICheckPaymentOptionsUseCase {
     @inject('WalletRepository') private walletRepository: IWalletRepository,
   ) {}
 
-  async execute(userId: string, totalAmount: number): Promise<{
+  async execute(
+    userId: string,
+    totalAmount: number,
+  ): Promise<{
     wallet: { enabled: boolean; balance: number };
     stripe: { enabled: boolean };
     moviePass: { active: boolean };
   }> {
-    const hasSufficientWalletBalance = await this.paymentService.checkWalletBalance(userId, totalAmount);
+    const hasSufficientWalletBalance = await this.paymentService.checkWalletBalance(
+      userId,
+      totalAmount,
+    );
     const moviePass = await this.moviePassRepository.findByUserId(userId);
     const isMoviePassActive = moviePass?.status === 'Active';
     const wallet = await this.walletRepository.findByUserId(userId);

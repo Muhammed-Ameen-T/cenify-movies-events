@@ -11,9 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VendorAuthController = void 0;
 // src/presentation/controllers/theaterAuth.controller.ts
@@ -21,16 +18,14 @@ require("reflect-metadata");
 const tsyringe_1 = require("tsyringe");
 const sendResponse_utils_1 = require("../../utils/response/sendResponse.utils");
 const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode.utils");
-const commonErrorMsg_constants_1 = __importDefault(require("../../utils/constants/commonErrorMsg.constants"));
 const vendor_dto_1 = require("../../application/dtos/vendor.dto");
 const commonSuccessMsg_constants_1 = require("../../utils/constants/commonSuccessMsg.constants");
 let VendorAuthController = class VendorAuthController {
-    constructor(sendOtpUseCase, verifyOtpUseCase, loginVendorUseCase, createTheaterUseCase, vendorRepository) {
+    constructor(sendOtpUseCase, verifyOtpUseCase, loginVendorUseCase, createTheaterUseCase) {
         this.sendOtpUseCase = sendOtpUseCase;
         this.verifyOtpUseCase = verifyOtpUseCase;
         this.loginVendorUseCase = loginVendorUseCase;
         this.createTheaterUseCase = createTheaterUseCase;
-        this.vendorRepository = vendorRepository;
     }
     async sendOtp(req, res, next) {
         try {
@@ -67,7 +62,7 @@ let VendorAuthController = class VendorAuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 24 * 60 * 60 * 1000,
+                maxAge: parseInt(process.env.ADMIN_MAX_AGE || '0', 10),
             });
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, commonSuccessMsg_constants_1.SuccessMsg.USER_LOGGED_IN, {
                 accessToken: result.accessToken,
@@ -90,32 +85,6 @@ let VendorAuthController = class VendorAuthController {
             next(error);
         }
     }
-    async getCurrentUser(req, res, next) {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.UNAUTHORIZED, commonErrorMsg_constants_1.default.AUTHENTICATION.UNAUTHORIZED);
-            return;
-        }
-        try {
-            const jwtService = tsyringe_1.container.resolve('JwtService');
-            const decoded = jwtService.verifyAccessToken(token);
-            const theater = await this.vendorRepository.findById(decoded.userId);
-            if (!theater) {
-                (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.NOT_FOUND, commonErrorMsg_constants_1.default.AUTHENTICATION.USER_NOT_FOUND);
-                return;
-            }
-            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.SUCCESS, {
-                id: theater._id,
-                name: theater.name,
-                email: theater.email,
-                phone: theater.phone || 0,
-                profileImage: theater.gallery?.[0] || '',
-            });
-        }
-        catch (error) {
-            next(error);
-        }
-    }
 };
 exports.VendorAuthController = VendorAuthController;
 exports.VendorAuthController = VendorAuthController = __decorate([
@@ -124,6 +93,5 @@ exports.VendorAuthController = VendorAuthController = __decorate([
     __param(1, (0, tsyringe_1.inject)('VerifyOtpVendorUseCase')),
     __param(2, (0, tsyringe_1.inject)('LoginVendorUseCase')),
     __param(3, (0, tsyringe_1.inject)('CreateTheaterUseCase')),
-    __param(4, (0, tsyringe_1.inject)('TheaterRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object])
+    __metadata("design:paramtypes", [Object, Object, Object, Object])
 ], VendorAuthController);
