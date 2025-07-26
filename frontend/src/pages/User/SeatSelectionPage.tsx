@@ -463,7 +463,12 @@ const TheaterSeatSelection: React.FC = () => {
                   <div className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     <span>
-                      {new Date(`1970-01-01T${data.showDetails.time}:00`).toLocaleTimeString()} | {data.showDetails.screenName}
+                      {new Intl.DateTimeFormat('en-IN', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: true
+}).format(new Date(`1970-01-01T${data.showDetails.time}:00`))} | {data.showDetails.screenName}
+
                     </span>
                   </div>
                 </div>
