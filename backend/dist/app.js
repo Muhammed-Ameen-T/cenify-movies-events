@@ -12,6 +12,7 @@ const logger_middleware_1 = require("./presentation/middleware/logger.middleware
 const errorHandler_middleware_1 = __importDefault(require("./presentation/middleware/errorHandler.middleware"));
 require("./infrastructure/container");
 require("tsconfig-paths/register");
+const env_config_1 = require("./config/env.config");
 // 🔹 Load environment variables
 dotenv_1.default.config();
 // 🔹 Initialize Express app
@@ -24,9 +25,11 @@ app.use((0, cors_1.default)({
         'http://localhost:5173',
         'https://www.muhammedameen.site',
         'https://muhammedameen.site',
+        'https://cenify.muhammedameen.site',
         'https://your-image-server.com',
         'https://lh3.googleusercontent.com',
         'https://res.cloudinary.com',
+        env_config_1.env.CLIENT_ORIGIN,
     ],
     credentials: true,
 }));

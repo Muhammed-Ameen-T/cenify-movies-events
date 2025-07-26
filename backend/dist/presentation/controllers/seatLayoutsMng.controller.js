@@ -22,13 +22,31 @@ const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode
 const custom_error_1 = require("../../utils/errors/custom.error");
 const commonErrorMsg_constants_1 = __importDefault(require("../../utils/constants/commonErrorMsg.constants"));
 const seatLayout_1 = require("../../application/dtos/seatLayout");
+/**
+ * Controller for managing seat layout operations, primarily for vendors.
+ * @implements {ISeatLayoutController}
+ */
 let SeatLayoutController = class SeatLayoutController {
+    /**
+     * Constructs an instance of SeatLayoutController.
+     * @param {ICreateSeatLayoutUseCase} createSeatLayoutUseCase - Use case for creating a new seat layout.
+     * @param {IUpdateSeatLayoutUseCase} updateSeatLayoutUseCase - Use case for updating an existing seat layout.
+     * @param {IFindSeatLayoutsByVendorUseCase} findSeatLayoutsByVendorUseCase - Use case for fetching seat layouts belonging to a specific vendor.
+     * @param {IFindSeatLayoutByIdUseCase} findSeatLayoutByIdUseCase - Use case for finding a seat layout by its ID.
+     */
     constructor(createSeatLayoutUseCase, updateSeatLayoutUseCase, findSeatLayoutsByVendorUseCase, findSeatLayoutByIdUseCase) {
         this.createSeatLayoutUseCase = createSeatLayoutUseCase;
         this.updateSeatLayoutUseCase = updateSeatLayoutUseCase;
         this.findSeatLayoutsByVendorUseCase = findSeatLayoutsByVendorUseCase;
         this.findSeatLayoutByIdUseCase = findSeatLayoutByIdUseCase;
     }
+    /**
+     * Handles the creation of a new seat layout.
+     * @param {Request} req - The Express request object, containing seat layout details in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async createSeatLayout(req, res, next) {
         try {
             const { uuid, vendorId, layoutName, seatPrice, rowCount, columnCount, seats, capacity } = req.body;
@@ -40,6 +58,13 @@ let SeatLayoutController = class SeatLayoutController {
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST, errorMessage);
         }
     }
+    /**
+     * Handles the update of an existing seat layout.
+     * @param {Request} req - The Express request object, containing seat layout ID in `req.params.id` and updated details in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async updateSeatLayout(req, res, next) {
         try {
             const { uuid, layoutName, seatPrice, rowCount, columnCount, seats, capacity } = req.body;
@@ -52,6 +77,13 @@ let SeatLayoutController = class SeatLayoutController {
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST, errorMessage);
         }
     }
+    /**
+     * Finds seat layouts belonging to a specific vendor with pagination and filtering.
+     * @param {Request} req - The Express request object. Requires `req.decoded.userId` for the vendor ID and optional query parameters.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async findSeatLayoutsByVendor(req, res, next) {
         try {
             const vendorId = req.decoded?.userId;
@@ -77,6 +109,13 @@ let SeatLayoutController = class SeatLayoutController {
             (0, sendResponse_utils_1.sendResponse)(res, error instanceof custom_error_1.CustomError ? error.statusCode : httpResponseCode_utils_1.HttpResCode.INTERNAL_SERVER_ERROR, errorMessage);
         }
     }
+    /**
+     * Finds a seat layout by its ID.
+     * @param {Request} req - The Express request object, containing the seat layout ID in `req.params.id`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async findSeatLayoutById(req, res, next) {
         try {
             const layoutId = req.params.id;

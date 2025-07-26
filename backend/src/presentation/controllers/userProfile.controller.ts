@@ -55,7 +55,8 @@ export class UserProfileController implements IUserProfileController {
     private redeemLoyalityToWalletUseCase: IRedeemLoyalityToWalletUseCase,
     @inject('SendOtpPhoneUseCase') private sendOtpPhoneUseCase: ISendOtpPhoneUseCase,
     @inject('VerifyOtpPhoneUseCase') private verifyOtpPhoneUseCase: IVerifyOtpPhoneUseCase,
-    @inject('FindProfileContentsUseCase') private findProfileContentsUseCase: IFindProfileContentsUseCase,
+    @inject('FindProfileContentsUseCase')
+    private findProfileContentsUseCase: IFindProfileContentsUseCase,
     @inject('WithdrawFundsUseCase') private withdrawFundsUseCase: IWithdrawFundsUseCase,
   ) {}
 
@@ -356,5 +357,5 @@ export class UserProfileController implements IUserProfileController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 }

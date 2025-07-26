@@ -44,14 +44,7 @@ export class MoviePassRepository implements IMoviePassRepository {
       const resolvedUserId = updates.userId;
       const userObjectId = new mongoose.Types.ObjectId(resolvedUserId);
 
-      const {
-        status,
-        history,
-        purchaseDate,
-        expireDate,
-        moneySaved,
-        totalMovies,
-      } = updates;
+      const { status, history, purchaseDate, expireDate, moneySaved, totalMovies } = updates;
 
       const updatePayload = {
         status,
@@ -61,12 +54,12 @@ export class MoviePassRepository implements IMoviePassRepository {
         moneySaved,
         totalMovies,
       };
-      
+
       const doc = await this.model
         .findOneAndUpdate(
           { userId: userObjectId },
           { $set: updatePayload },
-          { new: true, upsert: true }
+          { new: true, upsert: true },
         )
         .lean();
 

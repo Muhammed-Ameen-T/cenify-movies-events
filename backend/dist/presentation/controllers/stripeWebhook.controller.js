@@ -21,11 +21,29 @@ const stripe_1 = __importDefault(require("stripe"));
 const env_config_1 = require("../../config/env.config");
 const sendResponse_utils_1 = require("../../utils/response/sendResponse.utils");
 const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode.utils");
+/**
+ * Controller for handling Stripe webhook events, specifically for processing `checkout.session.completed` events
+ * to create a Movie Pass for the user.
+ * @implements {IStripeWebhookController}
+ */
 let StripeWebhookController = class StripeWebhookController {
+    /**
+     * Constructs an instance of StripeWebhookController.
+     * @param {ICreateMoviePassUseCase} createMoviePassUseCase - The use case for creating a movie pass.
+     */
     constructor(createMoviePassUseCase) {
         this.createMoviePassUseCase = createMoviePassUseCase;
         this.stripe = new stripe_1.default(env_config_1.env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
     }
+    /**
+     * Handles incoming Stripe webhook events.
+     * Verifies the webhook signature and processes `checkout.session.completed` events
+     * to create a movie pass for the associated user.
+     * @param {Request} req - The Express request object containing the Stripe event.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function (not used directly for sending response in this case, but good for error propagation if needed).
+     * @returns {Promise<void>}
+     */
     async handleWebhook(req, res, next) {
         const sig = req.headers['stripe-signature'];
         let event;

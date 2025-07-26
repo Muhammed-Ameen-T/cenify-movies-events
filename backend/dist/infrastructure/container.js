@@ -108,6 +108,13 @@ const sms_service_1 = require("./services/sms.service");
 const sendOtpPhone_useCase_1 = require("../application/useCases/userProfile/sendOtpPhone.useCase");
 const verifyOtpPhone_useCase_1 = require("../application/useCases/userProfile/verifyOtpPhone.useCase");
 const ProcessVendorPayout_1 = require("../application/useCases/bookingMng/ProcessVendorPayout");
+const findTheaterById_useCase_1 = require("../application/useCases/theaterMng/findTheaterById.useCase");
+const getProfileContents_useCase_1 = require("../application/useCases/userProfile/getProfileContents.useCase");
+const checkPaymentOptions_useCase_1 = require("../application/useCases/bookingMng/checkPaymentOptions.useCase");
+const likeOrUnlikeMovie_useCase_1 = require("../application/useCases/movieMng/likeOrUnlikeMovie.useCase");
+const isMovieLiked_useCase_1 = require("../application/useCases/movieMng/isMovieLiked.useCase");
+const refreshToken_useCase_1 = require("../application/useCases/userAuth/refreshToken.useCase");
+const withdrawFunds_usecase_1 = require("../application/useCases/userProfile/withdrawFunds.usecase");
 // import { VendorPayoutJobService } from './services/scheduleVendorPayouts.service';
 //Controller Registration
 tsyringe_1.container.register('UserAuthController', { useClass: userAuth_controller_1.UserAuthController });
@@ -138,6 +145,7 @@ tsyringe_1.container.register('VerifyOtpVendorUseCase', {
     useClass: verifyOtpVendor_useCase_1.VerifyOtpVendorUseCase,
 });
 tsyringe_1.container.register('LoginVendorUseCase', { useClass: loginVendor_useCase_1.LoginVendorUseCase });
+tsyringe_1.container.register('RefreshTokenUseCase', { useClass: refreshToken_useCase_1.RefreshTokenUseCase });
 // Repository Registration
 tsyringe_1.container.register('AuthRepository', { useClass: auth_repository_1.AuthRepository });
 tsyringe_1.container.register('TheaterRepository', { useClass: theater_repository_1.TheaterRepository });
@@ -166,6 +174,12 @@ tsyringe_1.container.register('FetchMoviesUserUseCase', {
 tsyringe_1.container.register('RateMovieUseCase', {
     useClass: movieRating_useCase_1.RateMovieUseCase,
 });
+tsyringe_1.container.register('LikeOrUnlikeMovieUseCase', {
+    useClass: likeOrUnlikeMovie_useCase_1.LikeOrUnlikeMovieUseCase,
+});
+tsyringe_1.container.register('IsMovieLikedUseCase', {
+    useClass: isMovieLiked_useCase_1.IsMovieLikedUseCase,
+});
 // User Management UseCases and Controller Registration
 tsyringe_1.container.register('FetchUsersUseCase', { useClass: fetchUser_useCase_1.FetchUsersUseCase });
 tsyringe_1.container.register('UpdateUserBlockStatusUseCase', {
@@ -193,6 +207,9 @@ tsyringe_1.container.register('FetchTheaterOfVendorUseCase', {
 });
 tsyringe_1.container.register('FetchAdminTheatersUseCase', {
     useClass: fetchAdminTheaters_useCase_1.FetchAdminTheatersUseCase,
+});
+tsyringe_1.container.register('FindTheaterByIdUseCase', {
+    useClass: findTheaterById_useCase_1.FindTheaterByIdUseCase,
 });
 // Seat Layout UseCases and Controller Registration
 tsyringe_1.container.register('CreateSeatLayoutUseCase', {
@@ -223,6 +240,9 @@ tsyringe_1.container.register('ChangePasswordUseCase', {
 tsyringe_1.container.register('GetUserDetailsUseCase', {
     useClass: getUserDetail_useCase_1.getUserDetailsUseCase,
 });
+tsyringe_1.container.register('FindProfileContentsUseCase', {
+    useClass: getProfileContents_useCase_1.FindProfileContentsUseCase,
+});
 tsyringe_1.container.register('RedeemLoyalityToWalletUseCase', {
     useClass: redeemPointsToWallet_useCase_1.RedeemLoyalityToWalletUseCase,
 });
@@ -231,7 +251,12 @@ tsyringe_1.container.register('UserProfileController', {
 });
 tsyringe_1.container.register('SmsService', { useClass: sms_service_1.SmsService });
 tsyringe_1.container.register('SendOtpPhoneUseCase', { useClass: sendOtpPhone_useCase_1.SendOtpPhoneUseCase });
-tsyringe_1.container.register('VerifyOtpPhoneUseCase', { useClass: verifyOtpPhone_useCase_1.VerifyOtpPhoneUseCase });
+tsyringe_1.container.register('VerifyOtpPhoneUseCase', {
+    useClass: verifyOtpPhone_useCase_1.VerifyOtpPhoneUseCase,
+});
+tsyringe_1.container.register('WithdrawFundsUseCase', {
+    useClass: withdrawFunds_usecase_1.WithdrawFundsUseCase,
+});
 // Screen Management UseCase, Controller, Repository Registration
 tsyringe_1.container.register('ScreenRepository', { useClass: screen_repository_1.ScreenRepository });
 tsyringe_1.container.register('CreateScreenUseCase', { useClass: createScreen_useCase_1.CreateScreenUseCase });
@@ -330,13 +355,18 @@ tsyringe_1.container.register('CancelBookingUseCase', {
 tsyringe_1.container.register('FindBookingsOfVendorUseCase', {
     useClass: fetchVendorBookings_1.FindBookingsOfVendorUseCase,
 });
+tsyringe_1.container.register('CheckPaymentOptionsUseCase', {
+    useClass: checkPaymentOptions_useCase_1.CheckPaymentOptionsUseCase,
+});
 tsyringe_1.container.register('BookingMngController', {
     useClass: bookingMng_controller_1.BookingMngController,
 });
 tsyringe_1.container.register('PaymentService', { useClass: checkoutPayment_service_1.PaymentService });
 tsyringe_1.container.register('CloudinaryService', { useClass: cloudinary_service_1.CloudinaryService });
 tsyringe_1.container.register('BookingStripeWebhookController', { useClass: bookingStripeWebhook_controller_1.BookingStripeWebhookController });
-tsyringe_1.container.register('IProcessVendorPayout', { useClass: ProcessVendorPayout_1.ProcessVendorPayoutUseCase });
+tsyringe_1.container.register('IProcessVendorPayout', {
+    useClass: ProcessVendorPayout_1.ProcessVendorPayoutUseCase,
+});
 // Notification Service Registration
 tsyringe_1.container.register('NotificationService', { useClass: notification_service_1.NotificationService });
 tsyringe_1.container.register('NotificationMngController', {

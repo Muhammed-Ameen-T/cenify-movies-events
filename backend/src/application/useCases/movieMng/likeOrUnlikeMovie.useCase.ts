@@ -8,13 +8,14 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class LikeOrUnlikeMovieUseCase implements ILikeOrUnlikeMovieUseCase {
-  constructor(
-    @inject('MovieRepository') private movieRepository: IMovieRepository
-  ) {}
+  constructor(@inject('MovieRepository') private movieRepository: IMovieRepository) {}
 
   async execute(movieId: string, userId: string, isLike: boolean): Promise<any> {
     if (!movieId || !userId || typeof isLike !== 'boolean') {
-      throw new CustomError(ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS, HttpResCode.BAD_REQUEST);
+      throw new CustomError(
+        ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
+        HttpResCode.BAD_REQUEST,
+      );
     }
 
     const updatedMovie = await this.movieRepository.likeMovie(movieId, userId, isLike);

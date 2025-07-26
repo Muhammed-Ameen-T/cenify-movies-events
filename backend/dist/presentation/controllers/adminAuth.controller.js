@@ -16,10 +16,25 @@ exports.AdminAuthController = void 0;
 const tsyringe_1 = require("tsyringe");
 const sendResponse_utils_1 = require("../../utils/response/sendResponse.utils");
 const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode.utils");
+/**
+ * Controller for handling admin authentication related requests.
+ * @implements {IAdminAuthController}
+ */
 let AdminAuthController = class AdminAuthController {
+    /**
+     * Creates an instance of AdminAuthController.
+     * @param {ILoginAdminUseCase} loginAdminUseCase - The use case for admin login.
+     */
     constructor(loginAdminUseCase) {
         this.loginAdminUseCase = loginAdminUseCase;
     }
+    /**
+     * Handles the admin login request.
+     * @param {Request} req - The express request object.
+     * @param {Response} res - The express response object.
+     * @param {NextFunction} next - The express next middleware function.
+     * @returns {Promise<void>}
+     */
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
@@ -30,7 +45,7 @@ let AdminAuthController = class AdminAuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 24 * 60 * 60 * 1000,
+                maxAge: parseInt(process.env.ADMIN_MAX_AGE || '0', 10),
             });
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.CREATED, {
                 accessToken: result.accessToken,

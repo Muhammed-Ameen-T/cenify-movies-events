@@ -306,7 +306,10 @@ export class MovieMngController implements IMovieMngController {
       const userId = req.decoded?.userId;
 
       if (!movieId || !theaterId || !userId) {
-        throw new CustomError(ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS, HttpResCode.BAD_REQUEST);
+        throw new CustomError(
+          ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
+          HttpResCode.BAD_REQUEST,
+        );
       }
 
       const dto = new SubmitRatingDTO(

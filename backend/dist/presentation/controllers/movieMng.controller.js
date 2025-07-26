@@ -26,8 +26,24 @@ const custom_error_1 = require("../../utils/errors/custom.error");
 const movie_dto_1 = require("../../application/dtos/movie.dto");
 const commonSuccessMsg_constants_1 = require("../../utils/constants/commonSuccessMsg.constants");
 const mongoose_1 = __importDefault(require("mongoose"));
+/**
+ * Controller for managing movie-related operations, accessible by both admins and users.
+ * @implements {IMovieMngController}
+ */
 let MovieMngController = class MovieMngController {
-    constructor(createMovieUseCase, fetchMoviesUseCase, updateMovieStatusUseCase, updateMovieUseCase, findMovieByIdUseCase, fetchMoviesUserUseCase, rateMovieUseCase, movieRepository) {
+    /**
+     * Constructs an instance of MovieMngController.
+     * @param {ICreateMovieUseCase} createMovieUseCase - Use case for creating a new movie.
+     * @param {IFetchMoviesUseCase} fetchMoviesUseCase - Use case for fetching movies (admin view).
+     * @param {IUpdateMovieStatusUseCase} updateMovieStatusUseCase - Use case for updating a movie's status.
+     * @param {IUpdateMovieUseCase} updateMovieUseCase - Use case for updating movie details.
+     * @param {IFindMovieByIdUseCase} findMovieByIdUseCase - Use case for finding a movie by ID.
+     * @param {IFetchMoviesUserUseCase} fetchMoviesUserUseCase - Use case for fetching movies (user view).
+     * @param {IRateMovieUseCase} rateMovieUseCase - Use case for submitting movie and theater ratings.
+     * @param {IIsMovieLikedUseCase} isMovieLikedUseCase - Use case for checking if a movie is liked by a user.
+     * @param {ILikeOrUnlikeMovieUseCase} likeOrUnlikeMovieUseCase - Use case for liking or unliking a movie.
+     */
+    constructor(createMovieUseCase, fetchMoviesUseCase, updateMovieStatusUseCase, updateMovieUseCase, findMovieByIdUseCase, fetchMoviesUserUseCase, rateMovieUseCase, isMovieLikedUseCase, likeOrUnlikeMovieUseCase) {
         this.createMovieUseCase = createMovieUseCase;
         this.fetchMoviesUseCase = fetchMoviesUseCase;
         this.updateMovieStatusUseCase = updateMovieStatusUseCase;
@@ -35,8 +51,16 @@ let MovieMngController = class MovieMngController {
         this.findMovieByIdUseCase = findMovieByIdUseCase;
         this.fetchMoviesUserUseCase = fetchMoviesUserUseCase;
         this.rateMovieUseCase = rateMovieUseCase;
-        this.movieRepository = movieRepository;
+        this.isMovieLikedUseCase = isMovieLikedUseCase;
+        this.likeOrUnlikeMovieUseCase = likeOrUnlikeMovieUseCase;
     }
+    /**
+     * Handles the creation of a new movie by an admin.
+     * @param {Request} req - The Express request object, containing movie details in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async createMovie(req, res, next) {
         try {
             const { name, genre, trailerLink, poster, duration, description, language, releaseDate, is3D, crew, cast, } = req.body;
@@ -48,6 +72,13 @@ let MovieMngController = class MovieMngController {
             next(error);
         }
     }
+    /**
+     * Fetches a list of movies with pagination, search, and filtering options for admin view.
+     * @param {Request} req - The Express request object, containing query parameters for filtering.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async fetchMovies(req, res, next) {
         try {
             const { page, limit, search, status, genre, sortBy, sortOrder } = req.query;
@@ -75,6 +106,13 @@ let MovieMngController = class MovieMngController {
             next(error);
         }
     }
+    /**
+     * Updates the status of a movie.
+     * @param {Request} req - The Express request object, containing movie ID and new status in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async updateMovieStatus(req, res, next) {
         try {
             const { id, status } = req.body;
@@ -87,6 +125,13 @@ let MovieMngController = class MovieMngController {
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST, errorMessage);
         }
     }
+    /**
+     * Updates the details of an existing movie.
+     * @param {Request} req - The Express request object, containing updated movie details in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async updateMovie(req, res, next) {
         try {
             const { id, name, genre, trailer, rating, poster, duration, description, language, releaseDate, is3D, crew, cast, } = req.body;
@@ -98,6 +143,13 @@ let MovieMngController = class MovieMngController {
             next(error);
         }
     }
+    /**
+     * Finds a movie by its ID.
+     * @param {Request} req - The Express request object, containing the movie ID in `req.params.id`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async findMovieById(req, res, next) {
         try {
             const { id } = req.params;
@@ -112,6 +164,14 @@ let MovieMngController = class MovieMngController {
             next(error);
         }
     }
+    /**
+     * Fetches a list of movies with pagination, search, filtering, and location-based relevance for user view.
+     * Uses latitude and longitude from cookies for location awareness, defaulting to "Calicut" if not present.
+     * @param {Request} req - The Express request object, containing query parameters and potentially cookies for location.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async fetchMoviesUser(req, res, next) {
         try {
             const { page, limit, search, status, genre, sortBy, sortOrder } = req.query;
@@ -147,12 +207,19 @@ let MovieMngController = class MovieMngController {
             next(error);
         }
     }
+    /**
+     * Submits a rating for a movie and a theater by a user.
+     * @param {Request} req - The Express request object, containing `movieId`, `theaterId`, `movieRating`, `theaterRating`, and `review` in the body. User ID is from `req.decoded.userId`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async submitRating(req, res, next) {
         try {
             const { movieId, theaterId, movieRating, theaterRating, review } = req.body;
             const userId = req.decoded?.userId;
             if (!movieId || !theaterId || !userId) {
-                throw new custom_error_1.CustomError('Missing required fields', httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
+                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.MISSING_REQUIRED_FIELDS, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
             }
             const dto = new movie_dto_1.SubmitRatingDTO(userId, movieId, theaterId, theaterRating, movieRating, review);
             const result = await this.rateMovieUseCase.execute(dto);
@@ -162,32 +229,43 @@ let MovieMngController = class MovieMngController {
             next(error);
         }
     }
+    /**
+     * Handles liking or unliking a movie by a user.
+     * @param {Request} req - The Express request object, containing `movieId` and `isLike` (boolean) in the body. User ID is from `req.decoded.userId`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async likeOrUnlikeMovie(req, res, next) {
         try {
-            const { movieId, isLike } = req.body;
             const userId = req.decoded?.userId;
-            if (!movieId || typeof isLike !== 'boolean' || !userId) {
-                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.MISSING_REQUIRED_FIELDS, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
+            if (!userId) {
+                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.AUTHENTICATION.UNAUTHORIZED, httpResponseCode_utils_1.HttpResCode.UNAUTHORIZED);
             }
-            const updatedMovie = await this.movieRepository.likeMovie(movieId, userId, isLike);
-            if (!updatedMovie) {
-                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.GENERAL.MOVIE_NOT_UPDATED, httpResponseCode_utils_1.HttpResCode.NOT_FOUND);
-            }
-            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, commonSuccessMsg_constants_1.SuccessMsg.LIKE_UPDATED, updatedMovie);
+            const { movieId, isLike } = req.body;
+            const response = await this.likeOrUnlikeMovieUseCase.execute(movieId, userId, isLike);
+            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, commonSuccessMsg_constants_1.SuccessMsg.LIKE_UPDATED, response);
         }
         catch (error) {
             next(error);
         }
     }
+    /**
+     * Checks if a user has liked a specific movie.
+     * @param {Request} req - The Express request object, containing `movieId` in `req.params.id`. User ID is from `req.decoded.userId`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async isMovieLiked(req, res, next) {
         try {
-            const { movieId } = req.params;
             const userId = req.decoded?.userId;
-            if (!movieId || !userId) {
-                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.MISSING_REQUIRED_FIELDS, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
+            if (!userId) {
+                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.AUTHENTICATION.UNAUTHORIZED, httpResponseCode_utils_1.HttpResCode.UNAUTHORIZED);
             }
-            const isLiked = await this.movieRepository.hasUserLikedMovie(movieId, userId);
-            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, commonSuccessMsg_constants_1.SuccessMsg.LIKE_FETCHED, { isLiked });
+            const { movieId } = req.params;
+            const response = await this.isMovieLikedUseCase.execute(movieId, userId);
+            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, commonSuccessMsg_constants_1.SuccessMsg.LIKE_FETCHED, response);
         }
         catch (error) {
             next(error);
@@ -204,6 +282,7 @@ exports.MovieMngController = MovieMngController = __decorate([
     __param(4, (0, tsyringe_1.inject)('FindMovieByIdUseCase')),
     __param(5, (0, tsyringe_1.inject)('FetchMoviesUserUseCase')),
     __param(6, (0, tsyringe_1.inject)('RateMovieUseCase')),
-    __param(7, (0, tsyringe_1.inject)('MovieRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object])
+    __param(7, (0, tsyringe_1.inject)('IsMovieLikedUseCase')),
+    __param(8, (0, tsyringe_1.inject)('LikeOrUnlikeMovieUseCase')),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object, Object])
 ], MovieMngController);

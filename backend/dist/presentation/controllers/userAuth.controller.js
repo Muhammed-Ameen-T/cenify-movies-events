@@ -16,18 +16,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserAuthController = void 0;
-// src/presentation/controllers/auth.controller.ts
+// src/presentation/controllers/userAuth.controller.ts
 require("reflect-metadata");
 const tsyringe_1 = require("tsyringe");
-const tsyringe_2 = require("tsyringe");
 const sendResponse_utils_1 = require("../../utils/response/sendResponse.utils");
 const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode.utils");
 const commonErrorMsg_constants_1 = __importDefault(require("../../utils/constants/commonErrorMsg.constants"));
 const auth_dto_1 = require("../../application/dtos/auth.dto");
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const commonSuccessMsg_constants_1 = require("../../utils/constants/commonSuccessMsg.constants");
+/**
+ * Controller for handling user authentication, including OTP-based registration, login,
+ * Google authentication, token refreshing, and password reset functionalities.
+ * @implements {IUserAuthController}
+ */
 let UserAuthController = class UserAuthController {
-    constructor(sendOtpUseCase, verifyOtpUseCase, googleAuthUseCase, loginUserUseCase, forgotPassSendOtpUseCase, forgotPassUpdatePassUseCase, forgotPassVerifyOtpUseCase, getUserDetailsUseCase, userRepository) {
+    /**
+     * Constructs an instance of UserAuthController.
+     * @param {ISendOtpUseCase} sendOtpUseCase - Use case for sending OTP to a user's email.
+     * @param {IVerifyOtpUseCase} verifyOtpUseCase - Use case for verifying OTP and registering/logging in a user.
+     * @param {IGoogleAuthUseCase} googleAuthUseCase - Use case for handling Google OAuth authentication.
+     * @param {ILoginUserUseCase} loginUserUseCase - Use case for user login.
+     * @param {IForgotPasswordSendOtpUseCase} forgotPassSendOtpUseCase - Use case for sending OTP for password reset.
+     * @param {IForgotPasswordUpdateUseCase} forgotPassUpdatePassUseCase - Use case for updating password after OTP verification.
+     * @param {IForgotPasswordVerifyOtpUseCase} forgotPassVerifyOtpUseCase - Use case for verifying OTP during password reset.
+     * @param {IRefreshTokenUseCase} refreshTokenUseCase - Use case for creaeting new Access Token Using refreshToken.
+     */
+    constructor(sendOtpUseCase, verifyOtpUseCase, googleAuthUseCase, loginUserUseCase, forgotPassSendOtpUseCase, forgotPassUpdatePassUseCase, forgotPassVerifyOtpUseCase, refreshTokenUseCase) {
         this.sendOtpUseCase = sendOtpUseCase;
         this.verifyOtpUseCase = verifyOtpUseCase;
         this.googleAuthUseCase = googleAuthUseCase;
@@ -35,9 +49,15 @@ let UserAuthController = class UserAuthController {
         this.forgotPassSendOtpUseCase = forgotPassSendOtpUseCase;
         this.forgotPassUpdatePassUseCase = forgotPassUpdatePassUseCase;
         this.forgotPassVerifyOtpUseCase = forgotPassVerifyOtpUseCase;
-        this.getUserDetailsUseCase = getUserDetailsUseCase;
-        this.userRepository = userRepository;
+        this.refreshTokenUseCase = refreshTokenUseCase;
     }
+    /**
+     * Handles the Google OAuth callback, processes user data, generates tokens, and sets a refresh token cookie.
+     * @param {Request} req - The Express request object, containing Google authentication data in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async googleCallback(req, res, next) {
         try {
             const result = await this.googleAuthUseCase.execute(req.body);
@@ -45,7 +65,7 @@ let UserAuthController = class UserAuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
+                maxAge: parseInt(process.env.MAX_AGE || '0', 10),
             });
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.SUCCESS, {
                 accessToken: result.accessToken,
@@ -56,30 +76,17 @@ let UserAuthController = class UserAuthController {
             next(error);
         }
     }
+    /**
+     * Refreshes the access token using a provided refresh token from cookies.
+     * @param {Request} req - The Express request object, expecting `refreshToken` in cookies.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async refreshToken(req, res, next) {
         try {
-            if (!req.cookies.refreshToken) {
-                (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.UNAUTHORIZED, commonErrorMsg_constants_1.default.AUTHENTICATION.INVALID_REFRESH_TOKEN);
-                return;
-            }
             const refreshToken = req.cookies.refreshToken;
-            // Decode first to check expiration
-            const decoded = jsonwebtoken_1.default.decode(refreshToken);
-            if (!decoded || !decoded.exp || Date.now() >= decoded.exp * 1000) {
-                (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.UNAUTHORIZED, commonErrorMsg_constants_1.default.AUTHENTICATION.INVALID_REFRESH_TOKEN);
-                return;
-            }
-            // Verify token
-            const jwtService = tsyringe_2.container.resolve('JwtService');
-            const verifiedDecoded = jwtService.verifyRefreshToken(refreshToken);
-            // const authRepository = container.resolve<IAuthRepository>('AuthRepository');
-            const user = await this.userRepository.findById(verifiedDecoded.userId);
-            if (!user) {
-                (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.NOT_FOUND, commonErrorMsg_constants_1.default.AUTHENTICATION.USER_NOT_FOUND);
-                return;
-            }
-            // Generate new access token
-            const newAccessToken = jwtService.generateAccessToken(user._id.toString(), user.role);
+            const newAccessToken = await this.refreshTokenUseCase.execute(refreshToken);
             // Send new token response
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.SUCCESS, { accessToken: newAccessToken });
         }
@@ -87,36 +94,49 @@ let UserAuthController = class UserAuthController {
             next(error);
         }
     }
-    async getCurrentUser(req, res, next) {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.UNAUTHORIZED, commonErrorMsg_constants_1.default.AUTHENTICATION.UNAUTHORIZED);
-            return;
-        }
-        try {
-            const jwtService = tsyringe_2.container.resolve('JwtService');
-            const decoded = jwtService.verifyAccessToken(token);
-            const user = await this.getUserDetailsUseCase.execute(decoded.userId);
-            if (!user) {
-                (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.NOT_FOUND, commonErrorMsg_constants_1.default.AUTHENTICATION.USER_NOT_FOUND);
-                return;
-            }
-            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.SUCCESS, {
-                id: user._id?.toString() || '',
-                name: user.name,
-                email: user.email,
-                phone: user.phone ? user.phone : 'N/A',
-                profileImage: user.profileImage,
-                role: user.role,
-                loyalityPoints: user.loyalityPoints || 0,
-                dateOfBirth: user.dob ? user.dob : 'N/A',
-                joinedDate: user.createdAt.toDateString(),
-            });
-        }
-        catch (error) {
-            next(error);
-        }
-    }
+    /**
+     * Retrieves details of the currently authenticated user based on their access token.
+     * @param {Request} req - The Express request object, expecting an Authorization header with a Bearer token.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
+    // async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+    //   const token = req.headers.authorization?.split(' ')[1];
+    //   if (!token) {
+    //     sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
+    //     return;
+    //   }
+    //   try {
+    //     const jwtService = container.resolve<JwtService>('JwtService');
+    //     const decoded = jwtService.verifyAccessToken(token);
+    //     const user = await this.getUserDetailsUseCase.execute(decoded.userId);
+    //     if (!user) {
+    //       sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
+    //       return;
+    //     }
+    //     sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
+    //       id: user._id?.toString() || '',
+    //       name: user.name,
+    //       email: user.email,
+    //       phone: user.phone ? user.phone : 'N/A',
+    //       profileImage: user.profileImage,
+    //       role: user.role,
+    //       loyalityPoints: user.loyalityPoints || 0,
+    //       dateOfBirth: user.dob ? user.dob : 'N/A',
+    //       joinedDate: user.createdAt.toDateString(),
+    //     });
+    //   } catch (error) {
+    //     next(error);
+    //   }
+    // }
+    /**
+     * Sends an OTP to the provided email address for user registration or verification.
+     * @param {Request} req - The Express request object, containing `email` in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async sendOtp(req, res, next) {
         try {
             const { email } = req.body;
@@ -131,6 +151,13 @@ let UserAuthController = class UserAuthController {
             next(error);
         }
     }
+    /**
+     * Verifies the OTP and completes user registration or login, setting a refresh token cookie.
+     * @param {Request} req - The Express request object, containing `name`, `email`, `password`, and `otp` in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async verifyOtp(req, res, next) {
         try {
             const { name, email, password, otp } = req.body;
@@ -140,7 +167,7 @@ let UserAuthController = class UserAuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
+                maxAge: parseInt(process.env.MAX_AGE || '0', 10),
             });
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, commonSuccessMsg_constants_1.SuccessMsg.USER_REGISTERED, {
                 accessToken: result.accessToken,
@@ -151,6 +178,13 @@ let UserAuthController = class UserAuthController {
             next(error);
         }
     }
+    /**
+     * Handles user login, authenticates credentials, and sets a refresh token cookie.
+     * @param {Request} req - The Express request object, containing `email` and `password` in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
@@ -160,7 +194,7 @@ let UserAuthController = class UserAuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
+                maxAge: parseInt(process.env.MAX_AGE || '0', 10),
             });
             (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, commonSuccessMsg_constants_1.SuccessMsg.USER_LOGGED_IN, {
                 accessToken: response.accessToken,
@@ -168,10 +202,16 @@ let UserAuthController = class UserAuthController {
             });
         }
         catch (error) {
-            console.log("🚀 ~ UserAuthController ~ login ~ error:", error);
             next(error);
         }
     }
+    /**
+     * Logs out the user by clearing the refresh token cookie.
+     * @param {Request} req - The Express request object.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async logout(req, res, next) {
         try {
             res.clearCookie('refreshToken');
@@ -181,6 +221,13 @@ let UserAuthController = class UserAuthController {
             next(error);
         }
     }
+    /**
+     * Sends an OTP to the user's email for a forgotten password reset process.
+     * @param {Request} req - The Express request object, containing `email` in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async forgotPassSendOtp(req, res, next) {
         try {
             const { email } = req.body;
@@ -191,6 +238,13 @@ let UserAuthController = class UserAuthController {
             next(error);
         }
     }
+    /**
+     * Verifies the OTP provided by the user for a forgotten password reset.
+     * @param {Request} req - The Express request object, containing `email` and `otp` in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async forgotPassVerifyOtp(req, res, next) {
         try {
             const { email, otp } = req.body;
@@ -201,6 +255,13 @@ let UserAuthController = class UserAuthController {
             next(error);
         }
     }
+    /**
+     * Updates the user's password after successful OTP verification during the forgotten password process.
+     * @param {Request} req - The Express request object, containing `email` and `password` in the body.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async forgotPassUpdatePassword(req, res, next) {
         try {
             const { email, password } = req.body;
@@ -222,7 +283,6 @@ exports.UserAuthController = UserAuthController = __decorate([
     __param(4, (0, tsyringe_1.inject)('ForgotPassSendOtp')),
     __param(5, (0, tsyringe_1.inject)('ForgotPassUpdate')),
     __param(6, (0, tsyringe_1.inject)('ForgotPassVerifyOtp')),
-    __param(7, (0, tsyringe_1.inject)('GetUserDetailsUseCase')),
-    __param(8, (0, tsyringe_1.inject)('IUserRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object, Object])
+    __param(7, (0, tsyringe_1.inject)('RefreshTokenUseCase')),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object])
 ], UserAuthController);

@@ -19,14 +19,16 @@ export class RateMovieUseCase implements IRateMovieUseCase {
     if (dto.movieRating < 1 || dto.movieRating > 5) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.RATING_MUST_BETWEEN, HttpResCode.BAD_REQUEST);
     }
+
+    const existingReview = await this.movieRepository.findReviewByUserId(dto.movieId, dto.userId);
+    if (existingReview) {
+      throw new CustomError(
+        ERROR_MESSAGES.VALIDATION.REVIEW_ALREADY_EXISTS,
+        HttpResCode.BAD_REQUEST,
+      );
+    }
+    
     try {
-      const existingReview = await this.movieRepository.findReviewByUserId(dto.movieId, dto.userId);
-      if (existingReview) {
-        throw new CustomError(
-          ERROR_MESSAGES.VALIDATION.REVIEW_ALREADY_EXISTS,
-          HttpResCode.BAD_REQUEST,
-        );
-      }
       const updatedMovie = await this.movieRepository.addReviewAndUpdateRating(dto.movieId, {
         comment: dto.movieReview,
         rating: dto.movieRating.toString(),

@@ -31,14 +31,13 @@ let UpdateTheaterUseCase = class UpdateTheaterUseCase {
     }
     async execute(id, data, res) {
         try {
-            //   const validatedData = theaterUpdateSchema.parse(data);
             const theater = await this.theaterRepository.findById(id);
             if (!theater) {
                 (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.NOT_FOUND, httpResponseCode_utils_1.HttpResMsg.THEATER_NOT_FOUND);
                 return;
             }
             // Update theater fields
-            const updatedTheater = new theater_entity_1.Theater(theater._id, theater.screens, data.name || theater.name, theater.status, theater.location, data.facilities || null, theater.createdAt, new Date(), data.intervalTime || theater.intervalTime, theater.gallery, data.email || theater.email, data.phone || theater.phone, data.description || theater.description, theater.vendorId, theater.rating, theater.ratingCount);
+            const updatedTheater = new theater_entity_1.Theater(theater._id, theater.screens, data.name || theater.name, theater.status, theater.location, data.facilities || null, theater.createdAt, new Date(), data.intervalTime || theater.intervalTime, data.gallery || theater.gallery, data.email || theater.email, data.phone || theater.phone, data.description || theater.description, theater.vendorId, theater.rating, theater.ratingCount);
             // Persist updates
             const savedTheater = await this.theaterRepository.updateTheaterDetails(updatedTheater);
             // Prepare response DTO

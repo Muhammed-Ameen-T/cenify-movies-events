@@ -19,11 +19,27 @@ const tsyringe_1 = require("tsyringe");
 const sendResponse_utils_1 = require("../../utils/response/sendResponse.utils");
 const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode.utils");
 const custom_error_1 = require("../../utils/errors/custom.error");
+/**
+ * Controller for managing user-related operations, primarily for administrative tasks.
+ * @implements {IUserManagementController}
+ */
 let UserManagementController = class UserManagementController {
+    /**
+     * Constructs an instance of UserManagementController.
+     * @param {IFetchUsersUseCase} fetchUsersUseCase - Use case for fetching a list of users.
+     * @param {IUpdateUserBlockStatusUseCase} updateUserBlockStatusUseCase - Use case for updating a user's block status.
+     */
     constructor(fetchUsersUseCase, updateUserBlockStatusUseCase) {
         this.fetchUsersUseCase = fetchUsersUseCase;
         this.updateUserBlockStatusUseCase = updateUserBlockStatusUseCase;
     }
+    /**
+     * Fetches a list of users with pagination, filtering, searching, and sorting capabilities.
+     * @param {Request} req - The Express request object, containing query parameters for pagination, filtering (isBlocked, role), search, and sorting.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getUsers(req, res, next) {
         try {
             const { page = '1', limit = '5', isBlocked, role, search, sortBy, sortOrder, } = req.query;
@@ -57,6 +73,13 @@ let UserManagementController = class UserManagementController {
             next(error);
         }
     }
+    /**
+     * Updates the block status of a specific user (e.g., block or unblock).
+     * @param {Request} req - The Express request object, containing user ID in `req.params.id` and `isBlocked` (boolean) in `req.body`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async updateUserBlockStatus(req, res, next) {
         try {
             const { id } = req.params;

@@ -11,6 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BookingMngController = void 0;
 require("reflect-metadata");
@@ -19,19 +22,38 @@ const sendResponse_utils_1 = require("../../utils/response/sendResponse.utils");
 const httpResponseCode_utils_1 = require("../../utils/constants/httpResponseCode.utils");
 const custom_error_1 = require("../../utils/errors/custom.error");
 const booking_dto_1 = require("../../application/dtos/booking.dto");
-const checkoutPayment_service_1 = require("../../infrastructure/services/checkoutPayment.service");
+const commonErrorMsg_constants_1 = __importDefault(require("../../utils/constants/commonErrorMsg.constants"));
+/**
+ * Controller for managing booking-related operations.
+ * @implements {IBookingMngController}
+ */
 let BookingMngController = class BookingMngController {
-    constructor(createBookingUseCase, fetchBookingsUseCase, findBookingByIdUseCase, cancelBookingUseCase, findBookingsOfUserUseCase, findBookingsOfVendorUseCase, paymentService, walletRepository, moviePassRepository) {
+    /**
+     * Constructs an instance of BookingMngController.
+     * @param {ICreateBookingUseCase} createBookingUseCase - Use case for creating a booking.
+     * @param {IFetchAllBookingsUseCase} fetchBookingsUseCase - Use case for fetching all bookings.
+     * @param {IFindBookingByIdUseCase} findBookingByIdUseCase - Use case for finding a booking by ID.
+     * @param {ICancelBookingUseCase} cancelBookingUseCase - Use case for canceling a booking.
+     * @param {IFindBookingsOfUserUseCase} findBookingsOfUserUseCase - Use case for finding bookings of a specific user.
+     * @param {IFindBookingsOfVendorUseCase} findBookingsOfVendorUseCase - Use case for finding bookings of a specific vendor.
+     * @param {ICheckPaymentOptionsUseCase} checkPaymentOptionsUseCase - Use case for checking payment options.
+     */
+    constructor(createBookingUseCase, fetchBookingsUseCase, findBookingByIdUseCase, cancelBookingUseCase, findBookingsOfUserUseCase, findBookingsOfVendorUseCase, checkPaymentOptionsUseCase) {
         this.createBookingUseCase = createBookingUseCase;
         this.fetchBookingsUseCase = fetchBookingsUseCase;
         this.findBookingByIdUseCase = findBookingByIdUseCase;
         this.cancelBookingUseCase = cancelBookingUseCase;
         this.findBookingsOfUserUseCase = findBookingsOfUserUseCase;
         this.findBookingsOfVendorUseCase = findBookingsOfVendorUseCase;
-        this.paymentService = paymentService;
-        this.walletRepository = walletRepository;
-        this.moviePassRepository = moviePassRepository;
+        this.checkPaymentOptionsUseCase = checkPaymentOptionsUseCase;
     }
+    /**
+     * Handles the creation of a new booking.
+     * @param {Request} req - The Express request object.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async createBooking(req, res, next) {
         try {
             const userId = req.decoded?.userId;
@@ -46,6 +68,13 @@ let BookingMngController = class BookingMngController {
             next(error);
         }
     }
+    /**
+     * Checks available payment options for a given total amount.
+     * @param {Request} req - The Express request object.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async checkPaymentOptions(req, res, next) {
         try {
             const userId = req.decoded?.userId;
@@ -54,22 +83,22 @@ let BookingMngController = class BookingMngController {
             }
             const totalAmount = parseFloat(req.query.totalAmount);
             if (isNaN(totalAmount)) {
-                throw new custom_error_1.CustomError('Invalid total amount', httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
+                throw new custom_error_1.CustomError(commonErrorMsg_constants_1.default.VALIDATION.INVALID_TOTAL_AMOUNT, httpResponseCode_utils_1.HttpResCode.BAD_REQUEST);
             }
-            const hasSufficientWalletBalance = await this.paymentService.checkWalletBalance(userId, totalAmount);
-            const hasMoviePass = await this.moviePassRepository.findByUserId(userId);
-            const isMoviePassActive = hasMoviePass && hasMoviePass.status === 'Active';
-            const wallet = await this.walletRepository.findByUserId(userId);
-            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.SUCCESS, {
-                wallet: { enabled: hasSufficientWalletBalance, balance: wallet?.balance || 0 },
-                stripe: { enabled: true },
-                moviePass: { active: isMoviePassActive },
-            });
+            const response = await this.checkPaymentOptionsUseCase.execute(userId, totalAmount);
+            (0, sendResponse_utils_1.sendResponse)(res, httpResponseCode_utils_1.HttpResCode.OK, httpResponseCode_utils_1.HttpResMsg.SUCCESS, response);
         }
         catch (error) {
             next(error);
         }
     }
+    /**
+     * Fetches all bookings based on provided query parameters.
+     * @param {Request} req - The Express request object.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async fetchBookings(req, res, next) {
         try {
             const { page, limit, search, status, sortBy, sortOrder } = req.query;
@@ -89,6 +118,13 @@ let BookingMngController = class BookingMngController {
             next(error);
         }
     }
+    /**
+     * Finds bookings associated with a specific vendor.
+     * @param {Request} req - The Express request object.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async findBookingsOfVendor(req, res, next) {
         try {
             const { page, limit, status, sortBy, sortOrder } = req.query;
@@ -112,6 +148,13 @@ let BookingMngController = class BookingMngController {
             next(error);
         }
     }
+    /**
+     * Finds a specific booking by its ID.
+     * @param {Request} req - The Express request object.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async findBookingById(req, res, next) {
         try {
             const { id } = req.params;
@@ -125,6 +168,13 @@ let BookingMngController = class BookingMngController {
             next(error);
         }
     }
+    /**
+     * Finds bookings associated with a specific user.
+     * @param {Request} req - The Express request object.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async findBookingsOfUser(req, res, next) {
         try {
             const { page, limit, status, sortBy, sortOrder } = req.query;
@@ -148,6 +198,13 @@ let BookingMngController = class BookingMngController {
             next(error);
         }
     }
+    /**
+     * Cancels a booking by its ID.
+     * @param {Request} req - The Express request object.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async cancelBooking(req, res, next) {
         try {
             const { id } = req.params;
@@ -172,8 +229,6 @@ exports.BookingMngController = BookingMngController = __decorate([
     __param(3, (0, tsyringe_1.inject)('CancelBookingUseCase')),
     __param(4, (0, tsyringe_1.inject)('FindBookingsOfUserUseCase')),
     __param(5, (0, tsyringe_1.inject)('FindBookingsOfVendorUseCase')),
-    __param(6, (0, tsyringe_1.inject)('PaymentService')),
-    __param(7, (0, tsyringe_1.inject)('WalletRepository')),
-    __param(8, (0, tsyringe_1.inject)('MoviePassRepository')),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, checkoutPayment_service_1.PaymentService, Object, Object])
+    __param(6, (0, tsyringe_1.inject)('CheckPaymentOptionsUseCase')),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object])
 ], BookingMngController);

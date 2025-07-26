@@ -23,13 +23,30 @@ const custom_error_1 = require("../../utils/errors/custom.error");
 const stripe_1 = __importDefault(require("stripe"));
 const env_config_1 = require("../../config/env.config");
 const commonErrorMsg_constants_1 = __importDefault(require("../../utils/constants/commonErrorMsg.constants"));
+/**
+ * Controller for managing movie pass related operations, including Stripe checkout and movie pass creation/fetching.
+ * @implements {IMoviePassController}
+ */
 let MoviePassController = class MoviePassController {
+    /**
+     * Constructs an instance of MoviePassController.
+     * @param {ICreateMoviePassUseCase} createMoviePassUseCase - Use case for creating a movie pass.
+     * @param {IFetchMoviePassUseCase} fetchMoviePassUseCase - Use case for fetching a user's movie pass.
+     * @param {IFindMoviePassHistoryUseCase} findMoviePassHistoryUseCase - Use case for finding a user's movie pass history.
+     */
     constructor(createMoviePassUseCase, fetchMoviePassUseCase, findMoviePassHistoryUseCase) {
         this.createMoviePassUseCase = createMoviePassUseCase;
         this.fetchMoviePassUseCase = fetchMoviePassUseCase;
         this.findMoviePassHistoryUseCase = findMoviePassHistoryUseCase;
         this.stripe = new stripe_1.default(env_config_1.env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
     }
+    /**
+     * Creates a Stripe checkout session for purchasing a movie pass.
+     * @param {Request} req - The Express request object. Requires `req.decoded.userId`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async createCheckoutSession(req, res, next) {
         const userId = req.decoded?.userId;
         if (!userId) {
@@ -62,6 +79,13 @@ let MoviePassController = class MoviePassController {
             next(error);
         }
     }
+    /**
+     * Creates a new movie pass for a user after successful payment.
+     * @param {Request} req - The Express request object. Requires `req.body.userId`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async createMoviePass(req, res, next) {
         const userId = req.body.userId;
         if (!userId) {
@@ -82,6 +106,13 @@ let MoviePassController = class MoviePassController {
             next(error);
         }
     }
+    /**
+     * Fetches the current movie pass details for a user.
+     * @param {Request} req - The Express request object. Requires `req.decoded.userId`.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async getMoviePass(req, res, next) {
         const userId = req.decoded?.userId;
         if (!userId) {
@@ -95,6 +126,13 @@ let MoviePassController = class MoviePassController {
             next(error);
         }
     }
+    /**
+     * Finds the movie pass history for a specific user with pagination.
+     * @param {Request} req - The Express request object. Requires `req.decoded.userId` and optional `page` and `limit` query parameters.
+     * @param {Response} res - The Express response object.
+     * @param {NextFunction} next - The Express next middleware function.
+     * @returns {Promise<void>}
+     */
     async findMoviePassHistory(req, res, next) {
         const userId = req.decoded?.userId;
         if (!userId) {
