@@ -10,7 +10,7 @@ import { API_BASE_URL } from "../constants/apiEndPoint";
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  timeout: 10000,
+  timeout: 20000,
 });
 
 // Function to refresh access token
