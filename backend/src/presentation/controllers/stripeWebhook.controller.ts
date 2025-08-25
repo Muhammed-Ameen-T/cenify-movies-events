@@ -41,7 +41,7 @@ export class StripeWebhookController implements IStripeWebhookController {
     let event: Stripe.Event;
 
     try {
-      event = this.stripe.webhooks.constructEvent(req.body, sig, env.STRIPE_WEBHOOK_SECRET);
+      event = this.stripe.webhooks.constructEvent(req.body, sig, env.STRIPE_WEBHOOK_SECRET_MOVIE_PASS);
     } catch (err: any) {
       console.error('Webhook signature verification failed:', err.message);
       sendResponse(res, HttpResCode.BAD_REQUEST, 'Webhook Error');

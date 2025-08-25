@@ -262,6 +262,15 @@ export const env = {
     }
     return process.env.STRIPE_WEBHOOK_SECRET;
   },
+  get STRIPE_WEBHOOK_SECRET_MOVIE_PASS(): string {
+    if (!process.env.STRIPE_WEBHOOK_SECRET_MOVIE_PASS) {
+      throw new CustomError(
+        EnvErrMsg.STRIPE_WEBHOOK_SECRET_UNDEFINES,
+        HttpResCode.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return process.env.STRIPE_WEBHOOK_SECRET_MOVIE_PASS;
+  },
 
   // Cloudinary Configuration
   get CLOUDINARY_CLOUD_NAME(): string {
