@@ -11,8 +11,6 @@ import PageNotFound from "./components/Shared/PageNotFound.tsx";
 import "./App.css";
 
 const App: React.FC = () => {
-  // const user = useSelector((state: RootState) => state.auth.user);
-
   return (
     <Suspense fallback={<Loader />}>
       <Toast />
