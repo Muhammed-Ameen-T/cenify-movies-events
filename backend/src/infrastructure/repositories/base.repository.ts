@@ -1,44 +1,58 @@
-import { Model, Document, FilterQuery } from 'mongoose';
+import {
+  Document,
+  Model,
+  FilterQuery,
+  UpdateQuery,
+  DeleteResult,
+  Types,
+  UpdateWriteOpResult,
+  Query,
+} from "mongoose";
 
 export abstract class BaseRepository<T extends Document> {
-  protected model: Model<T>;
+  constructor(protected model: Model<T>) {}
 
-  constructor(model: Model<T>) {
-    this.model = model;
+  // find
+  async findById(id: Types.ObjectId): Promise<T | null> {
+    return this.model.findById(id);
   }
 
-  // 🔹 Create a new document
+  async findOne(filter: FilterQuery<T>): Promise<T | null> {
+    return this.model.findOne(filter).sort({ createdAt: -1 });
+  }
+
+  async findAll(): Promise<T[]> {
+    return this.model.find();
+  }
+
+  find(filter: FilterQuery<T>): Query<T[], T> {
+    return this.model.find(filter);
+  }
+  
+  // create
   async create(data: Partial<T>): Promise<T> {
-    return await this.model.create(data);
+    const document = new this.model(data);
+    return document.save();
   }
 
-  // 🔹 Find by ID
-  async findById(id: string): Promise<T | null> {
-    return await this.model.findById(id);
+  // update
+  async update(id: Types.ObjectId, data: Partial<T>): Promise<T | null> {
+    return this.model.findByIdAndUpdate(id, data, { new: true });
   }
 
-  // 🔹 Find one by query
-  async findOne(query: FilterQuery<T>): Promise<T | null> {
-    return await this.model.findOne(query).exec();
+  async updateOne(
+    filter: FilterQuery<T>,
+    update: UpdateQuery<T>
+  ): Promise<UpdateWriteOpResult> {
+    return this.model.updateOne(filter, update);
   }
 
-  // 🔹 Find multiple by query
-  async findMany(query: FilterQuery<T>): Promise<T[]> {
-    return await this.model.find(query).exec();
+  // delete
+  async delete(id: Types.ObjectId): Promise<T | null> {
+    return this.model.findByIdAndDelete(id);
   }
 
-  // 🔹 Update a document by ID
-  async update(id: string, data: Partial<T>): Promise<T | null> {
-    return await this.model.findByIdAndUpdate(id, data, { new: true });
-  }
-
-  // 🔹 Delete a document by ID
-  async delete(id: string): Promise<T | null> {
-    return await this.model.findByIdAndDelete(id);
-  }
-
-  // 🔹 Count documents based on query
-  async count(query: FilterQuery<T>): Promise<number> {
-    return await this.model.countDocuments(query).exec();
+  async deleteOne(filter: FilterQuery<T>): Promise<DeleteResult> {
+    return this.model.deleteOne(filter);
   }
 }

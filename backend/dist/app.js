@@ -12,7 +12,6 @@ const logger_middleware_1 = require("./presentation/middleware/logger.middleware
 const errorHandler_middleware_1 = __importDefault(require("./presentation/middleware/errorHandler.middleware"));
 require("./infrastructure/container");
 require("tsconfig-paths/register");
-const env_config_1 = require("./config/env.config");
 // 🔹 Load environment variables
 dotenv_1.default.config();
 // 🔹 Initialize Express app
@@ -21,18 +20,26 @@ const app = (0, express_1.default)();
 app.use('/api/movie-pass/webhook', express_1.default.raw({ type: 'application/json' }));
 app.post('/api/booking/webhook/stripe', express_1.default.raw({ type: 'application/json' }));
 app.use((0, cors_1.default)({
-    origin: [
-        'http://localhost:5173',
-        'https://www.muhammedameen.site',
-        'https://muhammedameen.site',
-        'https://cenify.muhammedameen.site',
-        'https://your-image-server.com',
-        'https://lh3.googleusercontent.com',
-        'https://res.cloudinary.com',
-        env_config_1.env.CLIENT_ORIGIN,
-    ],
+    origin: (origin, callback) => {
+        callback(null, true);
+    },
     credentials: true,
 }));
+// app.use(
+//   cors({
+//     origin: [
+//       'http://localhost:5173',
+//       'https://www.muhammedameen.site',
+//       'https://muhammedameen.site',
+//       'https://cenify.muhammedameen.site',
+//       'https://your-image-server.com',
+//       'https://lh3.googleusercontent.com',
+//       'https://res.cloudinary.com',
+//       env.CLIENT_ORIGIN,
+//     ],
+//     credentials: true,
+//   }),
+// );
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 // 🔹 Routes
