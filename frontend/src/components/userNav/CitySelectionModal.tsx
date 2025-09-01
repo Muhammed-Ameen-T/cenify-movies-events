@@ -255,7 +255,7 @@ const CitySelectionModal: React.FC<CitySelectionModalProps> = ({
       },
       (error) => {
         console.error('Geolocation error:', error);
-        let errorMessage = 'Unable to get your current location';
+        let errorMessage = '';
         if (error.code === error.PERMISSION_DENIED) {
           errorMessage = 'Location permission denied. Please allow location access.';
         } else if (error.code === error.POSITION_UNAVAILABLE) {
@@ -263,7 +263,9 @@ const CitySelectionModal: React.FC<CitySelectionModalProps> = ({
         } else if (error.code === error.TIMEOUT) {
           errorMessage = 'The request to get location timed out.';
         }
-        showErrorToast(errorMessage);
+        if(errorMessage){
+          showErrorToast(errorMessage);
+        }
         setIsLoadingLocation(false);
       },
       { timeout: 10000, maximumAge: 60000 }
