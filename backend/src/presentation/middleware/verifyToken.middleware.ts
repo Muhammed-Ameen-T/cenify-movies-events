@@ -59,7 +59,7 @@ export const verifyAccessToken = async (req: Request, res: Response, next: NextF
           }
 
           // Generate new access token with userId and role
-          const newAccessToken = jwtService.generateAccessToken(user._id.toString(), user.role);
+          const newAccessToken = jwtService.generateAccessToken(user._id ? user._id.toString() : '', user.role);
 
           // Set new access token in response header
           res.setHeader('x-access-token', newAccessToken);

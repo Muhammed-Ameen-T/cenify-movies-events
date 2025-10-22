@@ -28,10 +28,10 @@ export class MoviePassController implements IMoviePassController {
    * @param {IFindMoviePassHistoryUseCase} findMoviePassHistoryUseCase - Use case for finding a user's movie pass history.
    */
   constructor(
-    @inject('CreateMoviePassUseCase') private createMoviePassUseCase: ICreateMoviePassUseCase,
-    @inject('FetchMoviePassUseCase') private fetchMoviePassUseCase: IFetchMoviePassUseCase,
+    @inject('CreateMoviePassUseCase') private _createMoviePassUseCase: ICreateMoviePassUseCase,
+    @inject('FetchMoviePassUseCase') private _fetchMoviePassUseCase: IFetchMoviePassUseCase,
     @inject('FindMoviePassHistoryUseCase')
-    private findMoviePassHistoryUseCase: IFindMoviePassHistoryUseCase,
+    private _findMoviePassHistoryUseCase: IFindMoviePassHistoryUseCase,
   ) {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
@@ -95,7 +95,7 @@ export class MoviePassController implements IMoviePassController {
       const expireDate = new Date(purchaseDate);
       expireDate.setDate(purchaseDate.getDate() + 30);
 
-      const moviePass = await this.createMoviePassUseCase.execute({
+      const moviePass = await this._createMoviePassUseCase.execute({
         userId,
         purchaseDate,
         expireDate,
@@ -121,7 +121,7 @@ export class MoviePassController implements IMoviePassController {
     }
 
     try {
-      const moviePass = await this.fetchMoviePassUseCase.execute(userId);
+      const moviePass = await this._fetchMoviePassUseCase.execute(userId);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, moviePass || {});
     } catch (error) {
       next(error);
@@ -153,7 +153,7 @@ export class MoviePassController implements IMoviePassController {
     }
 
     try {
-      const result = await this.findMoviePassHistoryUseCase.execute(userId, pageNum, limitNum);
+      const result = await this._findMoviePassHistoryUseCase.execute(userId, pageNum, limitNum);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);

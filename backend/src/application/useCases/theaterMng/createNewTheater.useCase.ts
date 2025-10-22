@@ -6,22 +6,21 @@ import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode, HttpResMsg } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { ICreateNewTheaterUseCase } from '../../../domain/interfaces/useCases/Vendor/createNewTheater.interface';
-import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
 @injectable()
 export class CreateNewTheaterUseCase implements ICreateNewTheaterUseCase {
-  constructor(@inject('TheaterRepository') private theaterRepository: ITheaterRepository) {}
+  constructor(@inject('TheaterRepository') private _theaterRepository: ITheaterRepository) {}
 
   async execute(dto: TheaterDetailsDTO): Promise<Theater> {
     // Check for existing theater by email
-    const existingTheater = await this.theaterRepository.findByEmail(dto.email);
+    const existingTheater = await this._theaterRepository.findByEmail(dto.email);
     if (existingTheater) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.EMAIL_ALREADY_EXISTS, HttpResCode.CONFLICT);
     }
     dto.location.type = 'Point';
 
     const newTheater = new Theater(
-      null as any,
+      null,
       [],
       dto.name,
       'verifying',
@@ -40,7 +39,7 @@ export class CreateNewTheaterUseCase implements ICreateNewTheaterUseCase {
     );
 
     try {
-      const savedTheater = await this.theaterRepository.create(newTheater);
+      const savedTheater = await this._theaterRepository.create(newTheater);
       return savedTheater;
     } catch (error) {
       throw new CustomError(HttpResMsg.INTERNAL_SERVER_ERROR, HttpResCode.INTERNAL_SERVER_ERROR);

@@ -46,15 +46,15 @@ export class MovieMngController implements IMovieMngController {
    * @param {ILikeOrUnlikeMovieUseCase} likeOrUnlikeMovieUseCase - Use case for liking or unliking a movie.
    */
   constructor(
-    @inject('CreateMovieUseCase') private createMovieUseCase: ICreateMovieUseCase,
-    @inject('FetchMoviesUseCase') private fetchMoviesUseCase: IFetchMoviesUseCase,
-    @inject('UpdateMovieStatusUseCase') private updateMovieStatusUseCase: IUpdateMovieStatusUseCase,
-    @inject('UpdateMovieUseCase') private updateMovieUseCase: IUpdateMovieUseCase,
-    @inject('FindMovieByIdUseCase') private findMovieByIdUseCase: IFindMovieByIdUseCase,
-    @inject('FetchMoviesUserUseCase') private fetchMoviesUserUseCase: IFetchMoviesUserUseCase,
-    @inject('RateMovieUseCase') private rateMovieUseCase: IRateMovieUseCase,
-    @inject('IsMovieLikedUseCase') private isMovieLikedUseCase: IIsMovieLikedUseCase,
-    @inject('LikeOrUnlikeMovieUseCase') private likeOrUnlikeMovieUseCase: ILikeOrUnlikeMovieUseCase,
+    @inject('CreateMovieUseCase') private _createMovieUseCase: ICreateMovieUseCase,
+    @inject('FetchMoviesUseCase') private _fetchMoviesUseCase: IFetchMoviesUseCase,
+    @inject('UpdateMovieStatusUseCase') private _updateMovieStatusUseCase: IUpdateMovieStatusUseCase,
+    @inject('UpdateMovieUseCase') private _updateMovieUseCase: IUpdateMovieUseCase,
+    @inject('FindMovieByIdUseCase') private _findMovieByIdUseCase: IFindMovieByIdUseCase,
+    @inject('FetchMoviesUserUseCase') private _fetchMoviesUserUseCase: IFetchMoviesUserUseCase,
+    @inject('RateMovieUseCase') private _rateMovieUseCase: IRateMovieUseCase,
+    @inject('IsMovieLikedUseCase') private _isMovieLikedUseCase: IIsMovieLikedUseCase,
+    @inject('LikeOrUnlikeMovieUseCase') private _likeOrUnlikeMovieUseCase: ILikeOrUnlikeMovieUseCase,
   ) {}
 
   /**
@@ -93,7 +93,7 @@ export class MovieMngController implements IMovieMngController {
         crew,
         cast,
       );
-      const movie = await this.createMovieUseCase.execute(dto);
+      const movie = await this._createMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_ADDED, movie);
     } catch (error) {
       next(error);
@@ -138,7 +138,7 @@ export class MovieMngController implements IMovieMngController {
         throw new CustomError('Invalid query parameters', HttpResCode.BAD_REQUEST);
       }
 
-      const result = await this.fetchMoviesUseCase.execute(params);
+      const result = await this._fetchMoviesUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -156,7 +156,7 @@ export class MovieMngController implements IMovieMngController {
     try {
       const { id, status } = req.body;
       const dto = new UpdateMovieStatusDTO(id, status);
-      const movie = await this.updateMovieStatusUseCase.execute(dto);
+      const movie = await this._updateMovieStatusUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_STATUS_UPDATED, movie);
     } catch (error) {
       const errorMessage =
@@ -204,7 +204,7 @@ export class MovieMngController implements IMovieMngController {
         crew,
         cast,
       );
-      const movie = await this.updateMovieUseCase.execute(dto);
+      const movie = await this._updateMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, SuccessMsg.MOVIE_UPDATED, movie);
     } catch (error) {
       next(error);
@@ -227,7 +227,7 @@ export class MovieMngController implements IMovieMngController {
         throw new CustomError('Invalid or missing movie ID', HttpResCode.BAD_REQUEST);
       }
 
-      const movie = await this.findMovieByIdUseCase.execute(id);
+      const movie = await this._findMovieByIdUseCase.execute(id);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, movie);
     } catch (error) {
       next(error);
@@ -285,7 +285,7 @@ export class MovieMngController implements IMovieMngController {
         throw new CustomError('Invalid query or location parameters', HttpResCode.BAD_REQUEST);
       }
 
-      const result = await this.fetchMoviesUserUseCase.execute(params);
+      const result = await this._fetchMoviesUserUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -321,7 +321,7 @@ export class MovieMngController implements IMovieMngController {
         review,
       );
 
-      const result = await this.rateMovieUseCase.execute(dto);
+      const result = await this._rateMovieUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, 'Rating submitted successfully', result);
     } catch (error) {
       next(error);
@@ -343,7 +343,7 @@ export class MovieMngController implements IMovieMngController {
       }
       const { movieId, isLike } = req.body;
 
-      const response = await this.likeOrUnlikeMovieUseCase.execute(movieId, userId, isLike);
+      const response = await this._likeOrUnlikeMovieUseCase.execute(movieId, userId, isLike);
 
       sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_UPDATED, response);
     } catch (error) {
@@ -365,7 +365,7 @@ export class MovieMngController implements IMovieMngController {
         throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
       const { movieId } = req.params;
-      const response = await this.isMovieLikedUseCase.execute(movieId, userId);
+      const response = await this._isMovieLikedUseCase.execute(movieId, userId);
       sendResponse(res, HttpResCode.OK, SuccessMsg.LIKE_FETCHED, response);
     } catch (error) {
       next(error);

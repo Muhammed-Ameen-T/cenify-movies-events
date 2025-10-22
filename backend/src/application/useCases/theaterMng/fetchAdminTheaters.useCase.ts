@@ -8,14 +8,14 @@ import { FetchTheatersParams } from '../../../domain/types/theater';
 
 @injectable()
 export class FetchAdminTheatersUseCase implements IFetchAdminTheatersUseCase {
-  constructor(@inject('TheaterRepository') private theaterRepository: ITheaterRepository) {}
+  constructor(@inject('TheaterRepository') private _theaterRepository: ITheaterRepository) {}
 
   async execute(params: FetchTheatersParams = {}): Promise<{
     theaters: TheaterResponseDTO[];
     totalCount: number;
   }> {
     try {
-      const { theaters, totalCount } = await this.theaterRepository.findAdminTheaters(params);
+      const { theaters, totalCount } = await this._theaterRepository.findAdminTheaters(params);
       return {
         theaters: theaters.map((theater: Theater) => this.mapToDTO(theater)),
         totalCount,
@@ -30,7 +30,7 @@ export class FetchAdminTheatersUseCase implements IFetchAdminTheatersUseCase {
     const vendor = theater.vendorId as any;
 
     return new TheaterResponseDTO(
-      theater._id.toString(),
+      theater._id ? theater._id.toString() : '',
       theater.name,
       theater.status,
       theater.location,

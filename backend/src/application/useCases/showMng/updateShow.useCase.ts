@@ -14,15 +14,15 @@ import mongoose from 'mongoose';
 @injectable()
 export class UpdateShowUseCase implements IUpdateShowUseCase {
   constructor(
-    @inject('ShowRepository') private showRepository: IShowRepository,
-    @inject('ScreenRepository') private screenRepository: IScreenRepository,
-    @inject('MovieRepository') private movieRepository: IMovieRepository,
-    @inject('TheaterRepository') private theaterRepository: ITheaterRepository,
+    @inject('ShowRepository') private _showRepository: IShowRepository,
+    @inject('ScreenRepository') private _screenRepository: IScreenRepository,
+    @inject('MovieRepository') private _movieRepository: IMovieRepository,
+    @inject('TheaterRepository') private _theaterRepository: ITheaterRepository,
   ) {}
 
   async execute(dto: UpdateShowDTO): Promise<Show> {
     try {
-      const existingShow = await this.showRepository.findById(dto.id);
+      const existingShow = await this._showRepository.findById(dto.id);
       if (!existingShow) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -35,7 +35,7 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
       }
 
       const movieId = dto.movieId || existingShow.movieId;
-      const movie = await this.movieRepository.findById(movieId);
+      const movie = await this._movieRepository.findById(movieId);
       if (!movie || !movie.duration) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.MOVIE_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -44,7 +44,7 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
       const movieDurationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
 
       const theaterId = dto.theaterId || existingShow.theaterId;
-      const theater = await this.theaterRepository.findById(theaterId);
+      const theater = await this._theaterRepository.findById(theaterId);
       if (!theater || typeof theater.intervalTime !== 'number') {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.THEATER_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -91,7 +91,7 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
         }
       }
 
-      const isSlotAvailable = await this.screenRepository.checkSlot(
+      const isSlotAvailable = await this._screenRepository.checkSlot(
         dto.screenId || existingShow.screenId,
         adjustedStartTime,
         adjustedEndTime,
@@ -117,7 +117,7 @@ export class UpdateShowUseCase implements IUpdateShowUseCase {
         showDate,
       );
 
-      return await this.showRepository.update(updatedShow, existingShow.startTime);
+      return await this._showRepository.update(updatedShow, existingShow.startTime);
     } catch (error) {
       console.error('❌ Error updating show:', error);
       if (error instanceof CustomError) throw error;

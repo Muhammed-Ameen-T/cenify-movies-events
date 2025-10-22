@@ -32,16 +32,16 @@ export class BookingMngController implements IBookingMngController {
    * @param {ICheckPaymentOptionsUseCase} checkPaymentOptionsUseCase - Use case for checking payment options.
    */
   constructor(
-    @inject('CreateBookingUseCase') private createBookingUseCase: ICreateBookingUseCase,
-    @inject('FetchAllBookingsUseCase') private fetchBookingsUseCase: IFetchAllBookingsUseCase,
-    @inject('FindBookingByIdUseCase') private findBookingByIdUseCase: IFindBookingByIdUseCase,
-    @inject('CancelBookingUseCase') private cancelBookingUseCase: ICancelBookingUseCase,
+    @inject('CreateBookingUseCase') private _createBookingUseCase: ICreateBookingUseCase,
+    @inject('FetchAllBookingsUseCase') private _fetchBookingsUseCase: IFetchAllBookingsUseCase,
+    @inject('FindBookingByIdUseCase') private _findBookingByIdUseCase: IFindBookingByIdUseCase,
+    @inject('CancelBookingUseCase') private _cancelBookingUseCase: ICancelBookingUseCase,
     @inject('FindBookingsOfUserUseCase')
-    private findBookingsOfUserUseCase: IFindBookingsOfUserUseCase,
+    private _findBookingsOfUserUseCase: IFindBookingsOfUserUseCase,
     @inject('FindBookingsOfVendorUseCase')
-    private findBookingsOfVendorUseCase: IFindBookingsOfVendorUseCase,
+    private _findBookingsOfVendorUseCase: IFindBookingsOfVendorUseCase,
     @inject('CheckPaymentOptionsUseCase')
-    private checkPaymentOptionsUseCase: ICheckPaymentOptionsUseCase,
+    private _checkPaymentOptionsUseCase: ICheckPaymentOptionsUseCase,
   ) {}
 
   /**
@@ -73,7 +73,7 @@ export class BookingMngController implements IBookingMngController {
         new Date(Date.now() + 5 * 60 * 1000), // 5-minute expiry
       );
 
-      const result = await this.createBookingUseCase.execute(dto);
+      const result = await this._createBookingUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -102,7 +102,7 @@ export class BookingMngController implements IBookingMngController {
         );
       }
 
-      const response = await this.checkPaymentOptionsUseCase.execute(userId, totalAmount);
+      const response = await this._checkPaymentOptionsUseCase.execute(userId, totalAmount);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, response);
     } catch (error) {
       next(error);
@@ -136,7 +136,7 @@ export class BookingMngController implements IBookingMngController {
         sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
       };
 
-      const result = await this.fetchBookingsUseCase.execute(params);
+      const result = await this._fetchBookingsUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -174,7 +174,7 @@ export class BookingMngController implements IBookingMngController {
         sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
       };
 
-      const result = await this.findBookingsOfVendorUseCase.execute(params);
+      const result = await this._findBookingsOfVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -195,7 +195,7 @@ export class BookingMngController implements IBookingMngController {
         throw new CustomError('Missing booking ID', HttpResCode.BAD_REQUEST);
       }
 
-      const booking = await this.findBookingByIdUseCase.execute(id);
+      const booking = await this._findBookingByIdUseCase.execute(id);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, booking);
     } catch (error) {
       next(error);
@@ -233,7 +233,7 @@ export class BookingMngController implements IBookingMngController {
         sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
       };
 
-      const result = await this.findBookingsOfUserUseCase.execute(params);
+      const result = await this._findBookingsOfUserUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -256,7 +256,7 @@ export class BookingMngController implements IBookingMngController {
         throw new CustomError('Missing booking ID', HttpResCode.BAD_REQUEST);
       }
 
-      const cancelledBooking = await this.cancelBookingUseCase.execute(id, reason);
+      const cancelledBooking = await this._cancelBookingUseCase.execute(id, reason);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, cancelledBooking);
     } catch (error) {
       next(error);

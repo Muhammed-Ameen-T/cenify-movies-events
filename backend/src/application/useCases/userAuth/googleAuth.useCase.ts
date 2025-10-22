@@ -19,7 +19,7 @@ import axios from 'axios';
  */
 @injectable()
 export class GoogleAuthUseCase {
-  private googleClient: OAuth2Client;
+  private _googleClient: OAuth2Client;
 
   /**
    * @constructor
@@ -29,12 +29,12 @@ export class GoogleAuthUseCase {
    * @param {CloudinaryService} cloudinaryService - The Cloudinary service dependency.
    */
   constructor(
-    @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
-    @inject('JwtService') private jwtService: JwtService,
-    @inject('CloudinaryService') private cloudinaryService: CloudinaryService,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
+    @inject('WalletRepository') private _walletRepository: IWalletRepository,
+    @inject('JwtService') private _jwtService: JwtService,
+    @inject('CloudinaryService') private _cloudinaryService: CloudinaryService,
   ) {
-    this.googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    this._googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   }
 
   /**
@@ -48,7 +48,7 @@ export class GoogleAuthUseCase {
    */
   async execute(request: GoogleAuthRequestDTO): Promise<AuthResponseDTO> {
     // Verify Google ID token
-    const ticket = await this.googleClient.verifyIdToken({
+    const ticket = await this._googleClient.verifyIdToken({
       idToken: request.idToken,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
@@ -57,8 +57,8 @@ export class GoogleAuthUseCase {
 
     const { sub: authId, email, name, picture } = payload;
     let user =
-      (await this.userRepository.findByAuthId(authId)) ||
-      (email ? await this.userRepository.findByEmail(email.toLowerCase()) : null);
+      (await this._userRepository.findByAuthId(authId)) ||
+      (email ? await this._userRepository.findByEmail(email.toLowerCase()) : null);
 
     let profileImage = picture || null;
 
@@ -67,7 +67,7 @@ export class GoogleAuthUseCase {
       try {
         const response = await axios.get(picture, { responseType: 'arraybuffer' });
         const fileBuffer = Buffer.from(response.data);
-        profileImage = await this.cloudinaryService.uploadImage(
+        profileImage = await this._cloudinaryService.uploadImage(
           fileBuffer,
           `google-profile-${authId}-${Date.now()}`,
         );
@@ -80,7 +80,7 @@ export class GoogleAuthUseCase {
     if (!user) {
       // Create new user
       user = new User(
-        null as any,
+        null,
         name || 'User',
         email!.toLowerCase(),
         null,
@@ -95,8 +95,8 @@ export class GoogleAuthUseCase {
         new Date(),
         new Date(),
       );
-      user = await this.userRepository.create(user);
-      user = await this.userRepository.findByEmail(user.email.toLowerCase());
+      user = await this._userRepository.create(user);
+      user = await this._userRepository.findByEmail(user.email.toLowerCase());
       if (!user) {
         throw new CustomError(
           ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND,
@@ -106,19 +106,19 @@ export class GoogleAuthUseCase {
 
       // Create wallet for new user
       const newWallet = new Wallet(
-        null as any,
-        user._id?.toString(),
+        null,
+        user._id ? user._id.toString() : '',
         0,
         [],
         new Date(),
         new Date(),
       );
-      await this.walletRepository.createWallet(newWallet);
+      await this._walletRepository.createWallet(newWallet);
     } else if (!user.authId || !user.profileImage) {
       // Update existing user with authId and profileImage
       user.authId = authId;
       user.profileImage = profileImage;
-      user = await this.userRepository.update(user);
+      user = await this._userRepository.update(user);
     }
 
     if (user?.isBlocked) {
@@ -126,11 +126,11 @@ export class GoogleAuthUseCase {
     }
 
     // Generate tokens
-    const accessToken = this.jwtService.generateAccessToken(
+    const accessToken = this._jwtService.generateAccessToken(
       user._id ? user._id.toString() : '',
       'user',
     );
-    const refreshToken = this.jwtService.generateRefreshToken(
+    const refreshToken = this._jwtService.generateRefreshToken(
       user._id ? user._id.toString() : '',
       'user',
     );
@@ -139,7 +139,7 @@ export class GoogleAuthUseCase {
       accessToken,
       refreshToken,
       user: {
-        id: user._id.toString(),
+        id: user._id ? user._id.toString() : '',
         name: user.name,
         email: user.email,
         phone: user.phone || null,

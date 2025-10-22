@@ -8,7 +8,7 @@ import { IFindUserWalletTransactionsUseCase } from '../../../domain/interfaces/u
 
 @injectable()
 export class FindUserWalletTransactionsUseCase implements IFindUserWalletTransactionsUseCase {
-  constructor(@inject('WalletRepository') private walletRepository: IWalletRepository) {}
+  constructor(@inject('WalletRepository') private _walletRepository: IWalletRepository) {}
 
   async execute(
     userId: string,
@@ -24,7 +24,7 @@ export class FindUserWalletTransactionsUseCase implements IFindUserWalletTransac
     totalDebit: number;
   }> {
     try {
-      const result = await this.walletRepository.findTransactionsByUserId(
+      const result = await this._walletRepository.findTransactionsByUserId(
         userId,
         page,
         limit,

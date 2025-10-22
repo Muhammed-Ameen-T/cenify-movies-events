@@ -38,18 +38,18 @@ export class ShowManagementController implements IShowManagementController {
    * @param {ShowJobService} showJobService - Service for scheduling and canceling show-related jobs.
    */
   constructor(
-    @inject('CreateShowUseCase') private createShowUseCase: ICreateShowUseCase,
-    @inject('UpdateShowUseCase') private updateShowUseCase: IUpdateShowUseCase,
-    @inject('UpdateShowStatusUseCase') private updateShowStatusUseCase: IUpdateShowStatusUseCase,
-    @inject('DeleteShowUseCase') private deleteShowUseCase: IDeleteShowUseCase,
-    @inject('FindShowByIdUseCase') private findShowByIdUseCase: IFindShowByIdUseCase,
-    @inject('FindAllShowsUseCase') private findAllShowsUseCase: IFindAllShowsUseCase,
-    @inject('FindShowsByVendorUseCase') private findShowsByVendorUseCase: IFindShowsByVendorUseCase,
+    @inject('CreateShowUseCase') private _createShowUseCase: ICreateShowUseCase,
+    @inject('UpdateShowUseCase') private _updateShowUseCase: IUpdateShowUseCase,
+    @inject('UpdateShowStatusUseCase') private _updateShowStatusUseCase: IUpdateShowStatusUseCase,
+    @inject('DeleteShowUseCase') private _deleteShowUseCase: IDeleteShowUseCase,
+    @inject('FindShowByIdUseCase') private _findShowByIdUseCase: IFindShowByIdUseCase,
+    @inject('FindAllShowsUseCase') private _findAllShowsUseCase: IFindAllShowsUseCase,
+    @inject('FindShowsByVendorUseCase') private _findShowsByVendorUseCase: IFindShowsByVendorUseCase,
     @inject('FetchShowSelectionUseCase')
-    private fetchShowSelectionUseCase: IFetchShowSelectionUseCase,
+    private _fetchShowSelectionUseCase: IFetchShowSelectionUseCase,
     @inject('CreateRecurringShowUseCase')
-    private createRecurringShowUseCase: ICreateRecurringShowUseCase,
-    @inject('ShowJobService') private showJobService: ShowJobService,
+    private _createRecurringShowUseCase: ICreateRecurringShowUseCase,
+    @inject('ShowJobService') private _showJobService: ShowJobService,
   ) {}
 
   /**
@@ -68,10 +68,13 @@ export class ShowManagementController implements IShowManagementController {
           HttpResCode.BAD_REQUEST,
         );
       }
-      const shows = await this.createShowUseCase.execute(vendorId, req.body);
+      const shows = await this._createShowUseCase.execute(vendorId, req.body);
       for (const show of shows) {
         try {
-          await this.showJobService.scheduleShowJobs(show._id, show.startTime, show.endTime);
+          if (!show._id) {
+            continue;
+          }
+          await this._showJobService.scheduleShowJobs(show._id, show.startTime, show.endTime);
         } catch (scheduleError) {
           console.error(
             '❌ ~ ShowManagementController ~ createShow ~ Failed to schedule jobs for show:',
@@ -97,10 +100,13 @@ export class ShowManagementController implements IShowManagementController {
     const { id } = req.params;
 
     try {
-      const show = await this.updateShowUseCase.execute({ id, ...req.body });
+      const show = await this._updateShowUseCase.execute({ id, ...req.body });
       try {
-        await this.showJobService.scheduleShowJobs(show._id, show.startTime, show.endTime);
-      } catch (scheduleError: any) {
+        if(!show._id) {
+          return;
+        }
+        await this._showJobService.scheduleShowJobs(show._id, show.startTime, show.endTime);
+      } catch (scheduleError ) {
         console.error(
           '❌ ~ ShowManagementController ~ updateShow ~ Failed to reschedule jobs for show:',
           show._id,
@@ -125,7 +131,7 @@ export class ShowManagementController implements IShowManagementController {
     const { status } = req.body;
 
     try {
-      const show = await this.updateShowStatusUseCase.execute(id, status);
+      const show = await this._updateShowStatusUseCase.execute(id, status);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, show);
     } catch (error) {
       console.error('❌ ~ ShowManagementController ~ updateShowStatus ~ Error:', error);
@@ -144,10 +150,10 @@ export class ShowManagementController implements IShowManagementController {
     const { id } = req.params;
 
     try {
-      await this.deleteShowUseCase.execute(id);
+      await this._deleteShowUseCase.execute(id);
       try {
-        await this.showJobService.cancelShowJobs(id);
-      } catch (cancelError: any) {
+        await this._showJobService.cancelShowJobs(id);
+      } catch (cancelError) {
         console.error(
           '❌ ~ ShowManagementController ~ deleteShow ~ Failed to cancel jobs for show:',
           id,
@@ -173,7 +179,7 @@ export class ShowManagementController implements IShowManagementController {
     const { id } = req.params;
 
     try {
-      const show = await this.findShowByIdUseCase.execute(id);
+      const show = await this._findShowByIdUseCase.execute(id);
       if (!show) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -207,7 +213,7 @@ export class ShowManagementController implements IShowManagementController {
         sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
       };
 
-      const result = await this.findAllShowsUseCase.execute(params);
+      const result = await this._findAllShowsUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -240,7 +246,7 @@ export class ShowManagementController implements IShowManagementController {
         sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
       };
 
-      const result = await this.findShowsByVendorUseCase.execute(params);
+      const result = await this._findShowsByVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -298,7 +304,7 @@ export class ShowManagementController implements IShowManagementController {
         facilities: facilities ? (facilities as string).split(',') : undefined,
       };
 
-      const result = await this.fetchShowSelectionUseCase.execute(params);
+      const result = await this._fetchShowSelectionUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -323,7 +329,7 @@ export class ShowManagementController implements IShowManagementController {
         );
       }
 
-      const shows = await this.createRecurringShowUseCase.execute(
+      const shows = await this._createRecurringShowUseCase.execute(
         showId,
         startDate,
         endDate,
@@ -332,8 +338,15 @@ export class ShowManagementController implements IShowManagementController {
 
       for (const show of shows) {
         try {
-          await this.showJobService.scheduleShowJobs(show._id, show.startTime, show.endTime);
-        } catch (scheduleError: any) {
+          if (!show._id) {
+            console.error(
+              '❌ ~ ShowManagementController ~ createRecurringShow ~ Show ID is missing:',
+              show,
+            );
+            continue; 
+          }
+          await this._showJobService.scheduleShowJobs(show._id, show.startTime, show.endTime);
+        } catch (scheduleError) {
           console.error(
             '❌ ~ ShowManagementController ~ createRecurringShow ~ Failed to schedule jobs for show:',
             show._id,

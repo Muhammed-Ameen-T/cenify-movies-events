@@ -8,7 +8,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FindBookingsOfVendorUseCase implements IFindBookingsOfVendorUseCase {
-  constructor(@inject('BookingRepository') private bookingRepository: IBookingRepository) {}
+  constructor(@inject('BookingRepository') private _bookingRepository: IBookingRepository) {}
 
   async execute(params: {
     vendorId: string;
@@ -22,7 +22,7 @@ export class FindBookingsOfVendorUseCase implements IFindBookingsOfVendorUseCase
       const page = params.page || 1;
       const limit = params.limit || 8;
 
-      const { bookings, totalCount } = await this.bookingRepository.findBookingsOfVendor(params);
+      const { bookings, totalCount } = await this._bookingRepository.findBookingsOfVendor(params);
       const totalPages = Math.ceil(totalCount / limit);
 
       return {

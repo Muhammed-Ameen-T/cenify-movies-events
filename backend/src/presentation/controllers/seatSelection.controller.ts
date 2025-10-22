@@ -22,8 +22,8 @@ export class SeatSelectionController implements ISeatSelectionController {
    */
   constructor(
     @inject('FetchSeatSelectionUseCase')
-    private fetchSeatSelectionUseCase: IFetchSeatSelectionUseCase,
-    @inject('SelectSeatsUseCase') private selectSeatsUseCase: ISelectSeatsUseCase,
+    private _fetchSeatSelectionUseCase: IFetchSeatSelectionUseCase,
+    @inject('SelectSeatsUseCase') private _selectSeatsUseCase: ISelectSeatsUseCase,
   ) {}
 
   /**
@@ -41,7 +41,7 @@ export class SeatSelectionController implements ISeatSelectionController {
         throw new CustomError('Invalid show ID', HttpResCode.BAD_REQUEST);
       }
 
-      const result = await this.fetchSeatSelectionUseCase.execute(showId);
+      const result = await this._fetchSeatSelectionUseCase.execute(showId);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -73,7 +73,7 @@ export class SeatSelectionController implements ISeatSelectionController {
         throw new CustomError('Invalid seat selection', HttpResCode.BAD_REQUEST);
       }
 
-      const result = await this.selectSeatsUseCase.execute({ showId, seatIds, userId });
+      const result = await this._selectSeatsUseCase.execute({ showId, seatIds, userId });
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);

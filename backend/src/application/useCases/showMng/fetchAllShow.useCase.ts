@@ -4,11 +4,10 @@ import { IShowRepository } from '../../../domain/interfaces/repositories/show.re
 import { IFindAllShowsUseCase } from '../../../domain/interfaces/useCases/Vendor/fetchAllShow.interface';
 import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
-import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FindAllShowsUseCase implements IFindAllShowsUseCase {
-  constructor(@inject('ShowRepository') private showRepository: IShowRepository) {}
+  constructor(@inject('ShowRepository') private _showRepository: IShowRepository) {}
 
   async execute(params: {
     page?: number;
@@ -22,7 +21,7 @@ export class FindAllShowsUseCase implements IFindAllShowsUseCase {
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ shows: Show[]; totalCount: number }> {
     try {
-      return await this.showRepository.findAll(params);
+      return await this._showRepository.findAll(params);
     } catch (error) {
       console.error('❌ Error fetching shows:', error);
       throw new CustomError('Failed to retrieve shows', HttpResCode.INTERNAL_SERVER_ERROR);

@@ -8,11 +8,11 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FindBookingByIdUseCase implements IFindBookingByIdUseCase {
-  constructor(@inject('BookingRepository') private bookingRepository: IBookingRepository) {}
+  constructor(@inject('BookingRepository') private _bookingRepository: IBookingRepository) {}
 
   async execute(id: string): Promise<Booking> {
     try {
-      const booking = await this.bookingRepository.findByBookingId(id);
+      const booking = await this._bookingRepository.findByBookingId(id);
       if (!booking) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
       }

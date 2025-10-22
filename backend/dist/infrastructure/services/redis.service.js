@@ -15,7 +15,7 @@ const commonErrorMsg_constants_1 = __importDefault(require("../../utils/constant
 class RedisService {
     /**
      * Initializes the Redis client and connects to the Redis server.
-     * Handles connection events and logs errors if any occur.
+     * Handles connection events and logs errors if an occur.
      */
     constructor() {
         this.client = (0, redis_1.createClient)({

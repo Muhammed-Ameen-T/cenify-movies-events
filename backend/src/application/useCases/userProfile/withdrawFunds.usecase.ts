@@ -11,8 +11,8 @@ import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 @injectable()
 export class WithdrawFundsUseCase implements IWithdrawFundsUseCase {
   constructor(
-    @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
+    @inject('WalletRepository') private _walletRepository: IWalletRepository,
   ) {}
 
   async execute(
@@ -20,7 +20,7 @@ export class WithdrawFundsUseCase implements IWithdrawFundsUseCase {
     amount: number,
     stripeAccountId: string,
   ): Promise<{ success: boolean; balance: number }> {
-    const user = await this.userRepository.findById(userId);
+    const user = await this._userRepository.findById(userId);
     if (!user) {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
@@ -32,14 +32,14 @@ export class WithdrawFundsUseCase implements IWithdrawFundsUseCase {
       );
     }
 
-    const wallet = await this.walletRepository.findByUserId(userId);
+    const wallet = await this._walletRepository.findByUserId(userId);
     if (!wallet || wallet.balance < amount) {
       throw new CustomError(ERROR_MESSAGES.GENERAL.INSUFFICIENT_BALANCE, HttpResCode.BAD_REQUEST);
     }
 
     await StripeWithdrawService(stripeAccountId, amount);
 
-    const updatedWallet = await this.walletRepository.pushTransactionAndUpdateBalance(userId, {
+    const updatedWallet = await this._walletRepository.pushTransactionAndUpdateBalance(userId, {
       amount: amount,
       remark: `₹${amount} withdrawn to Stripe Account: ${stripeAccountId}.`,
       type: 'debit',

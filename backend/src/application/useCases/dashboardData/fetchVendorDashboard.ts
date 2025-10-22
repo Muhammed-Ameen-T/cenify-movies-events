@@ -7,10 +7,10 @@ import { IFetchDashboardUseCase } from '../../../domain/interfaces/useCases/Vend
 
 @injectable()
 export class FetchDashboardUseCase implements IFetchDashboardUseCase {
-  constructor(@inject('DashboardRepository') private dashboardRepository: IDashboardRepository) {}
+  constructor(@inject('DashboardRepository') private _dashboardRepository: IDashboardRepository) {}
 
   async execute(vendorId: string, params: DashboardQueryParams): Promise<DashboardData> {
-    const data = await this.dashboardRepository.getDashboardData(vendorId, params);
+    const data = await this._dashboardRepository.getDashboardData(vendorId, params);
     return DashboardData.fromMongo(data);
   }
 }

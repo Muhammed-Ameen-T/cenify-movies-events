@@ -4,11 +4,10 @@ import { IShowRepository } from '../../../domain/interfaces/repositories/show.re
 import { IFindShowsByVendorUseCase } from '../../../domain/interfaces/useCases/Vendor/fetchVendorShows.interface';
 import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
-import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FindShowsByVendorUseCase implements IFindShowsByVendorUseCase {
-  constructor(@inject('ShowRepository') private showRepository: IShowRepository) {}
+  constructor(@inject('ShowRepository') private _showRepository: IShowRepository) {}
 
   async execute(params: {
     vendorId: string;
@@ -23,7 +22,7 @@ export class FindShowsByVendorUseCase implements IFindShowsByVendorUseCase {
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ shows: Show[]; totalCount: number }> {
     try {
-      return await this.showRepository.findShowsByVendor(params);
+      return await this._showRepository.findShowsByVendor(params);
     } catch (error) {
       console.error('❌ Error fetching shows by vendor:', error);
       throw new CustomError('Failed to retrieve shows', HttpResCode.INTERNAL_SERVER_ERROR);

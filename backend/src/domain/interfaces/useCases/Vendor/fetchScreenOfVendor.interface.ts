@@ -1,3 +1,5 @@
+import { Screen } from "../../../entities/screen.entity";
+
 export interface IFetchScreensOfVendorUseCase {
   execute(params: {
     vendorId: string;
@@ -7,5 +9,5 @@ export interface IFetchScreensOfVendorUseCase {
     theaterId?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
-  }): Promise<{ screens: any[]; totalCount: number }>;
+  }): Promise<{ screens: Screen[]; totalCount: number }>;
 }

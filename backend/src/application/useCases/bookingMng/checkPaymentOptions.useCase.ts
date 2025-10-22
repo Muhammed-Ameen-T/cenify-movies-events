@@ -9,9 +9,9 @@ import { PaymentService } from '../../../infrastructure/services/checkoutPayment
 @injectable()
 export class CheckPaymentOptionsUseCase implements ICheckPaymentOptionsUseCase {
   constructor(
-    @inject('PaymentService') private paymentService: PaymentService,
-    @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
+    @inject('PaymentService') private _paymentService: PaymentService,
+    @inject('MoviePassRepository') private _moviePassRepository: IMoviePassRepository,
+    @inject('WalletRepository') private _walletRepository: IWalletRepository,
   ) {}
 
   async execute(
@@ -22,13 +22,13 @@ export class CheckPaymentOptionsUseCase implements ICheckPaymentOptionsUseCase {
     stripe: { enabled: boolean };
     moviePass: { active: boolean };
   }> {
-    const hasSufficientWalletBalance = await this.paymentService.checkWalletBalance(
+    const hasSufficientWalletBalance = await this._paymentService.checkWalletBalance(
       userId,
       totalAmount,
     );
-    const moviePass = await this.moviePassRepository.findByUserId(userId);
+    const moviePass = await this._moviePassRepository.findByUserId(userId);
     const isMoviePassActive = moviePass?.status === 'Active';
-    const wallet = await this.walletRepository.findByUserId(userId);
+    const wallet = await this._walletRepository.findByUserId(userId);
 
     return {
       wallet: {

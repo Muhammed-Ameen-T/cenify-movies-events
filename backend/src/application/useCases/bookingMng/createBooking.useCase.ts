@@ -21,14 +21,14 @@ import { ShowJobService } from '../../../infrastructure/services/showAgenda.serv
 @injectable()
 export class CreateBookingUseCase implements ICreateBookingUseCase {
   constructor(
-    @inject('BookingRepository') private bookingRepository: IBookingRepository,
-    @inject('NotificationRepository') private notificationRepository: INotificationRepository,
-    @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
-    @inject('PaymentService') private paymentService: PaymentService,
-    @inject('SeatRepository') private seatRepository: ISeatRepository,
-    @inject('ShowRepository') private showRepository: IShowRepository,
-    @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('ShowJobService') private showJobService: ShowJobService,
+    @inject('BookingRepository') private _bookingRepository: IBookingRepository,
+    @inject('NotificationRepository') private _notificationRepository: INotificationRepository,
+    @inject('MoviePassRepository') private _moviePassRepository: IMoviePassRepository,
+    @inject('PaymentService') private _paymentService: PaymentService,
+    @inject('SeatRepository') private _seatRepository: ISeatRepository,
+    @inject('ShowRepository') private _showRepository: IShowRepository,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
+    @inject('ShowJobService') private _showJobService: ShowJobService,
   ) {}
 
   async execute(dto: CreateBookingDTO): Promise<{ booking: Booking; stripeSessionUrl?: string }> {
@@ -39,7 +39,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
 
     // Calculate movie pass discount
     let moviePassDiscount = 0;
-    const hasMoviePass = await this.moviePassRepository.findByUserId(dto.userId);
+    const hasMoviePass = await this._moviePassRepository.findByUserId(dto.userId);
     if (hasMoviePass && dto.moviePassApplied && hasMoviePass.status === 'Active') {
       moviePassDiscount = Math.round(dto.subTotal * 0.08); // 8% discount
       dto.moviePassApplied = true;
@@ -89,8 +89,8 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       new Date(),
     );
 
-    await this.bookingRepository.create(newBooking);
-    const savedBooking = await this.bookingRepository.findByBookingId(bookingId);
+    await this._bookingRepository.create(newBooking);
+    const savedBooking = await this._bookingRepository.findByBookingId(bookingId);
     if (!savedBooking) {
       throw new CustomError(
         ERROR_MESSAGES.GENERAL.FAILED_CREATING_BOOKING,
@@ -98,10 +98,10 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       );
     }
 
-    await this.moviePassRepository.incrementMovieStats(dto.userId, moviePassDiscount);
+    await this._moviePassRepository.incrementMovieStats(dto.userId, moviePassDiscount);
     // Process payment
     if (dto.payment.method === 'wallet') {
-      await this.paymentService.deductWalletBalance(dto.userId, dto.totalAmount);
+      await this._paymentService.deductWalletBalance(dto.userId, dto.totalAmount);
 
       if (!savedBooking._id) {
         throw new CustomError(
@@ -109,7 +109,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
           HttpResCode.INTERNAL_SERVER_ERROR,
         );
       }
-      await this.bookingRepository.updatePaymentStatusAndId(
+      await this._bookingRepository.updatePaymentStatusAndId(
         savedBooking._id.toString(),
         `WALLET-${bookingId}`,
       );
@@ -119,7 +119,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
 
       // Send to user
       const userNotification = new Notification(
-        null as any,
+        null,
         dto.userId,
         'Booking Confirmed',
         'booking',
@@ -133,7 +133,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       );
 
       // Send to vendor
-      const show = await this.showRepository.findById(savedBooking.showId._id.toString());
+      const show = await this._showRepository.findById(savedBooking.showId._id.toString());
       if (!show) {
         throw new CustomError(
           'Show not found when creating vendor notification.',
@@ -141,7 +141,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         );
       }
       const vendorNotification = new Notification(
-        null as any,
+        null,
         show.vendorId,
         'New Booking Received',
         'booking',
@@ -155,7 +155,7 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
       );
 
       const adminNotification = new Notification(
-        null as any,
+        null,
         null,
         'New Booking Received',
         'booking',
@@ -168,39 +168,39 @@ export class CreateBookingUseCase implements ICreateBookingUseCase {
         [],
       );
 
-      await this.notificationRepository.createNotification(userNotification);
-      await this.notificationRepository.createNotification(vendorNotification);
-      await this.notificationRepository.createGlobalNotification(adminNotification);
+      await this._notificationRepository.createNotification(userNotification);
+      await this._notificationRepository.createNotification(vendorNotification);
+      await this._notificationRepository.createGlobalNotification(adminNotification);
       socketService.emitNotification(`vendor-${show.vendorId}`, vendorNotification);
       socketService.emitNotification('admin-global', adminNotification);
       socketService.emitNotification(`user-${dto.userId}`, userNotification);
 
-      await this.userRepository.incrementLoyalityPoints(
+      await this._userRepository.incrementLoyalityPoints(
         dto.userId,
         savedBooking.bookedSeatsId.length,
       );
-      const seatNumbers: string[] = await this.seatRepository.findSeatNumbersByIds(
+      const seatNumbers: string[] = await this._seatRepository.findSeatNumbersByIds(
         savedBooking.bookedSeatsId.map((seat) => seat._id),
       );
 
-      await this.showRepository.confirmBookedSeats(savedBooking.showId._id.toString(), seatNumbers);
+      await this._showRepository.confirmBookedSeats(savedBooking.showId._id.toString(), seatNumbers);
 
       socketService.emitSeatUpdate(
-        show._id,
+        show._id ? show._id : '',
         savedBooking.bookedSeatsId.map((seat) => seat.toString()),
         'booked',
       );
 
       return { booking: savedBooking };
     } else if (dto.payment.method === 'stripe') {
-      const stripeSessionUrl = await this.paymentService.createStripeSession(
+      const stripeSessionUrl = await this._paymentService.createStripeSession(
         dto.userId,
         bookingId,
         dto.totalAmount,
         dto.showId,
         dto.bookedSeatsId,
       );
-      await this.showJobService.scheduleBookingAutoCancel(bookingId);
+      await this._showJobService.scheduleBookingAutoCancel(bookingId);
 
       return { booking: savedBooking, stripeSessionUrl };
     }

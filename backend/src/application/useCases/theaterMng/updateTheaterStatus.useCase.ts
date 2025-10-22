@@ -10,7 +10,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class UpdateTheaterStatusUseCase implements IUpdateTheaterStatusUseCase {
-  constructor(@inject('TheaterRepository') private vendorRepository: ITheaterRepository) {}
+  constructor(@inject('TheaterRepository') private _vendorRepository: ITheaterRepository) {}
 
   async execute(id: string, status: string, res: Response): Promise<void> {
     const validStatuses = ['active', 'blocked', 'verified', 'verifying', 'pending', 'request'];
@@ -19,7 +19,7 @@ export class UpdateTheaterStatusUseCase implements IUpdateTheaterStatusUseCase {
       return;
     }
 
-    const vendor = await this.vendorRepository.findById(id);
+    const vendor = await this._vendorRepository.findById(id);
     if (!vendor) {
       sendResponse(res, HttpResCode.NOT_FOUND, HttpResMsg.THEATER_NOT_FOUND);
       return;
@@ -27,10 +27,10 @@ export class UpdateTheaterStatusUseCase implements IUpdateTheaterStatusUseCase {
 
     vendor.status = status;
     vendor.updatedAt = new Date();
-    await this.vendorRepository.updateVerificationStatus(id, vendor);
+    await this._vendorRepository.updateVerificationStatus(id, vendor);
 
     const responseDTO = new TheaterResponseDTO(
-      vendor._id.toString(),
+      vendor._id ? vendor._id.toString() : '',
       vendor.name,
       vendor.status,
       vendor.location,

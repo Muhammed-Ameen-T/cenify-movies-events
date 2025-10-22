@@ -8,6 +8,40 @@ import {
   TopTheater,
 } from '../interfaces/model/vendorDashboard.interface';
 
+// --- RAW DATA INTERFACES (Representing Mongoose/Aggregation Output) ---
+
+// MonthlyRevenue structure is simple enough to use directly, but ensure properties exist
+type RawMonthlyRevenue = {
+  name: string;
+  value: number;
+};
+
+// OccupancyRate structure is simple enough to use directly, but ensure properties exist
+type RawOccupancyRate = {
+  name: string;
+  rate: number;
+};
+
+// TopSellingShow expects 'id' to be convertible to ObjectId
+interface RawTopSellingShow {
+  id: Types.ObjectId | string; // ID field from aggregation
+  title: string;
+  tickets: number;
+  revenue: number;
+  showTime: Date | string; // Mongoose aggregation returns Date, but map uses new Date()
+}
+
+// TopTheater expects 'id' to be convertible to ObjectId
+interface RawTopTheater {
+  id: Types.ObjectId | string; // ID field from aggregation
+  name: string;
+  tickets: number;
+  revenue: number;
+  occupancyRate: number;
+}
+
+// ----------------------------------------------------------------------
+
 export class DashboardData {
   constructor(
     public statistics: VendorStatistics,
@@ -18,11 +52,11 @@ export class DashboardData {
   ) {}
 
   static fromMongo(data: {
-    statistics: VendorStatistics;
-    monthlyRevenue: any[];
-    occupancyRate: any[];
-    topSellingShows: any[];
-    topTheaters: any[];
+    statistics: VendorStatistics; 
+    monthlyRevenue: RawMonthlyRevenue[];
+    occupancyRate: RawOccupancyRate[];
+    topSellingShows: RawTopSellingShow[];
+    topTheaters: RawTopTheater[];
   }): DashboardData {
     return new DashboardData(
       {
@@ -40,6 +74,7 @@ export class DashboardData {
         rate: Number(o.rate.toFixed(2)),
       })),
       data.topSellingShows.map((s) => ({
+        // Casts the raw ID to Types.ObjectId for the domain entity
         id: new Types.ObjectId(s.id),
         title: s.title,
         tickets: s.tickets,
@@ -47,6 +82,7 @@ export class DashboardData {
         showTime: new Date(s.showTime),
       })),
       data.topTheaters.map((t) => ({
+        // Casts the raw ID to Types.ObjectId for the domain entity
         id: new Types.ObjectId(t.id),
         name: t.name,
         tickets: t.tickets,

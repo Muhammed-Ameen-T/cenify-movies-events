@@ -9,10 +9,10 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class UpdateMovieUseCase implements IUpdateMovieUseCase {
-  constructor(@inject('MovieRepository') private movieRepository: IMovieRepository) {}
+  constructor(@inject('MovieRepository') private _movieRepository: IMovieRepository) {}
 
   async execute(dto: UpdateMovieDTO): Promise<Movie> {
-    const existingMovie = await this.movieRepository.findById(dto.id);
+    const existingMovie = await this._movieRepository.findById(dto.id);
     if (!existingMovie) {
       throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
@@ -38,7 +38,7 @@ export class UpdateMovieUseCase implements IUpdateMovieUseCase {
     );
 
     try {
-      const savedMovie = await this.movieRepository.update(updatedMovie);
+      const savedMovie = await this._movieRepository.update(updatedMovie);
       return savedMovie;
     } catch (error) {
       throw new CustomError(

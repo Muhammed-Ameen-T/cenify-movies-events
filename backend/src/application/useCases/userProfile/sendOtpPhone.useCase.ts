@@ -12,21 +12,21 @@ import { SendOtpPhoneRequestDTO } from '../../dtos/profile.dto';
 @injectable()
 export class SendOtpPhoneUseCase implements ISendOtpPhoneUseCase {
   constructor(
-    @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('RedisService') private redisService: RedisService,
-    @inject('SmsService') private smsService: SmsService,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
+    @inject('RedisService') private _redisService: RedisService,
+    @inject('SmsService') private _smsService: SmsService,
   ) {}
 
   async execute(dto: SendOtpPhoneRequestDTO): Promise<void> {
     const parsedPhone = parseInt(dto.phone, 10);
     // Check if phone number is already in use by another user
-    const existingUser = await this.userRepository.findByPhone(parsedPhone);
+    const existingUser = await this._userRepository.findByPhone(parsedPhone);
 
     const otp = generateOtp(6);
     const otpKey = `otp:phone:${dto.phone}:${dto.userId}`;
 
     try {
-      await this.redisService.set(otpKey, otp, 300); // 5-minute expiry
+      await this._redisService.set(otpKey, otp, 300); // 5-minute expiry
       console.log('SendOtpPhoneUseCase: Stored OTP in Redis:', { otpKey, otp });
     } catch (error) {
       console.error('SendOtpPhoneUseCase: Redis error:', error);
@@ -37,7 +37,7 @@ export class SendOtpPhoneUseCase implements ISendOtpPhoneUseCase {
     }
 
     try {
-      await this.smsService.sendSms(dto.phone, `Your OTP is ${otp}. It is valid for 5 minutes.`);
+      await this._smsService.sendSms(dto.phone, `Your OTP is ${otp}. It is valid for 5 minutes.`);
       console.log('SendOtpPhoneUseCase: OTP SMS sent to:', dto.phone);
     } catch (error) {
       console.error('SendOtpPhoneUseCase: SMS service error:', error);

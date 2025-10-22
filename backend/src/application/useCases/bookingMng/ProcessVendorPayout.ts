@@ -12,8 +12,7 @@ export class ProcessVendorPayoutUseCase implements IProcessVendorPayout {
   private readonly ADMIN_COMMISSION = 0.15;
 
   constructor(
-    @inject('ShowRepository') private showRepository: IShowRepository,
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
+    @inject('WalletRepository') private _walletRepository: IWalletRepository,
   ) {}
 
   async execute(): Promise<{ vendorId: string; gross: number; net: number }[]> {
@@ -53,7 +52,7 @@ export class ProcessVendorPayoutUseCase implements IProcessVendorPayout {
       const gross = vendor.totalRevenue;
       const net = gross * (1 - this.ADMIN_COMMISSION);
 
-      await this.walletRepository.pushTransactionAndUpdateBalance(vendor._id, {
+      await this._walletRepository.pushTransactionAndUpdateBalance(vendor._id, {
         amount: net,
         type: 'credit',
         source: 'booking',
@@ -63,7 +62,7 @@ export class ProcessVendorPayoutUseCase implements IProcessVendorPayout {
 
       const targetUserId = process.env.ADMIN_USER_ID || '681a66250869b998bbad2545';
 
-      await this.walletRepository.pushTransactionAndUpdateBalance(targetUserId, {
+      await this._walletRepository.pushTransactionAndUpdateBalance(targetUserId, {
         amount: net,
         type: 'debit',
         source: 'booking',

@@ -2,7 +2,7 @@ import mongoose, { ObjectId, Types } from 'mongoose';
 
 export class Screen {
   constructor(
-    public _id: string,
+    public _id: string | null,
     public name: string | null,
     public theaterId: Types.ObjectId | null,
     public seatLayoutId: Types.ObjectId | null,

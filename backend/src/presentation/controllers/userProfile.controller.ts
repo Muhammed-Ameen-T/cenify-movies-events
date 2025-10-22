@@ -45,19 +45,19 @@ export class UserProfileController implements IUserProfileController {
    * @param {IWithdrawFundsUseCase} withdrawFundsUseCase - Use case for withdrawing funds from wallet.
    */
   constructor(
-    @inject('GetUserDetailsUseCase') private getUserDetailsUseCase: IgetUserDetailsUseCase,
-    @inject('UpdateUserProfileUseCase') private updateUserDetailsUseCase: IupdateUserProfileUseCase,
-    @inject('FindUserWalletUseCase') private findUserWalletUseCase: IFindUserWalletUseCase,
-    @inject('ChangePasswordUseCase') private changePasswordUseCase: IChangePasswordUseCase,
+    @inject('GetUserDetailsUseCase') private _getUserDetailsUseCase: IgetUserDetailsUseCase,
+    @inject('UpdateUserProfileUseCase') private _updateUserDetailsUseCase: IupdateUserProfileUseCase,
+    @inject('FindUserWalletUseCase') private _findUserWalletUseCase: IFindUserWalletUseCase,
+    @inject('ChangePasswordUseCase') private _changePasswordUseCase: IChangePasswordUseCase,
     @inject('WalletTransactionUseCase')
-    private findWalletTransaction: IFindUserWalletTransactionsUseCase,
+    private _findWalletTransaction: IFindUserWalletTransactionsUseCase,
     @inject('RedeemLoyalityToWalletUseCase')
-    private redeemLoyalityToWalletUseCase: IRedeemLoyalityToWalletUseCase,
-    @inject('SendOtpPhoneUseCase') private sendOtpPhoneUseCase: ISendOtpPhoneUseCase,
-    @inject('VerifyOtpPhoneUseCase') private verifyOtpPhoneUseCase: IVerifyOtpPhoneUseCase,
+    private _redeemLoyalityToWalletUseCase: IRedeemLoyalityToWalletUseCase,
+    @inject('SendOtpPhoneUseCase') private _sendOtpPhoneUseCase: ISendOtpPhoneUseCase,
+    @inject('VerifyOtpPhoneUseCase') private _verifyOtpPhoneUseCase: IVerifyOtpPhoneUseCase,
     @inject('FindProfileContentsUseCase')
-    private findProfileContentsUseCase: IFindProfileContentsUseCase,
-    @inject('WithdrawFundsUseCase') private withdrawFundsUseCase: IWithdrawFundsUseCase,
+    private _findProfileContentsUseCase: IFindProfileContentsUseCase,
+    @inject('WithdrawFundsUseCase') private _withdrawFundsUseCase: IWithdrawFundsUseCase,
   ) {}
 
   /**
@@ -74,7 +74,7 @@ export class UserProfileController implements IUserProfileController {
         sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
         return;
       }
-      const user = await this.getUserDetailsUseCase.execute(userId);
+      const user = await this._getUserDetailsUseCase.execute(userId);
       if (!user) {
         sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
         return;
@@ -119,7 +119,7 @@ export class UserProfileController implements IUserProfileController {
         req.body.dob == 'N/A' ? null : new Date(req.body.dob),
       );
 
-      const userResponse = await this.updateUserDetailsUseCase.execute(userId, updateData);
+      const userResponse = await this._updateUserDetailsUseCase.execute(userId, updateData);
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { userResponse });
     } catch (error) {
@@ -142,7 +142,7 @@ export class UserProfileController implements IUserProfileController {
     }
 
     try {
-      const wallet = await this.findUserWalletUseCase.execute(userId);
+      const wallet = await this._findUserWalletUseCase.execute(userId);
       if (!wallet) {
         sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.GENERAL.WALLET_NOT_FOUND);
         return;
@@ -168,7 +168,7 @@ export class UserProfileController implements IUserProfileController {
       return;
     }
     try {
-      const response = await this.findProfileContentsUseCase.execute(userId);
+      const response = await this._findProfileContentsUseCase.execute(userId);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, response);
     } catch (error) {
       next(error);
@@ -192,7 +192,7 @@ export class UserProfileController implements IUserProfileController {
     try {
       const dto = new ChangePasswordRequestDTO(userId, req.body.oldPassword, req.body.newPassword);
 
-      const userResponse = await this.changePasswordUseCase.execute(dto);
+      const userResponse = await this._changePasswordUseCase.execute(dto);
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { userResponse });
     } catch (error) {
@@ -232,7 +232,7 @@ export class UserProfileController implements IUserProfileController {
     }
 
     try {
-      const result = await this.findWalletTransaction.execute(
+      const result = await this._findWalletTransaction.execute(
         userId,
         pageNum,
         limitNum,
@@ -267,7 +267,7 @@ export class UserProfileController implements IUserProfileController {
         return;
       }
 
-      const walletResponse = await this.redeemLoyalityToWalletUseCase.execute(userId, amount);
+      const walletResponse = await this._redeemLoyalityToWalletUseCase.execute(userId, amount);
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { walletResponse });
     } catch (error) {
@@ -297,7 +297,7 @@ export class UserProfileController implements IUserProfileController {
         return;
       }
 
-      await this.sendOtpPhoneUseCase.execute(dto);
+      await this._sendOtpPhoneUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { message: 'OTP sent successfully' });
     } catch (error) {
       next(error);
@@ -326,7 +326,7 @@ export class UserProfileController implements IUserProfileController {
         return;
       }
 
-      await this.verifyOtpPhoneUseCase.execute(dto);
+      await this._verifyOtpPhoneUseCase.execute(dto);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
         message: 'OTP verified successfully',
       });
@@ -351,7 +351,7 @@ export class UserProfileController implements IUserProfileController {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_INPUT, HttpResCode.BAD_REQUEST);
       }
 
-      const result = await this.withdrawFundsUseCase.execute(userId, amount, stripeAccountId);
+      const result = await this._withdrawFundsUseCase.execute(userId, amount, stripeAccountId);
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {

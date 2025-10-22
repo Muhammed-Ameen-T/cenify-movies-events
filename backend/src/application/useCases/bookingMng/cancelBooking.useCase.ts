@@ -13,20 +13,20 @@ import { socketService } from '../../../infrastructure/services/socket.service';
 @injectable()
 export class CancelBookingUseCase implements ICancelBookingUseCase {
   constructor(
-    @inject('BookingRepository') private bookingRepository: IBookingRepository,
-    @inject('NotificationRepository') private notificationRepository: INotificationRepository,
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
+    @inject('BookingRepository') private _bookingRepository: IBookingRepository,
+    @inject('NotificationRepository') private _notificationRepository: INotificationRepository,
+    @inject('WalletRepository') private _walletRepository: IWalletRepository,
   ) {}
 
   async execute(bookingId: string, reason: string): Promise<Booking> {
-    const existingBooking = await this.bookingRepository.findByBookingId(bookingId);
+    const existingBooking = await this._bookingRepository.findByBookingId(bookingId);
 
     if (!existingBooking) {
       throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
 
     const show = existingBooking.showId as any;
-    const theater = show.theaterId as any;
+    const theater = show.theaterId ;
 
     if (!theater.facilities?.freeCancellation) {
       throw new CustomError(
@@ -42,7 +42,7 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     if (!existingBooking._id) {
       throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
-    const updatedBooking = await this.bookingRepository.cancelBooking(
+    const updatedBooking = await this._bookingRepository.cancelBooking(
       existingBooking._id.toString(),
       reason,
     );
@@ -54,7 +54,7 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
     }
 
     const notification = new Notification(
-      null as any,
+      null,
       existingBooking.userId._id.toString(),
       'Booking Cancelled',
       'booking',
@@ -66,14 +66,14 @@ export class CancelBookingUseCase implements ICancelBookingUseCase {
       false,
       [],
     );
-    await this.notificationRepository.createNotification(notification);
+    await this._notificationRepository.createNotification(notification);
     socketService.emitNotification(`user-${existingBooking.userId._id.toString()}`, notification);
 
     if (updatedBooking.payment.status === 'completed') {
       const cancellationFeePercentage = 15;
       const cancellationFee = (existingBooking.totalAmount * cancellationFeePercentage) / 100;
       const refundableAmount = existingBooking.totalAmount - cancellationFee;
-      await this.walletRepository.pushTransactionAndUpdateBalance(
+      await this._walletRepository.pushTransactionAndUpdateBalance(
         existingBooking.userId._id.toString(),
         {
           amount: refundableAmount,

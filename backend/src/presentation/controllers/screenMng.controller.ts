@@ -22,10 +22,10 @@ export class ScreenManagementController implements IScreenManagementController {
    * @param {IFetchScreensOfVendorUseCase} fetchScreensOfVendorUseCase - Use case for fetching screens belonging to a specific vendor.
    */
   constructor(
-    @inject('CreateScreenUseCase') private createScreenUseCase: ICreateScreenUseCase,
-    @inject('UpdateScreenUseCase') private updateScreenUseCase: IUpdateScreenUseCase,
+    @inject('CreateScreenUseCase') private _createScreenUseCase: ICreateScreenUseCase,
+    @inject('UpdateScreenUseCase') private _updateScreenUseCase: IUpdateScreenUseCase,
     @inject('FetchScreensOfVendorUseCase')
-    private fetchScreensOfVendorUseCase: IFetchScreensOfVendorUseCase,
+    private _fetchScreensOfVendorUseCase: IFetchScreensOfVendorUseCase,
   ) {}
 
   /**
@@ -37,7 +37,7 @@ export class ScreenManagementController implements IScreenManagementController {
    */
   async createScreen(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const screen = await this.createScreenUseCase.execute(req.body);
+      const screen = await this._createScreenUseCase.execute(req.body);
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, screen);
     } catch (error) {
       next(error);
@@ -55,7 +55,7 @@ export class ScreenManagementController implements IScreenManagementController {
     const { id } = req.params;
 
     try {
-      const screen = await this.updateScreenUseCase.execute(id, req.body);
+      const screen = await this._updateScreenUseCase.execute(id, req.body);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, screen);
     } catch (error) {
       next(error);
@@ -88,7 +88,7 @@ export class ScreenManagementController implements IScreenManagementController {
         sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
       };
 
-      const result = await this.fetchScreensOfVendorUseCase.execute(params);
+      const result = await this._fetchScreensOfVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);

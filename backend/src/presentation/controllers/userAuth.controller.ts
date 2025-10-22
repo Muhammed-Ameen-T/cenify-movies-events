@@ -41,15 +41,15 @@ export class UserAuthController implements IUserAuthController {
    * @param {IRefreshTokenUseCase} refreshTokenUseCase - Use case for creaeting new Access Token Using refreshToken.
    */
   constructor(
-    @inject('SendOtpUserUseCase') private sendOtpUseCase: ISendOtpUseCase,
-    @inject('VerifyOtpUserUseCase') private verifyOtpUseCase: IVerifyOtpUseCase,
-    @inject('GoogleAuthUseCase') private googleAuthUseCase: IGoogleAuthUseCase,
-    @inject('LoginUserUseCase') private loginUserUseCase: ILoginUserUseCase,
-    @inject('ForgotPassSendOtp') private forgotPassSendOtpUseCase: IForgotPasswordSendOtpUseCase,
-    @inject('ForgotPassUpdate') private forgotPassUpdatePassUseCase: IForgotPasswordUpdateUseCase,
+    @inject('SendOtpUserUseCase') private _sendOtpUseCase: ISendOtpUseCase,
+    @inject('VerifyOtpUserUseCase') private _verifyOtpUseCase: IVerifyOtpUseCase,
+    @inject('GoogleAuthUseCase') private _googleAuthUseCase: IGoogleAuthUseCase,
+    @inject('LoginUserUseCase') private _loginUserUseCase: ILoginUserUseCase,
+    @inject('ForgotPassSendOtp') private _forgotPassSendOtpUseCase: IForgotPasswordSendOtpUseCase,
+    @inject('ForgotPassUpdate') private _forgotPassUpdatePassUseCase: IForgotPasswordUpdateUseCase,
     @inject('ForgotPassVerifyOtp')
-    private forgotPassVerifyOtpUseCase: IForgotPasswordVerifyOtpUseCase,
-    @inject('RefreshTokenUseCase') private refreshTokenUseCase: IRefreshTokenUseCase,
+    private _forgotPassVerifyOtpUseCase: IForgotPasswordVerifyOtpUseCase,
+    @inject('RefreshTokenUseCase') private _refreshTokenUseCase: IRefreshTokenUseCase,
   ) {}
 
   /**
@@ -61,7 +61,7 @@ export class UserAuthController implements IUserAuthController {
    */
   async googleCallback(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const result = await this.googleAuthUseCase.execute(req.body);
+      const result = await this._googleAuthUseCase.execute(req.body);
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -87,50 +87,13 @@ export class UserAuthController implements IUserAuthController {
   async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const refreshToken = req.cookies.refreshToken;
-      const newAccessToken = await this.refreshTokenUseCase.execute(refreshToken);
+      const newAccessToken = await this._refreshTokenUseCase.execute(refreshToken);
       // Send new token response
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, { accessToken: newAccessToken });
     } catch (error) {
       next(error);
     }
   }
-
-  /**
-   * Retrieves details of the currently authenticated user based on their access token.
-   * @param {Request} req - The Express request object, expecting an Authorization header with a Bearer token.
-   * @param {Response} res - The Express response object.
-   * @param {NextFunction} next - The Express next middleware function.
-   * @returns {Promise<void>}
-   */
-  // async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
-  //   const token = req.headers.authorization?.split(' ')[1];
-  //   if (!token) {
-  //     sendResponse(res, HttpResCode.UNAUTHORIZED, ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED);
-  //     return;
-  //   }
-  //   try {
-  //     const jwtService = container.resolve<JwtService>('JwtService');
-  //     const decoded = jwtService.verifyAccessToken(token);
-  //     const user = await this.getUserDetailsUseCase.execute(decoded.userId);
-  //     if (!user) {
-  //       sendResponse(res, HttpResCode.NOT_FOUND, ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND);
-  //       return;
-  //     }
-  //     sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
-  //       id: user._id?.toString() || '',
-  //       name: user.name,
-  //       email: user.email,
-  //       phone: user.phone ? user.phone : 'N/A',
-  //       profileImage: user.profileImage,
-  //       role: user.role,
-  //       loyalityPoints: user.loyalityPoints || 0,
-  //       dateOfBirth: user.dob ? user.dob : 'N/A',
-  //       joinedDate: user.createdAt.toDateString(),
-  //     });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
 
   /**
    * Sends an OTP to the provided email address for user registration or verification.
@@ -147,7 +110,7 @@ export class UserAuthController implements IUserAuthController {
         sendResponse(res, HttpResCode.BAD_REQUEST, ERROR_MESSAGES.VALIDATION.EMAIL_FORMAT_INVALID);
         return;
       }
-      await this.sendOtpUseCase.execute(email.trim());
+      await this._sendOtpUseCase.execute(email.trim());
 
       sendResponse(res, HttpResCode.OK, SuccessMsg.OTP_SENT);
     } catch (error) {
@@ -167,7 +130,7 @@ export class UserAuthController implements IUserAuthController {
       const { name, email, password, otp } = req.body;
 
       const dto = new VerifyOtpDTO(name, email, otp, password);
-      const result = await this.verifyOtpUseCase.execute(dto);
+      const result = await this._verifyOtpUseCase.execute(dto);
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -195,7 +158,7 @@ export class UserAuthController implements IUserAuthController {
       const { email, password } = req.body;
 
       const dto = new LoginDTO(email, password);
-      const response = await this.loginUserUseCase.execute(dto);
+      const response = await this._loginUserUseCase.execute(dto);
 
       res.cookie('refreshToken', response.refreshToken, {
         httpOnly: true,
@@ -240,7 +203,7 @@ export class UserAuthController implements IUserAuthController {
     try {
       const { email } = req.body as ForgotPassSendOtpDTO;
 
-      await this.forgotPassSendOtpUseCase.execute(email.trim());
+      await this._forgotPassSendOtpUseCase.execute(email.trim());
       sendResponse(res, HttpResCode.OK, SuccessMsg.OTP_SENT);
     } catch (error) {
       next(error);
@@ -258,7 +221,7 @@ export class UserAuthController implements IUserAuthController {
     try {
       const { email, otp } = req.body as ForgotPassVerifyOtpDTO;
 
-      await this.forgotPassVerifyOtpUseCase.execute(email, otp);
+      await this._forgotPassVerifyOtpUseCase.execute(email, otp);
       sendResponse(res, HttpResCode.OK, SuccessMsg.OTP_VERIFIED);
     } catch (error) {
       next(error);
@@ -276,7 +239,7 @@ export class UserAuthController implements IUserAuthController {
     try {
       const { email, password } = req.body as ForgotPassUpdateDTO;
 
-      await this.forgotPassUpdatePassUseCase.execute(email, password);
+      await this._forgotPassUpdatePassUseCase.execute(email, password);
       sendResponse(res, HttpResCode.OK, SuccessMsg.PASSWORD_UPDATED);
     } catch (error) {
       next(error);

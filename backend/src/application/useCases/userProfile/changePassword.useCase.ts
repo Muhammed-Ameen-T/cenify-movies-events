@@ -10,11 +10,11 @@ import { hashPassword } from '../../../utils/helpers/hash.utils';
 
 @injectable()
 export class ChangePasswordUseCase implements IChangePasswordUseCase {
-  constructor(@inject('IUserRepository') private userRepository: IUserRepository) {}
+  constructor(@inject('IUserRepository') private _userRepository: IUserRepository) {}
 
   async execute(dto: ChangePasswordRequestDTO): Promise<UserResponseDTO> {
     // Fetch existing user
-    const existingUser = await this.userRepository.findById(dto.userId);
+    const existingUser = await this._userRepository.findById(dto.userId);
     if (!existingUser) {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
@@ -37,11 +37,11 @@ export class ChangePasswordUseCase implements IChangePasswordUseCase {
     // Hash new password
     const hashedNewPassword = await hashPassword(dto.newPassword);
 
-    const updatedUser = await this.userRepository.updatePasswordById(dto.userId, hashedNewPassword);
+    const updatedUser = await this._userRepository.updatePasswordById(dto.userId, hashedNewPassword);
 
     // Return UserResponseDTO
     return new UserResponseDTO(
-      updatedUser._id.toString(),
+      updatedUser._id ? updatedUser._id.toString() : '',
       updatedUser.name,
       updatedUser.email,
       updatedUser.phone,

@@ -10,18 +10,18 @@ import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
  */
 @injectable()
 export class ForgotPasswordVerifyOtpUseCase implements IForgotPasswordVerifyOtpUseCase {
-  constructor(@inject('RedisService') private redisService: RedisService) {}
+  constructor(@inject('RedisService') private _redisService: RedisService) {}
 
   async execute(email: string, otp: string): Promise<void> {
     const otpKey = `reset-otp:${email}`;
-    const storedOtp = await this.redisService.get(otpKey);
+    const storedOtp = await this._redisService.get(otpKey);
 
     if (!storedOtp || storedOtp !== otp) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_OTP, HttpResCode.BAD_REQUEST);
     }
 
     try {
-      await this.redisService.del(otpKey); // Invalidate OTP after verification
+      await this._redisService.del(otpKey); 
       console.log('VerifyOtpUseCase: OTP verified and deleted from Redis:', { otpKey });
     } catch (error) {
       console.error('VerifyOtpUseCase: Redis error:', error);

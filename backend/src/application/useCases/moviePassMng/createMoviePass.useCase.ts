@@ -14,22 +14,21 @@ import { socketService } from '../../../infrastructure/services/socket.service';
 @injectable()
 export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
   constructor(
-    @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
-    @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('NotificationRepository') private notificationRepository: INotificationRepository,
-    @inject('MoviePassJobService') private moviePassJobService: MoviePassJobService,
+    @inject('MoviePassRepository') private _moviePassRepository: IMoviePassRepository,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
+    @inject('NotificationRepository') private _notificationRepository: INotificationRepository,
+    @inject('MoviePassJobService') private _moviePassJobService: MoviePassJobService,
   ) {}
 
   async execute(dto: CreateMoviePassDTO): Promise<MoviePass> {
-    console.log('🚀 ~ CreateMoviePassUseCase ~ execute ~ dto:', dto);
     // Check if user exists
-    const user = await this.userRepository.findById(dto.userId);
+    const user = await this._userRepository.findById(dto.userId);
     if (!user) {
       throw new CustomError('User not found', HttpResCode.BAD_REQUEST);
     }
 
     // Check if Movie Pass exists
-    let moviePass = await this.moviePassRepository.findByUserId(dto.userId);
+    let moviePass = await this._moviePassRepository.findByUserId(dto.userId);
     if (moviePass) {
       // Update existing Movie Pass
       const updateMoviePass = new MoviePass(
@@ -42,8 +41,7 @@ export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
         moviePass.moneySaved,
         moviePass.totalMovies,
       );
-      moviePass = await this.moviePassRepository.update(moviePass._id!, updateMoviePass);
-      console.log('🚀 ~ CreateMoviePassUseCase ~ execute ~ moviePass:', moviePass);
+      moviePass = await this._moviePassRepository.update(moviePass._id!, updateMoviePass);
       if (!moviePass) {
         throw new CustomError('Failed to update Movie Pass', HttpResCode.INTERNAL_SERVER_ERROR);
       }
@@ -59,11 +57,11 @@ export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
         0,
         0,
       );
-      moviePass = await this.moviePassRepository.create(newMoviePass);
+      moviePass = await this._moviePassRepository.create(newMoviePass);
     }
 
     // Update user document
-    await this.userRepository.updateMoviePass(dto.userId, {
+    await this._userRepository.updateMoviePass(dto.userId, {
       moviePass: {
         buyDate: dto.purchaseDate,
         expiryDate: dto.expireDate,
@@ -73,7 +71,7 @@ export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
 
     // Send notification
     const notification = new Notification(
-      null as any,
+      null,
       dto.userId,
       'Movie Pass Purchased',
       'MoviePass',
@@ -85,11 +83,11 @@ export class CreateMoviePassUseCase implements ICreateMoviePassUseCase {
       false,
       [],
     );
-    await this.notificationRepository.createNotification(notification);
+    await this._notificationRepository.createNotification(notification);
     socketService.emitNotification(`user-${dto.userId}`, notification);
 
     // Schedule expiration job
-    await this.moviePassJobService.scheduleMoviePassExpiration(dto.userId, dto.expireDate);
+    await this._moviePassJobService.scheduleMoviePassExpiration(dto.userId, dto.expireDate);
 
     return moviePass;
   }

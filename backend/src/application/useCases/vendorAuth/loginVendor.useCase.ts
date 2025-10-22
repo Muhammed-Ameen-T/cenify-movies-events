@@ -11,12 +11,12 @@ import bcrypt from 'bcryptjs';
 @injectable()
 export class LoginVendorUseCase implements ILoginVendorUseCase {
   constructor(
-    @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('JwtService') private jwtService: JwtService,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
+    @inject('JwtService') private _jwtService: JwtService,
   ) {}
 
   async execute(dto: LoginDTO): Promise<AuthResponseDTO> {
-    const vendor = await this.userRepository.findByEmail(dto.email);
+    const vendor = await this._userRepository.findByEmail(dto.email);
 
     if (!vendor) {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.UNAUTHORIZED);
@@ -38,11 +38,11 @@ export class LoginVendorUseCase implements ILoginVendorUseCase {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.PASSWORD_MISMATCH, HttpResCode.UNAUTHORIZED);
     }
 
-    const accessToken = this.jwtService.generateAccessToken(vendor._id.toString(), vendor.role);
-    const refreshToken = this.jwtService.generateRefreshToken(vendor._id.toString(), vendor.role);
+    const accessToken = this._jwtService.generateAccessToken(vendor._id ? vendor._id.toString() : '', vendor.role);
+    const refreshToken = this._jwtService.generateRefreshToken(vendor._id ? vendor._id.toString() : '', vendor.role);
 
     return new AuthResponseDTO(accessToken, refreshToken, {
-      id: vendor._id.toString(),
+      id: vendor._id ? vendor._id.toString() : '',
       email: vendor.email,
       name: vendor.name,
       phone: vendor.phone,

@@ -14,10 +14,10 @@ import mongoose from 'mongoose';
 @injectable()
 export class CreateShowUseCase implements ICreateShowUseCase {
   constructor(
-    @inject('ShowRepository') private showRepository: IShowRepository,
-    @inject('ScreenRepository') private screenRepository: IScreenRepository,
-    @inject('MovieRepository') private movieRepository: IMovieRepository,
-    @inject('TheaterRepository') private theaterRepository: ITheaterRepository,
+    @inject('ShowRepository') private _showRepository: IShowRepository,
+    @inject('ScreenRepository') private _screenRepository: IScreenRepository,
+    @inject('MovieRepository') private _movieRepository: IMovieRepository,
+    @inject('TheaterRepository') private _theaterRepository: ITheaterRepository,
   ) {}
 
   async execute(vendorId: string, dto: CreateShowDTO): Promise<Show[]> {
@@ -31,7 +31,7 @@ export class CreateShowUseCase implements ICreateShowUseCase {
       }
 
       // Fetch Movie Duration
-      const movie = await this.movieRepository.findById(dto.movieId);
+      const movie = await this._movieRepository.findById(dto.movieId);
       if (!movie || !movie.duration) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.MOVIE_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -39,7 +39,7 @@ export class CreateShowUseCase implements ICreateShowUseCase {
       const movieDurationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
 
       // Fetch Theater Interval Gap
-      const theater = await this.theaterRepository.findById(dto.theaterId);
+      const theater = await this._theaterRepository.findById(dto.theaterId);
       if (!theater || typeof theater.intervalTime !== 'number') {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.THEATER_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -78,7 +78,7 @@ export class CreateShowUseCase implements ICreateShowUseCase {
         }
 
         // Check if time slot is available
-        const isSlotAvailable = await this.screenRepository.checkSlot(
+        const isSlotAvailable = await this._screenRepository.checkSlot(
           dto.screenId,
           startTime,
           endTime,
@@ -92,7 +92,7 @@ export class CreateShowUseCase implements ICreateShowUseCase {
 
         // Create Show
         const newShow = new Show(
-          null as any,
+          null,
           startTime,
           new mongoose.Types.ObjectId(dto.movieId),
           new mongoose.Types.ObjectId(dto.theaterId),
@@ -104,7 +104,7 @@ export class CreateShowUseCase implements ICreateShowUseCase {
           showDate, // Set showDate
         );
 
-        const savedShow = await this.showRepository.create(newShow);
+        const savedShow = await this._showRepository.create(newShow);
         createdShows.push(savedShow);
       }
 

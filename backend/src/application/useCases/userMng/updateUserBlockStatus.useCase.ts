@@ -11,26 +11,18 @@ import { CustomError } from '../../../utils/errors/custom.error';
 
 @injectable()
 export class UpdateUserBlockStatusUseCase implements IUpdateUserBlockStatusUseCase {
-  constructor(@inject('IUserRepository') private userRepository: IUserRepository) {}
+  constructor(@inject('IUserRepository') private _userRepository: IUserRepository) {}
 
   async execute(id: string, data: UpdateUserBlockStatusDTO, res: Response): Promise<void> {
     try {
-      // Validate isBlocked
-      // if (typeof data.isBlocked !== 'boolean') {
-      //   throw new CustomError(
-      //     ERROR_MESSAGES.VALIDATION.INVALID_STATUS,
-      //     HttpResCode.BAD_REQUEST,
-      //   );
-      // }
-
       // Check if user exists
-      const user = await this.userRepository.findById(id);
+      const user = await this._userRepository.findById(id);
       if (!user) {
         throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.NOT_FOUND);
       }
 
       // Update block status
-      await this.userRepository.updateBlockStatus(id, data.isBlocked);
+      await this._userRepository.updateBlockStatus(id, data.isBlocked);
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
         message: `User ${data.isBlocked ? 'blocked' : 'unblocked'} successfully`,

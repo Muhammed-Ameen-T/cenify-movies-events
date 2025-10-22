@@ -8,17 +8,17 @@ import { VerifyOtpPhoneRequestDTO } from '../../dtos/profile.dto';
 
 @injectable()
 export class VerifyOtpPhoneUseCase implements IVerifyOtpPhoneUseCase {
-  constructor(@inject('RedisService') private redisService: RedisService) {}
+  constructor(@inject('RedisService') private _redisService: RedisService) {}
 
   async execute(dto: VerifyOtpPhoneRequestDTO): Promise<void> {
     const otpKey = `otp:phone:${dto.phone}:${dto.userId}`;
-    const storedOtp = await this.redisService.get(otpKey);
+    const storedOtp = await this._redisService.get(otpKey);
 
     if (!storedOtp || storedOtp !== dto.otp) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_OTP, HttpResCode.BAD_REQUEST);
     }
 
-    await this.redisService.del(otpKey);
+    await this._redisService.del(otpKey);
     console.log('VerifyOtpPhoneUseCase: OTP verified and deleted from Redis:', { otpKey });
   }
 }

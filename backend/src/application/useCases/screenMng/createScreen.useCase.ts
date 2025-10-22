@@ -12,13 +12,13 @@ import { ITheaterRepository } from '../../../domain/interfaces/repositories/thea
 @injectable()
 export class CreateScreenUseCase implements ICreateScreenUseCase {
   constructor(
-    @inject('ScreenRepository') private screenRepository: IScreenRepository,
-    @inject('TheaterRepository') private theaterRepository: ITheaterRepository,
+    @inject('ScreenRepository') private _screenRepository: IScreenRepository,
+    @inject('TheaterRepository') private _theaterRepository: ITheaterRepository,
   ) {}
 
   async execute(dto: CreateScreenDTO): Promise<Screen> {
     const newScreen = new Screen(
-      null as any,
+      null,
       dto.name,
       new mongoose.Types.ObjectId(dto.theaterId),
       new mongoose.Types.ObjectId(dto.seatLayoutId),
@@ -26,7 +26,7 @@ export class CreateScreenUseCase implements ICreateScreenUseCase {
       dto.amenities,
     );
 
-    const existingScreenName = await this.screenRepository.findScreenByName(
+    const existingScreenName = await this._screenRepository.findScreenByName(
       dto.name,
       dto.theaterId,
     );
@@ -38,8 +38,8 @@ export class CreateScreenUseCase implements ICreateScreenUseCase {
     }
 
     try {
-      const savedScreen = await this.screenRepository.create(newScreen);
-      await this.theaterRepository.updateScreens(
+      const savedScreen = await this._screenRepository.create(newScreen);
+      await this._theaterRepository.updateScreens(
         savedScreen.theaterId?.toString() || '',
         savedScreen._id?.toString() || '',
         'push',

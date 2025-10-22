@@ -8,11 +8,11 @@ import { User } from '../../../domain/entities/user.entity';
 
 @injectable()
 export class getUserDetailsUseCase implements IgetUserDetailsUseCase {
-  constructor(@inject('IUserRepository') private userRepository: IUserRepository) {}
+  constructor(@inject('IUserRepository') private _userRepository: IUserRepository) {}
 
   async execute(id: string): Promise<User> {
     try {
-      const user = await this.userRepository.findById(id);
+      const user = await this._userRepository.findById(id);
       if (!user) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
       }

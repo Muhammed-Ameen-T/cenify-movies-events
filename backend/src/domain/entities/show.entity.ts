@@ -1,6 +1,6 @@
 export class Show {
   constructor(
-    public _id: string,
+    public _id: string | null,
     public startTime: Date,
     public movieId: string | any,
     public theaterId: string | any,

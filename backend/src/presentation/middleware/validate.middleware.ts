@@ -7,7 +7,7 @@ import { sendResponse } from '../../utils/response/sendResponse.utils';
  * Middleware to validate request body using Zod schema.
  * If validation fails, it responds with an unauthorized error.
  *
- * @param {ZodSchema<any>} schema - The Zod schema used for validation.
+ * @param {ZodSchema<>} schema - The Zod schema used for validation.
  * @returns {(req: Request, res: Response, next: NextFunction) => void} Express middleware function.
  */
 export const validateRequest =

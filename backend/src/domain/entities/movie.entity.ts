@@ -3,7 +3,7 @@ import { ICast, ICrew, IDuration, IMovie, IReview } from '../interfaces/model/mo
 
 export class Movie {
   constructor(
-    public _id: ObjectId | string,
+    public _id: ObjectId | string | null,
     public name: string,
     public genre: string[],
     public trailer: string,

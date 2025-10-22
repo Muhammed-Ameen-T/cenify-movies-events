@@ -8,11 +8,11 @@ import { Theater } from '../../../domain/entities/theater.entity';
 
 @injectable()
 export class FindTheaterByIdUseCase implements IFindTheaterByIdUseCase {
-  constructor(@inject('TheaterRepository') private theaterRepository: ITheaterRepository) {}
+  constructor(@inject('TheaterRepository') private _theaterRepository: ITheaterRepository) {}
 
   async execute(theaterId: string): Promise<Theater | null> {
     try {
-      return await this.theaterRepository.findById(theaterId);
+      return await this._theaterRepository.findById(theaterId);
     } catch (error) {
       throw new CustomError(
         ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND,

@@ -2,7 +2,7 @@ import { ObjectId } from 'mongoose';
 
 export class User {
   constructor(
-    public _id: ObjectId,
+    public _id: ObjectId | null,
     public name: string,
     public email: string,
     public phone: number | null,

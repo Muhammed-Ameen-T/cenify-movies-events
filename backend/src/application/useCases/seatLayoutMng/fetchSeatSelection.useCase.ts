@@ -13,22 +13,22 @@ import { ISeatRepository } from '../../../domain/interfaces/repositories/seat.re
 @injectable()
 export class FetchSeatSelectionUseCase implements IFetchSeatSelectionUseCase {
   constructor(
-    @inject('ShowRepository') private showRepository: IShowRepository,
-    @inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository,
-    @inject('ScreenRepository') private screenRepository: IScreenRepository,
-    @inject('SeatRepository') private seatRepository: ISeatRepository,
+    @inject('ShowRepository') private _showRepository: IShowRepository,
+    @inject('SeatLayoutRepository') private _seatLayoutRepository: ISeatLayoutRepository,
+    @inject('ScreenRepository') private _screenRepository: IScreenRepository,
+    @inject('SeatRepository') private _seatRepository: ISeatRepository,
   ) {}
 
   async execute(showId: string): Promise<SeatSelectionResponseDTO> {
     try {
       // Fetch show details
-      const show = await this.showRepository.findById(showId);
+      const show = await this._showRepository.findById(showId);
       if (!show) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
 
       // Fetch seat layout
-      const screen = await this.screenRepository.findById(show.screenId);
+      const screen = await this._screenRepository.findById(show.screenId);
       if (!screen) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SCREEN_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -39,7 +39,7 @@ export class FetchSeatSelectionUseCase implements IFetchSeatSelectionUseCase {
           HttpResCode.BAD_REQUEST,
         );
       }
-      const seatLayout = await this.seatLayoutRepository.findById(
+      const seatLayout = await this._seatLayoutRepository.findById(
         screen.seatLayoutId._id.toString(),
       );
       if (!seatLayout) {
@@ -50,7 +50,7 @@ export class FetchSeatSelectionUseCase implements IFetchSeatSelectionUseCase {
       }
 
       // Fetch seats
-      const seats = await this.seatRepository.findSeatsByLayoutId(seatLayout._id?.toString() || '');
+      const seats = await this._seatRepository.findSeatsByLayoutId(seatLayout._id?.toString() || '');
       const bookedSeats = show.bookedSeats || [];
 
       // Map seats to DTO
@@ -81,7 +81,7 @@ export class FetchSeatSelectionUseCase implements IFetchSeatSelectionUseCase {
           seatPrices: seatLayout.seatPrice,
         },
         showDetails: {
-          showId: show._id,
+          showId: show._id ? show._id : '',
           movieTitle: show.movieId?.name || 'Unknown Movie',
           movieId: show.movieId._id,
           theaterName: show.theaterId?.name || 'Unknown Theater',

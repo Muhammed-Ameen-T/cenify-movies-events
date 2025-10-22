@@ -10,7 +10,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FetchUsersUseCase implements IFetchUsersUseCase {
-  constructor(@inject('IUserRepository') private userRepository: IUserRepository) {}
+  constructor(@inject('IUserRepository') private _userRepository: IUserRepository) {}
 
   async execute(params: {
     page: number;
@@ -32,7 +32,7 @@ export class FetchUsersUseCase implements IFetchUsersUseCase {
       const { page, limit, isBlocked, role, search, sortBy, sortOrder } = params;
       const roleArray = role ? role.split(',') : undefined;
 
-      const result = await this.userRepository.findUsers({
+      const result = await this._userRepository.findUsers({
         page,
         limit,
         isBlocked,
@@ -61,7 +61,7 @@ export class FetchUsersUseCase implements IFetchUsersUseCase {
 
   private mapToDTO(user: User): UserResponseDTO {
     return new UserResponseDTO(
-      user._id.toString(),
+      user._id ? user._id.toString() : '',
       user.name,
       user.email,
       user.phone,

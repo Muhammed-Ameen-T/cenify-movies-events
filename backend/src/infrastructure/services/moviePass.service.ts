@@ -9,13 +9,13 @@ import { SuccessMsg } from '../../utils/constants/commonSuccessMsg.constants';
 
 @injectable()
 export class MoviePassJobService {
-  private agenda: Agenda;
+  private _agenda: Agenda;
 
   constructor(
-    @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
-    @inject('IUserRepository') private userRepository: IUserRepository,
+    @inject('MoviePassRepository') private _moviePassRepository: IMoviePassRepository,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
   ) {
-    this.agenda = new Agenda({
+    this._agenda = new Agenda({
       db: {
         address: env.MONGO_URI,
         collection: 'agendaJobs',
@@ -28,16 +28,16 @@ export class MoviePassJobService {
   }
 
   private defineJobs() {
-    this.agenda.define('expireMoviePass', async (job: Job) => {
+    this._agenda.define('expireMoviePass', async (job: Job) => {
       const { userId } = job.attrs.data;
       try {
-        const moviePass = await this.moviePassRepository.findByUserId(userId);
+        const moviePass = await this._moviePassRepository.findByUserId(userId);
         if (!moviePass) {
           throw new CustomError('Movie Pass not found', HttpResCode.BAD_REQUEST);
         }
         if (moviePass.status === 'Active') {
-          await this.moviePassRepository.updateStatus(userId, 'Inactive');
-          await this.userRepository.updateMoviePass(userId, {
+          await this._moviePassRepository.updateStatus(userId, 'Inactive');
+          await this._userRepository.updateMoviePass(userId, {
             moviePass: {
               buyDate: null,
               expiryDate: null,
@@ -65,7 +65,7 @@ export class MoviePassJobService {
   async scheduleMoviePassExpiration(userId: string, expireDate: Date): Promise<void> {
     try {
       await this.cancelMoviePassJobs(userId);
-      await this.agenda.schedule(expireDate, 'expireMoviePass', { userId });
+      await this._agenda.schedule(expireDate, 'expireMoviePass', { userId });
       console.log(
         `✅ MoviePassJobService ~ scheduleMoviePassExpiration ~ Scheduled expiration for userId: ${userId} at ${expireDate}`,
       );
@@ -83,7 +83,7 @@ export class MoviePassJobService {
 
   async cancelMoviePassJobs(userId: string): Promise<void> {
     try {
-      await this.agenda.cancel({ 'data.userId': userId });
+      await this._agenda.cancel({ 'data.userId': userId });
       console.log(
         `✅ MoviePassJobService ~ cancelMoviePassJobs ~ Cancelled existing jobs for userId: ${userId}`,
       );
@@ -98,7 +98,7 @@ export class MoviePassJobService {
 
   async startAgenda(): Promise<void> {
     try {
-      await this.agenda.start();
+      await this._agenda.start();
       console.log(SuccessMsg.AGENDA_STARTED);
     } catch (error) {
       console.error('Failed to start Agenda scheduler', error);

@@ -7,7 +7,7 @@ import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class SmsService {
-  private client: Twilio.Twilio;
+  private _client: Twilio.Twilio;
 
   constructor() {
     const accountSid = env.TWILIO_ACCOUNT_SID;
@@ -20,7 +20,7 @@ export class SmsService {
       );
     }
 
-    this.client = Twilio(accountSid, authToken);
+    this._client = Twilio(accountSid, authToken);
   }
 
   async sendSms(phone: string, message: string): Promise<void> {
@@ -35,17 +35,17 @@ export class SmsService {
         );
       }
 
-      await this.client.messages.create({
+      await this._client.messages.create({
         body: message,
         from: twilioPhone,
         to: formattedPhone,
       });
 
       console.log(`SMS sent to ${formattedPhone}: ${message}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('SmsService: Failed to send SMS:', error);
       throw new CustomError(
-        error.message || ERROR_MESSAGES.GENERAL.FAILE_SENDING_SMS,
+        ERROR_MESSAGES.GENERAL.FAILE_SENDING_SMS,
         HttpResCode.INTERNAL_SERVER_ERROR,
       );
     }

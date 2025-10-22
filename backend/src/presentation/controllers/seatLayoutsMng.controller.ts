@@ -25,12 +25,12 @@ export class SeatLayoutController implements ISeatLayoutController {
    * @param {IFindSeatLayoutByIdUseCase} findSeatLayoutByIdUseCase - Use case for finding a seat layout by its ID.
    */
   constructor(
-    @inject('CreateSeatLayoutUseCase') private createSeatLayoutUseCase: ICreateSeatLayoutUseCase,
-    @inject('UpdateSeatLayoutUseCase') private updateSeatLayoutUseCase: IUpdateSeatLayoutUseCase,
+    @inject('CreateSeatLayoutUseCase') private _createSeatLayoutUseCase: ICreateSeatLayoutUseCase,
+    @inject('UpdateSeatLayoutUseCase') private _updateSeatLayoutUseCase: IUpdateSeatLayoutUseCase,
     @inject('FindSeatLayoutsByVendorUseCase')
-    private findSeatLayoutsByVendorUseCase: IFindSeatLayoutsByVendorUseCase,
+    private _findSeatLayoutsByVendorUseCase: IFindSeatLayoutsByVendorUseCase,
     @inject('FindSeatLayoutByIdUseCase')
-    private findSeatLayoutByIdUseCase: IFindSeatLayoutByIdUseCase,
+    private _findSeatLayoutByIdUseCase: IFindSeatLayoutByIdUseCase,
   ) {}
 
   /**
@@ -54,7 +54,7 @@ export class SeatLayoutController implements ISeatLayoutController {
         seats,
         capacity,
       );
-      await this.createSeatLayoutUseCase.execute(dto, res);
+      await this._createSeatLayoutUseCase.execute(dto, res);
     } catch (error) {
       const errorMessage =
         error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_SAVED;
@@ -83,7 +83,7 @@ export class SeatLayoutController implements ISeatLayoutController {
         seats,
         capacity,
       );
-      await this.updateSeatLayoutUseCase.execute(dto, res);
+      await this._updateSeatLayoutUseCase.execute(dto, res);
     } catch (error) {
       const errorMessage =
         error instanceof CustomError ? error.message : ERROR_MESSAGES.DATABASE.RECORD_NOT_UPDATED;
@@ -116,7 +116,7 @@ export class SeatLayoutController implements ISeatLayoutController {
         sortOrder: sortOrder ? (sortOrder as 'asc' | 'desc') : undefined,
       };
 
-      const result = await this.findSeatLayoutsByVendorUseCase.execute(params);
+      const result = await this._findSeatLayoutsByVendorUseCase.execute(params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       const errorMessage =
@@ -148,7 +148,7 @@ export class SeatLayoutController implements ISeatLayoutController {
         );
       }
 
-      const seatLayout = await this.findSeatLayoutByIdUseCase.execute(layoutId, res);
+      const seatLayout = await this._findSeatLayoutByIdUseCase.execute(layoutId, res);
       if (!seatLayout) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.SEAT_LAYOUT_NOT_FOUND, HttpResCode.NOT_FOUND);
       }

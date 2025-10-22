@@ -27,10 +27,10 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
    * @param {RedisService} redisService - Service for storing and retrieving OTPs.
    */
   constructor(
-    @inject('IUserRepository') private authRepository: IUserRepository,
-    @inject('JwtService') private jwtService: JwtService,
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
-    @inject('RedisService') private redisService: RedisService,
+    @inject('IUserRepository') private _authRepository: IUserRepository,
+    @inject('JwtService') private _jwtService: JwtService,
+    @inject('WalletRepository') private _walletRepository: IWalletRepository,
+    @inject('RedisService') private _redisService: RedisService,
   ) {}
 
   /**
@@ -43,7 +43,7 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
    */
   async execute(dto: VerifyOtpDTO): Promise<AuthResponseDTO> {
     console.log(dto);
-    const storedOtp = await this.redisService.get(`otp:${dto.email}`);
+    const storedOtp = await this._redisService.get(`otp:${dto.email}`);
 
     console.log('storedOtp:', storedOtp);
 
@@ -51,13 +51,13 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_OTP, HttpResCode.BAD_REQUEST);
     }
 
-    await this.redisService.del(`otp:${dto.email}`);
+    await this._redisService.del(`otp:${dto.email}`);
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     // Create new user
     let user = new User(
-      null as any,
+      null,
       dto.name,
       dto.email,
       null,
@@ -73,9 +73,9 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       new Date(),
     );
 
-    const savedUser = await this.authRepository.create(user);
+    const savedUser = await this._authRepository.create(user);
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    const createdUser = await this.authRepository.findByEmail(user.email.toLocaleLowerCase());
+    const createdUser = await this._authRepository.findByEmail(user.email.toLocaleLowerCase());
     console.log('newcreatedUser:', createdUser);
     if (!createdUser) {
       throw new CustomError(
@@ -84,20 +84,20 @@ export class VerifyOtpUseCase implements IVerifyOtpUseCase {
       );
     }
     const newWallet = new Wallet(
-      null as any,
-      createdUser._id?.toString(),
+      null,
+      createdUser._id ? createdUser._id.toString() : '',
       0,
       [],
       new Date(),
       new Date(),
     );
-    await this.walletRepository.createWallet(newWallet);
+    await this._walletRepository.createWallet(newWallet);
 
-    const accessToken = this.jwtService.generateAccessToken(createdUser._id?.toString(), 'user');
-    const refreshToken = this.jwtService.generateRefreshToken(createdUser._id?.toString(), 'user');
+    const accessToken = this._jwtService.generateAccessToken(createdUser._id ? createdUser._id.toString() : '', 'user');
+    const refreshToken = this._jwtService.generateRefreshToken(createdUser._id ? createdUser._id.toString() : '', 'user');
 
     return new AuthResponseDTO(accessToken, refreshToken, {
-      id: createdUser._id?.toString(),
+      id: createdUser._id ? createdUser._id.toString() : '',
       email: createdUser.email,
       name: createdUser.name,
       phone: createdUser.phone,

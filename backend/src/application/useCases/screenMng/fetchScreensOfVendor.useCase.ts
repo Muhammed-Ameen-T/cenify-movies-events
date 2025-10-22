@@ -7,7 +7,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FetchScreensOfVendorUseCase implements IFetchScreensOfVendorUseCase {
-  constructor(@inject('ScreenRepository') private screenRepository: IScreenRepository) {}
+  constructor(@inject('ScreenRepository') private _screenRepository: IScreenRepository) {}
 
   async execute(params: {
     vendorId: string;
@@ -19,7 +19,7 @@ export class FetchScreensOfVendorUseCase implements IFetchScreensOfVendorUseCase
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ screens: any[]; totalCount: number }> {
     try {
-      const result = await this.screenRepository.findScreensByVendor(params);
+      const result = await this._screenRepository.findScreensByVendor(params);
       return result;
     } catch (error) {
       throw new CustomError(

@@ -15,11 +15,10 @@ import { socketService } from '../../../infrastructure/services/socket.service';
 @injectable()
 export class SelectSeatsUseCase implements ISelectSeatsUseCase {
   constructor(
-    @inject('ShowRepository') private showRepository: IShowRepository,
-    @inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository,
-    @inject('ScreenRepository') private screenRepository: IScreenRepository,
-    @inject('SeatRepository') private seatRepository: ISeatRepository,
-    @inject('ShowJobService') private showJobService: ShowJobService,
+    @inject('ShowRepository') private _showRepository: IShowRepository,
+    @inject('ScreenRepository') private _screenRepository: IScreenRepository,
+    @inject('SeatRepository') private _seatRepository: ISeatRepository,
+    @inject('ShowJobService') private _showJobService: ShowJobService,
   ) {
     console.log(
       `SelectSeatsUseCase initialized with SocketService instance ID: ${socketService.getInstanceId()}`,
@@ -52,12 +51,12 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
 
       console.log(`Selecting seats for showId: ${showId}, seatIds:`, seatIds);
 
-      const show = await this.showRepository.findByIdSession(showId, session);
+      const show = await this._showRepository.findByIdSession(showId, session);
       if (!show) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
 
-      const screen = await this.screenRepository.findByIdSession(show.screenId, session);
+      const screen = await this._screenRepository.findByIdSession(show.screenId, session);
       if (!screen) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SCREEN_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -68,7 +67,7 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
         );
       }
 
-      const seats = await this.seatRepository.findSeatsByIdsSession(
+      const seats = await this._seatRepository.findSeatsByIdsSession(
         screen.seatLayoutId._id.toString(),
         seatIds,
         session,
@@ -97,7 +96,7 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
         userId: String(userId),
       }));
 
-      await this.showRepository.updateBookedSeatsSession(showId, newBookedSeats, session);
+      await this._showRepository.updateBookedSeatsSession(showId, newBookedSeats, session);
 
       await session.commitTransaction();
 
@@ -115,7 +114,7 @@ export class SelectSeatsUseCase implements ISelectSeatsUseCase {
         console.warn('No valid seat IDs to emit for socket update');
       }
 
-      await this.showJobService.scheduleSeatExpiration(showId);
+      await this._showJobService.scheduleSeatExpiration(showId);
 
       return {
         selectedSeats: seats.map((seat) => ({

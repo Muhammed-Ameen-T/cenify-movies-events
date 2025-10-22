@@ -7,13 +7,13 @@ import { Notification } from '../../domain/entities/notification.entity';
 @injectable()
 export class NotificationService {
   constructor(
-    @inject('NotificationRepository') private notificationRepository: INotificationRepository,
+    @inject('NotificationRepository') private _notificationRepository: INotificationRepository,
   ) {}
 
   // Create an individual notification
   async createNotification(notificationData: Partial<Notification>): Promise<Notification> {
     try {
-      return await this.notificationRepository.createNotification(notificationData as Notification);
+      return await this._notificationRepository.createNotification(notificationData as Notification);
     } catch (error) {
       console.error('❌ Error creating notification:', error);
       throw new CustomError('Failed to create notification', HttpResCode.INTERNAL_SERVER_ERROR);
@@ -24,7 +24,7 @@ export class NotificationService {
   async createGlobalNotification(title: string, description: string, type: string): Promise<void> {
     try {
       const notificationData: Notification = {
-        _id: null as any,
+        _id: null,
         userId: null,
         title,
         description,
@@ -36,7 +36,7 @@ export class NotificationService {
         readedUsers: [],
       };
 
-      await this.notificationRepository.createGlobalNotification(notificationData);
+      await this._notificationRepository.createGlobalNotification(notificationData);
     } catch (error) {
       console.error('❌ Error creating global notification:', error);
       throw new CustomError(
@@ -50,7 +50,7 @@ export class NotificationService {
   async createVendorNotification(title: string, description: string, type: string): Promise<void> {
     try {
       const notificationData: Notification = {
-        _id: null as any,
+        _id: null,
         userId: null,
         title,
         description,
@@ -61,7 +61,7 @@ export class NotificationService {
         isRead: false,
         readedUsers: [],
       };
-      await this.notificationRepository.createVendorNotification(notificationData);
+      await this._notificationRepository.createVendorNotification(notificationData);
     } catch (error) {
       console.error('❌ Error creating vendor notifications:', error);
       throw new CustomError(
@@ -84,7 +84,7 @@ export class NotificationService {
     readCount: number;
   }> {
     try {
-      return await this.notificationRepository.fetchAllNotifications(userId, page, limit, filter);
+      return await this._notificationRepository.fetchAllNotifications(userId, page, limit, filter);
     } catch (error) {
       console.error('❌ Error fetching notifications:', error);
       throw new CustomError('Failed to fetch notifications', HttpResCode.INTERNAL_SERVER_ERROR);
@@ -103,7 +103,7 @@ export class NotificationService {
     readCount: number;
   }> {
     try {
-      return await this.notificationRepository.fetchAdminNotifications(page, limit, filter);
+      return await this._notificationRepository.fetchAdminNotifications(page, limit, filter);
     } catch (error) {
       console.error('❌ Error fetching admin notifications:', error);
       throw new CustomError(
@@ -116,7 +116,7 @@ export class NotificationService {
   // Mark a single notification as read
   async markNotificationAsRead(notificationId: string, userId: string): Promise<boolean> {
     try {
-      return await this.notificationRepository.markNotificationAsRead(notificationId, userId);
+      return await this._notificationRepository.markNotificationAsRead(notificationId, userId);
     } catch (error) {
       console.error('❌ Error marking notification as read:', error);
       throw new CustomError(
@@ -129,7 +129,7 @@ export class NotificationService {
   // Mark all notifications for a user as read
   async markAllNotificationsAsRead(userId: string): Promise<boolean> {
     try {
-      return await this.notificationRepository.markAllAsRead(userId);
+      return await this._notificationRepository.markAllAsRead(userId);
     } catch (error) {
       console.error('❌ Error marking all notifications as read:', error);
       throw new CustomError(
@@ -141,7 +141,7 @@ export class NotificationService {
 
   async markAllAdminNotificationsAsRead(): Promise<boolean> {
     try {
-      return await this.notificationRepository.markAllAdminNotificationsRead();
+      return await this._notificationRepository.markAllAdminNotificationsRead();
     } catch (error) {
       console.error('❌ Error marking all admin notifications as read:', error);
       throw new CustomError(

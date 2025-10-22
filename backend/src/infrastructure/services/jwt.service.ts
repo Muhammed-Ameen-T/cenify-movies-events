@@ -2,10 +2,10 @@ import * as jwt from 'jsonwebtoken';
 import { env } from '../../config/env.config';
 
 export class JwtService {
-  private accessSecret: string = env.ACCESS_TOKEN_SECRET;
-  private refreshSecret: string = env.REFRESH_TOKEN_SECRET;
-  private accessExpiry: string = env.ACCESS_TOKEN_EXPIRY;
-  private refreshExpiry: string = env.REFRESH_TOKEN_EXPIRY;
+  private _accessSecret: string = env.ACCESS_TOKEN_SECRET;
+  private _refreshSecret: string = env.REFRESH_TOKEN_SECRET;
+  private _accessExpiry: string = env.ACCESS_TOKEN_EXPIRY;
+  private _refreshExpiry: string = env.REFRESH_TOKEN_EXPIRY;
 
   /**
    * Generates an access token for authentication.
@@ -14,8 +14,8 @@ export class JwtService {
    * @returns {string} A signed JWT access token.
    */
   generateAccessToken(userId: string, role: string): string {
-    return jwt.sign({ userId, role }, this.accessSecret, {
-      expiresIn: this.accessExpiry as jwt.SignOptions['expiresIn'],
+    return jwt.sign({ userId, role }, this._accessSecret, {
+      expiresIn: this._accessExpiry as jwt.SignOptions['expiresIn'],
     });
   }
 
@@ -26,8 +26,8 @@ export class JwtService {
    * @returns {string} A signed JWT refresh token.
    */
   generateRefreshToken(userId: string, role: string): string {
-    return jwt.sign({ userId, role }, this.refreshSecret, {
-      expiresIn: this.refreshExpiry as jwt.SignOptions['expiresIn'],
+    return jwt.sign({ userId, role }, this._refreshSecret, {
+      expiresIn: this._refreshExpiry as jwt.SignOptions['expiresIn'],
     });
   }
 
@@ -38,7 +38,7 @@ export class JwtService {
    * @throws {jwt.JsonWebTokenError} If the token is invalid or expired.
    */
   verifyAccessToken(token: string): { userId: string } {
-    return jwt.verify(token, this.accessSecret) as { userId: string };
+    return jwt.verify(token, this._accessSecret) as { userId: string };
   }
 
   /**
@@ -48,6 +48,6 @@ export class JwtService {
    * @throws {jwt.JsonWebTokenError} If the token is invalid or expired.
    */
   verifyRefreshToken(token: string): { userId: string } {
-    return jwt.verify(token, this.refreshSecret) as { userId: string };
+    return jwt.verify(token, this._refreshSecret) as { userId: string };
   }
 }

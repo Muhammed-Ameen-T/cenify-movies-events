@@ -7,11 +7,11 @@ import { IVendorSM } from '../../dtos/vendor.dto';
 
 @injectable()
 export class FetchTheatersUseCase implements IFetchTheatersUseCase {
-  constructor(@inject('TheaterRepository') private theaterRepository: ITheaterRepository) {}
+  constructor(@inject('TheaterRepository') private _theaterRepository: ITheaterRepository) {}
 
   async execute(): Promise<TheaterResponseDTO[]> {
     try {
-      const theaters = await this.theaterRepository.findTheaters();
+      const theaters = await this._theaterRepository.findTheaters();
       return theaters.map((theater: Theater) => this.mapToDTO(theater));
     } catch (error) {
       console.error('Error fetching theaters:', error);
@@ -23,7 +23,7 @@ export class FetchTheatersUseCase implements IFetchTheatersUseCase {
     const vendor = theater.vendorId as unknown as IVendorSM;
 
     return new TheaterResponseDTO(
-      theater._id.toString(),
+      theater._id ? theater._id.toString() : '',
       theater.name,
       theater.status,
       theater.location,

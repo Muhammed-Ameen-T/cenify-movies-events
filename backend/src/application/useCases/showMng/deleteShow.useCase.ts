@@ -7,16 +7,16 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class DeleteShowUseCase implements IDeleteShowUseCase {
-  constructor(@inject('ShowRepository') private showRepository: IShowRepository) {}
+  constructor(@inject('ShowRepository') private _showRepository: IShowRepository) {}
 
   async execute(id: string): Promise<void> {
     try {
-      const existingShow = await this.showRepository.findById(id);
+      const existingShow = await this._showRepository.findById(id);
       if (!existingShow) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
 
-      await this.showRepository.delete(id);
+      await this._showRepository.delete(id);
     } catch (error) {
       console.error('❌ Error deleting show:', error);
       throw new CustomError(

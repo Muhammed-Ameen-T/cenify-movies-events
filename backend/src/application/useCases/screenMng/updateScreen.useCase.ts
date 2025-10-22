@@ -12,18 +12,18 @@ import { ITheaterRepository } from '../../../domain/interfaces/repositories/thea
 @injectable()
 export class UpdateScreenUseCase implements IUpdateScreenUseCase {
   constructor(
-    @inject('ScreenRepository') private screenRepository: IScreenRepository,
-    @inject('TheaterRepository') private theaterRepository: ITheaterRepository,
+    @inject('ScreenRepository') private _screenRepository: IScreenRepository,
+    @inject('TheaterRepository') private _theaterRepository: ITheaterRepository,
   ) {}
 
   async execute(id: string, dto: UpdateScreenDTO): Promise<Screen> {
     try {
-      const existingScreen = await this.screenRepository.findById(id);
+      const existingScreen = await this._screenRepository.findById(id);
       if (!existingScreen) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
       }
 
-      const existingScreenName = await this.screenRepository.findScreenByName(
+      const existingScreenName = await this._screenRepository.findScreenByName(
         dto.name,
         dto.theaterId,
         id,
@@ -74,7 +74,7 @@ export class UpdateScreenUseCase implements IUpdateScreenUseCase {
         new Date(),
       );
 
-      const savedScreen = await this.screenRepository.updateScreenDetails(updatedScreen);
+      const savedScreen = await this._screenRepository.updateScreenDetails(updatedScreen);
       if (!savedScreen) {
         throw new CustomError(
           ERROR_MESSAGES.DATABASE.RECORD_NOT_SAVED,
@@ -82,12 +82,12 @@ export class UpdateScreenUseCase implements IUpdateScreenUseCase {
         );
       }
       if (oldTheaterId !== savedScreen.theaterId?._id.toString()) {
-        await this.theaterRepository.updateScreens(
+        await this._theaterRepository.updateScreens(
           oldTheaterId,
           savedScreen._id?.toString() || '',
           'pull',
         );
-        await this.theaterRepository.updateScreens(
+        await this._theaterRepository.updateScreens(
           savedScreen.theaterId?._id.toString() || '',
           savedScreen._id?.toString() || '',
           'push',

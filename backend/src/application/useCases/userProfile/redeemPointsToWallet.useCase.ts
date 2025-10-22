@@ -8,7 +8,7 @@ import { IRedeemLoyalityToWalletUseCase } from '../../../domain/interfaces/useCa
 
 @injectable()
 export class RedeemLoyalityToWalletUseCase implements IRedeemLoyalityToWalletUseCase {
-  constructor(@inject('WalletRepository') private walletRepository: IWalletRepository) {}
+  constructor(@inject('WalletRepository') private _walletRepository: IWalletRepository) {}
 
   async execute(userId: string, amount: number): Promise<Wallet> {
     try {
@@ -20,7 +20,7 @@ export class RedeemLoyalityToWalletUseCase implements IRedeemLoyalityToWalletUse
         createdAt: new Date(),
       };
 
-      const updatedWallet = await this.walletRepository.redeemLoyalityPointsAndUpdateWallet(
+      const updatedWallet = await this._walletRepository.redeemLoyalityPointsAndUpdateWallet(
         userId,
         amount,
         transaction,

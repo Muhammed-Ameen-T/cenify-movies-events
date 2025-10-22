@@ -17,7 +17,7 @@ export class AdminAuthController implements IAdminAuthController {
    * Creates an instance of AdminAuthController.
    * @param {ILoginAdminUseCase} loginAdminUseCase - The use case for admin login.
    */
-  constructor(@inject('LoginAdminUseCase') private loginAdminUseCase: ILoginAdminUseCase) {}
+  constructor(@inject('LoginAdminUseCase') private _loginAdminUseCase: ILoginAdminUseCase) {}
 
   /**
    * Handles the admin login request.
@@ -31,7 +31,7 @@ export class AdminAuthController implements IAdminAuthController {
       const { email, password } = req.body;
 
       const dto: LoginAdminDTO = { email, password };
-      const result = await this.loginAdminUseCase.execute(dto);
+      const result = await this._loginAdminUseCase.execute(dto);
 
       console.log('Admin Login Success!');
 

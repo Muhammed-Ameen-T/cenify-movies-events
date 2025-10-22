@@ -8,7 +8,7 @@ import { ShowSelectionResponseDTO } from '../../dtos/show.dto';
 
 @injectable()
 export class FetchShowSelectionUseCase implements IFetchShowSelectionUseCase {
-  constructor(@inject('ShowRepository') private showRepository: IShowRepository) {}
+  constructor(@inject('ShowRepository') private _showRepository: IShowRepository) {}
 
   async execute(params: {
     movieId: string;
@@ -21,7 +21,7 @@ export class FetchShowSelectionUseCase implements IFetchShowSelectionUseCase {
     facilities?: string[];
   }): Promise<ShowSelectionResponseDTO> {
     try {
-      return await this.showRepository.findShowSelection(params);
+      return await this._showRepository.findShowSelection(params);
     } catch (error) {
       console.error('❌ Error in FetchShowSelectionUseCase:', error);
       throw new CustomError(

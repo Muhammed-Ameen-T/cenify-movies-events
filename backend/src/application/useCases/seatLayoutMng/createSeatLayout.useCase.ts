@@ -17,28 +17,13 @@ import {
   CreateSeatLayoutDTOType,
 } from '../../dtos/seatLayout';
 import SeatLayoutModel from '../../../infrastructure/database/seatLayout.model';
+import { normalizeSeatType } from '../../../utils/helpers/normalizeSeatType.utils';
 
-// Utility function to normalize seat types
-const normalizeSeatType = (type: string): 'Regular' | 'Premium' | 'VIP' | 'Unavailable' => {
-  const normalized = type.toLowerCase();
-  switch (normalized) {
-    case 'regular':
-      return 'Regular';
-    case 'premium':
-      return 'Premium';
-    case 'vip':
-      return 'VIP';
-    case 'unavailable':
-      return 'Unavailable';
-    default:
-      throw new CustomError(`Invalid seat type: ${type}`, 400);
-  }
-};
 
 @injectable()
 export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
   constructor(
-    @inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository,
+    @inject('SeatLayoutRepository') private _seatLayoutRepository: ISeatLayoutRepository,
   ) {}
 
   async execute(dto: CreateSeatLayoutDTO, res: Response): Promise<void> {
@@ -90,7 +75,7 @@ export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
       );
 
       // Create or update SeatLayout document
-      const savedSeatLayout = await this.seatLayoutRepository.create(seatLayout);
+      const savedSeatLayout = await this._seatLayoutRepository.create(seatLayout);
       if (!savedSeatLayout._id) {
         throw new CustomError('Failed to create or update seat layout', 500);
       }
@@ -118,7 +103,7 @@ export class CreateSeatLayoutUseCase implements ICreateSeatLayoutUseCase {
       });
 
       // Create Seat documents
-      const savedSeats = await this.seatLayoutRepository.createSeats(seats);
+      const savedSeats = await this._seatLayoutRepository.createSeats(seats);
       seatLayout.seatIds = savedSeats.map((seat) => seat._id!);
 
       // Update SeatLayout with seatIds

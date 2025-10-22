@@ -43,7 +43,7 @@ export interface ShowSelectionTheaterDTO {
     time: string;
     status: 'available' | 'fast-filling' | 'not-available';
     _id: string;
-    amenities: any;
+    amenities: string[];
   }[];
 }
 

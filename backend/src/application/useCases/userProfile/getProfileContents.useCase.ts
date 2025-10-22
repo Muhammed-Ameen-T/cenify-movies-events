@@ -12,9 +12,9 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 @injectable()
 export class FindProfileContentsUseCase implements IFindProfileContentsUseCase {
   constructor(
-    @inject('WalletRepository') private walletRepository: IWalletRepository,
-    @inject('BookingRepository') private bookingRepository: IBookingRepository,
-    @inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository,
+    @inject('WalletRepository') private _walletRepository: IWalletRepository,
+    @inject('BookingRepository') private _bookingRepository: IBookingRepository,
+    @inject('MoviePassRepository') private _moviePassRepository: IMoviePassRepository,
   ) {}
 
   async execute(userId: string): Promise<{
@@ -26,9 +26,9 @@ export class FindProfileContentsUseCase implements IFindProfileContentsUseCase {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
     }
 
-    const walletBalance = (await this.walletRepository.walletbalance(userId)) ?? 0;
-    const bookingsCount = await this.bookingRepository.countBookings(userId);
-    const moviePass = await this.moviePassRepository.findByUserId(userId);
+    const walletBalance = (await this._walletRepository.walletbalance(userId)) ?? 0;
+    const bookingsCount = await this._bookingRepository.countBookings(userId);
+    const moviePass = await this._moviePassRepository.findByUserId(userId);
 
     return {
       walletBalance,

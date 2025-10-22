@@ -7,7 +7,6 @@ import { IUpdateSeatLayoutUseCase } from '../../../domain/interfaces/useCases/Ve
 import { sendResponse } from '../../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../../utils/constants/httpResponseCode.utils';
 import { CustomError } from '../../../utils/errors/custom.error';
-import { SuccessMsg } from '../../../utils/constants/commonSuccessMsg.constants';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 import { z } from 'zod';
 import { Seat, SeatLayout } from '../../../domain/entities/seatLayout.entity';
@@ -17,28 +16,12 @@ import {
   UpdateSeatLayoutDTOType,
 } from '../../dtos/seatLayout';
 import SeatLayoutModel from '../../../infrastructure/database/seatLayout.model';
-
-// Utility function to normalize seat types (reused from create use case)
-const normalizeSeatType = (type: string): 'Regular' | 'Premium' | 'VIP' | 'Unavailable' => {
-  const normalized = type.toLowerCase();
-  switch (normalized) {
-    case 'regular':
-      return 'Regular';
-    case 'premium':
-      return 'Premium';
-    case 'vip':
-      return 'VIP';
-    case 'unavailable':
-      return 'Unavailable';
-    default:
-      throw new CustomError(`Invalid seat type: ${type}`, 400);
-  }
-};
+import { normalizeSeatType } from '../../../utils/helpers/normalizeSeatType.utils';
 
 @injectable()
 export class UpdateSeatLayoutUseCase implements IUpdateSeatLayoutUseCase {
   constructor(
-    @inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository,
+    @inject('SeatLayoutRepository') private _seatLayoutRepository: ISeatLayoutRepository,
   ) {}
 
   async execute(dto: UpdateSeatLayoutDTO, res: Response): Promise<SeatLayout | null> {
@@ -129,14 +112,14 @@ export class UpdateSeatLayoutUseCase implements IUpdateSeatLayoutUseCase {
       });
 
       // Replace existing seats
-      const savedSeats = await this.seatLayoutRepository.replaceSeats(
+      const savedSeats = await this._seatLayoutRepository.replaceSeats(
         new mongoose.Types.ObjectId(validatedData.layoutId),
         seats,
       );
       seatLayout.seatIds = savedSeats.map((seat) => seat._id!);
 
       // Update SeatLayout with new seatIds and other fields
-      return await this.seatLayoutRepository.update(seatLayout);
+      return await this._seatLayoutRepository.update(seatLayout);
     } catch (error) {
       if (error instanceof z.ZodError) {
         throw new CustomError(

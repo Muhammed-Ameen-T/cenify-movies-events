@@ -22,8 +22,8 @@ export class SendOtpUseCase implements ISendOtpUseCase {
    * @param {RedisService} redisService - Service for storing OTP temporarily in Redis.
    */
   constructor(
-    @inject('IUserRepository') private authRepository: IUserRepository,
-    @inject('RedisService') private redisService: RedisService,
+    @inject('IUserRepository') private _authRepository: IUserRepository,
+    @inject('RedisService') private _redisService: RedisService,
   ) {}
 
   /**
@@ -36,7 +36,7 @@ export class SendOtpUseCase implements ISendOtpUseCase {
    */
   async execute(email: string): Promise<void> {
     // Check if user already exists
-    let user = await this.authRepository.findByEmail(email);
+    let user = await this._authRepository.findByEmail(email);
     if (user) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.USER_ALREADY_EXISTS, HttpResCode.BAD_REQUEST);
     }
@@ -45,7 +45,7 @@ export class SendOtpUseCase implements ISendOtpUseCase {
     const otpKey = `otp:${email}`;
 
     try {
-      await this.redisService.set(otpKey, otp, 300);
+      await this._redisService.set(otpKey, otp, 300);
       console.log('SendOtpUseCase: Stored OTP in Redis:', { otpKey, otp });
     } catch (error) {
       console.error('SendOtpUseCase: Redis error:', error);

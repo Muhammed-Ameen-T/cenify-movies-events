@@ -8,7 +8,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FetchTheaterOfVendorUseCase implements IFetchTheaterOfVendorUseCase {
-  constructor(@inject('TheaterRepository') private theaterRepository: ITheaterRepository) {}
+  constructor(@inject('TheaterRepository') private _theaterRepository: ITheaterRepository) {}
   /**
    * Fetches theaters for a specific vendor.
    * @param params - The parameters for fetching theaters.
@@ -42,7 +42,7 @@ export class FetchTheaterOfVendorUseCase implements IFetchTheaterOfVendorUseCase
       const page = params?.page || 1;
       const limit = params?.limit || 8;
 
-      const { theaters, totalCount } = await this.theaterRepository.findTheatersByVendor(params);
+      const { theaters, totalCount } = await this._theaterRepository.findTheatersByVendor(params);
       const totalPages = Math.ceil(totalCount / limit);
 
       return {

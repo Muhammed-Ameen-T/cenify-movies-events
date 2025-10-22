@@ -8,7 +8,7 @@ import { IFindMoviePassHistoryUseCase } from '../../../domain/interfaces/useCase
 
 @injectable()
 export class FindMoviePassHistoryUseCase implements IFindMoviePassHistoryUseCase {
-  constructor(@inject('MoviePassRepository') private moviePassRepository: IMoviePassRepository) {}
+  constructor(@inject('MoviePassRepository') private _moviePassRepository: IMoviePassRepository) {}
 
   async execute(
     userId: string,
@@ -19,7 +19,7 @@ export class FindMoviePassHistoryUseCase implements IFindMoviePassHistoryUseCase
     total: number;
   }> {
     try {
-      const result = await this.moviePassRepository.findHistoryByUserId(userId, page, limit);
+      const result = await this._moviePassRepository.findHistoryByUserId(userId, page, limit);
       return result;
     } catch (error) {
       console.error('❌ Error in FindMoviePassHistoryUseCase:', error);

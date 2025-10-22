@@ -29,10 +29,10 @@ export class BookingStripeWebhookController {
    * @param {IUserRepository} userRepository - Repository for user data.
    */
   constructor(
-    @inject('NotificationRepository') private notificationRepository: INotificationRepository,
-    @inject('SeatRepository') private seatRepository: ISeatRepository,
-    @inject('ShowRepository') private showRepository: IShowRepository,
-    @inject('IUserRepository') private userRepository: IUserRepository,
+    @inject('NotificationRepository') private _notificationRepository: INotificationRepository,
+    @inject('SeatRepository') private _seatRepository: ISeatRepository,
+    @inject('ShowRepository') private _showRepository: IShowRepository,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
   ) {
     this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
@@ -77,10 +77,10 @@ export class BookingStripeWebhookController {
         booking.payment.paymentId = session.payment_intent as string;
         await booking.save();
 
-        const seatNumbers: string[] = await this.seatRepository.findSeatNumbersByIds(
+        const seatNumbers: string[] = await this._seatRepository.findSeatNumbersByIds(
           booking.bookedSeatsId.map((seat) => seat._id),
         );
-        await this.showRepository.confirmBookedSeats(booking.showId._id.toString(), seatNumbers);
+        await this._showRepository.confirmBookedSeats(booking.showId._id.toString(), seatNumbers);
         console.log(`Emitting seatUpdate to show-${booking.showId._id}:`, {
           seatIds: booking.bookedSeatsId.map((seat) => seat.toString()),
           status: 'booked',
@@ -91,8 +91,8 @@ export class BookingStripeWebhookController {
           'booked',
         );
 
-        await this.userRepository.incrementLoyalityPoints(userId, booking.bookedSeatsId.length);
-        const show = await this.showRepository.findById(booking.showId._id.toString());
+        await this._userRepository.incrementLoyalityPoints(userId, booking.bookedSeatsId.length);
+        const show = await this._showRepository.findById(booking.showId._id.toString());
         if (!show) {
           console.error(`Show not found for booking ${bookingId}`);
           throw new CustomError(
@@ -105,7 +105,7 @@ export class BookingStripeWebhookController {
 
         // Create notifications
         const userNotification = new Notification(
-          null as any,
+          null,
           userId,
           'Booking Confirmed',
           'booking',
@@ -119,7 +119,7 @@ export class BookingStripeWebhookController {
         );
 
         const vendorNotification = new Notification(
-          null as any,
+          null,
           show.vendorId.toString(),
           'New Booking Received',
           'booking',
@@ -133,7 +133,7 @@ export class BookingStripeWebhookController {
         );
 
         const adminNotification = new Notification(
-          null as any,
+          null,
           null,
           'New Booking Received',
           'booking',
@@ -148,11 +148,11 @@ export class BookingStripeWebhookController {
 
         // Save notifications to database
         const savedUserNotification =
-          await this.notificationRepository.createNotification(userNotification);
+          await this._notificationRepository.createNotification(userNotification);
         const savedVendorNotification =
-          await this.notificationRepository.createNotification(vendorNotification);
+          await this._notificationRepository.createNotification(vendorNotification);
         const savedAdminNotification =
-          await this.notificationRepository.createGlobalNotification(adminNotification);
+          await this._notificationRepository.createGlobalNotification(adminNotification);
 
         // Emit notifications with consistent structure
         const userNotificationPayload = {

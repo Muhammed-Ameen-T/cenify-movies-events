@@ -1,3 +1,5 @@
+import { SeatLayout } from "../../../entities/seatLayout.entity";
+
 export interface IFindSeatLayoutsByVendorUseCase {
   execute(params: {
     vendorId: string;
@@ -6,5 +8,5 @@ export interface IFindSeatLayoutsByVendorUseCase {
     search?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
-  }): Promise<{ seatLayouts: any[]; totalCount: number }>;
+  }): Promise<{ seatLayouts: SeatLayout[]; totalCount: number }>;
 }

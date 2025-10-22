@@ -14,12 +14,12 @@ import { generateOtp } from '../../../utils/helpers/otp.utils';
 @injectable()
 export class ForgotPasswordSendOtpUseCase implements IForgotPasswordSendOtpUseCase {
   constructor(
-    @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('RedisService') private redisService: RedisService,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
+    @inject('RedisService') private _redisService: RedisService,
   ) {}
 
   async execute(email: string): Promise<void> {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this._userRepository.findByEmail(email);
     if (!user) {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
@@ -28,7 +28,7 @@ export class ForgotPasswordSendOtpUseCase implements IForgotPasswordSendOtpUseCa
     const otpKey = `reset-otp:${email}`;
 
     try {
-      await this.redisService.set(otpKey, otp, 300); // 5 minutes expiry
+      await this._redisService.set(otpKey, otp, 300); // 5 minutes expiry
       console.log('RequestPasswordResetUseCase: Stored OTP in Redis:', { otpKey, otp });
     } catch (error) {
       console.error('RequestPasswordResetUseCase: Redis error:', error);

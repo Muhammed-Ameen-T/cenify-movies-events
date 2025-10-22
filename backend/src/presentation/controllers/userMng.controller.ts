@@ -8,7 +8,6 @@ import { CustomError } from '../../utils/errors/custom.error';
 import { IFetchUsersUseCase } from '../../domain/interfaces/useCases/Admin/fetchUsers.interface';
 import { IUpdateUserBlockStatusUseCase } from '../../domain/interfaces/useCases/Admin/updateUserBlockStatus.interface';
 import { IUserManagementController } from '../controllers/interface/userMng.controller.interface';
-import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 
 /**
  * Controller for managing user-related operations, primarily for administrative tasks.
@@ -22,9 +21,9 @@ export class UserManagementController implements IUserManagementController {
    * @param {IUpdateUserBlockStatusUseCase} updateUserBlockStatusUseCase - Use case for updating a user's block status.
    */
   constructor(
-    @inject('FetchUsersUseCase') private fetchUsersUseCase: IFetchUsersUseCase,
+    @inject('FetchUsersUseCase') private _fetchUsersUseCase: IFetchUsersUseCase,
     @inject('UpdateUserBlockStatusUseCase')
-    private updateUserBlockStatusUseCase: IUpdateUserBlockStatusUseCase,
+    private _updateUserBlockStatusUseCase: IUpdateUserBlockStatusUseCase,
   ) {}
 
   /**
@@ -62,7 +61,7 @@ export class UserManagementController implements IUserManagementController {
         throw new CustomError('Invalid pagination parameters', HttpResCode.BAD_REQUEST);
       }
 
-      const result = await this.fetchUsersUseCase.execute({
+      const result = await this._fetchUsersUseCase.execute({
         page: pageNum,
         limit: limitNum,
         isBlocked: isBlockedBool,
@@ -103,7 +102,7 @@ export class UserManagementController implements IUserManagementController {
         throw new CustomError('Missing required fields', HttpResCode.BAD_REQUEST);
       }
 
-      await this.updateUserBlockStatusUseCase.execute(id, { isBlocked }, res);
+      await this._updateUserBlockStatusUseCase.execute(id, { isBlocked }, res);
     } catch (error) {
       next(error);
     }

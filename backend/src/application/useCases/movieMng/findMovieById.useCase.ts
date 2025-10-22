@@ -8,11 +8,11 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FindMovieByIdUseCase implements IFindMovieByIdUseCase {
-  constructor(@inject('MovieRepository') private movieRepository: IMovieRepository) {}
+  constructor(@inject('MovieRepository') private _movieRepository: IMovieRepository) {}
 
   async execute(id: string): Promise<Movie> {
     try {
-      const movie = await this.movieRepository.findById(id);
+      const movie = await this._movieRepository.findById(id);
       if (!movie) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
       }

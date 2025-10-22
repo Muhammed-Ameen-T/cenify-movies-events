@@ -4,7 +4,6 @@ import { injectable, inject } from 'tsyringe';
 import { sendResponse } from '../../utils/response/sendResponse.utils';
 import { HttpResCode, HttpResMsg } from '../../utils/constants/httpResponseCode.utils';
 import { CustomError } from '../../utils/errors/custom.error';
-import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 import { ITheaterManagementController } from './interface/theaterMng.controller.interface';
 import { IUpdateTheaterStatusUseCase } from '../../domain/interfaces/useCases/Vendor/updateTheaterStatus.interface';
 import { IFetchTheaterOfVendorUseCase } from '../../domain/interfaces/useCases/Vendor/fetchTheatersOfVendor.interface';

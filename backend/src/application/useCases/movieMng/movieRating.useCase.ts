@@ -11,8 +11,8 @@ import { ITheaterRepository } from '../../../domain/interfaces/repositories/thea
 @injectable()
 export class RateMovieUseCase implements IRateMovieUseCase {
   constructor(
-    @inject('MovieRepository') private movieRepository: IMovieRepository,
-    @inject('TheaterRepository') private theaterRepository: ITheaterRepository,
+    @inject('MovieRepository') private _movieRepository: IMovieRepository,
+    @inject('TheaterRepository') private _theaterRepository: ITheaterRepository,
   ) {}
 
   async execute(dto: SubmitRatingDTO): Promise<Movie> {
@@ -20,7 +20,7 @@ export class RateMovieUseCase implements IRateMovieUseCase {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.RATING_MUST_BETWEEN, HttpResCode.BAD_REQUEST);
     }
 
-    const existingReview = await this.movieRepository.findReviewByUserId(dto.movieId, dto.userId);
+    const existingReview = await this._movieRepository.findReviewByUserId(dto.movieId, dto.userId);
     if (existingReview) {
       throw new CustomError(
         ERROR_MESSAGES.VALIDATION.REVIEW_ALREADY_EXISTS,
@@ -29,13 +29,13 @@ export class RateMovieUseCase implements IRateMovieUseCase {
     }
     
     try {
-      const updatedMovie = await this.movieRepository.addReviewAndUpdateRating(dto.movieId, {
+      const updatedMovie = await this._movieRepository.addReviewAndUpdateRating(dto.movieId, {
         comment: dto.movieReview,
         rating: dto.movieRating.toString(),
         userId: dto.userId,
       });
 
-      await this.theaterRepository.addRating(dto.theaterId, dto.theaterRating);
+      await this._theaterRepository.addRating(dto.theaterId, dto.theaterRating);
 
       if (!updatedMovie) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);

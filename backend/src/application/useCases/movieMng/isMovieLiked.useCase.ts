@@ -8,7 +8,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class IsMovieLikedUseCase implements IIsMovieLikedUseCase {
-  constructor(@inject('MovieRepository') private movieRepository: IMovieRepository) {}
+  constructor(@inject('MovieRepository') private _movieRepository: IMovieRepository) {}
 
   async execute(movieId: string, userId: string): Promise<{ isLiked: boolean }> {
     if (!movieId || !userId) {
@@ -18,7 +18,7 @@ export class IsMovieLikedUseCase implements IIsMovieLikedUseCase {
       );
     }
 
-    const isLiked = await this.movieRepository.hasUserLikedMovie(movieId, userId);
+    const isLiked = await this._movieRepository.hasUserLikedMovie(movieId, userId);
     return { isLiked };
   }
 }

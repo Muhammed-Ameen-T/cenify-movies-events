@@ -21,8 +21,8 @@ export class LoginAdminUseCase implements ILoginUserUseCase {
    * @param {JwtService} jwtService - Service for JWT token generation.
    */
   constructor(
-    @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('JwtService') private jwtService: JwtService,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
+    @inject('JwtService') private _jwtService: JwtService,
   ) {}
 
   /**
@@ -34,7 +34,7 @@ export class LoginAdminUseCase implements ILoginUserUseCase {
    * @throws {CustomError} If the admin is not found, blocked, or password mismatch occurs.
    */
   async execute(dto: LoginDTO): Promise<AuthResponseDTO> {
-    const admin = await this.userRepository.findByEmail(dto.email);
+    const admin = await this._userRepository.findByEmail(dto.email);
     if (!admin) {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.UNAUTHORIZED);
     }
@@ -55,11 +55,11 @@ export class LoginAdminUseCase implements ILoginUserUseCase {
 
     console.log('Admin authenticated successfully');
 
-    const accessToken = this.jwtService.generateAccessToken(admin._id.toString(), 'admin');
-    const refreshToken = this.jwtService.generateRefreshToken(admin._id.toString(), 'admin');
+    const accessToken = this._jwtService.generateAccessToken(admin._id ? admin._id.toString() : '', 'admin');
+    const refreshToken = this._jwtService.generateRefreshToken(admin._id ? admin._id.toString() : '', 'admin');
 
     return new AuthResponseDTO(accessToken, refreshToken, {
-      id: admin._id.toString(),
+      id: admin._id ? admin._id.toString() : '',
       email: admin.email,
       name: admin.name,
       phone: admin.phone || 0,

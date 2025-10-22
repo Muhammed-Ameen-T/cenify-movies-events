@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken';
 
 @injectable()
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
-  constructor(@inject('IUserRepository') private userRepository: IUserRepository) {}
+  constructor(@inject('IUserRepository') private _userRepository: IUserRepository) {}
 
   async execute(refreshToken: string): Promise<string> {
     if (!refreshToken) {
@@ -32,13 +32,13 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
 
     const verifiedDecoded = jwtService.verifyRefreshToken(refreshToken);
 
-    const user = await this.userRepository.findById(verifiedDecoded.userId);
+    const user = await this._userRepository.findById(verifiedDecoded.userId);
 
     if (!user) {
       throw new CustomError(ERROR_MESSAGES.AUTHENTICATION.USER_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
 
-    const newAccessToken = jwtService.generateAccessToken(user._id.toString(), user.role);
+    const newAccessToken = jwtService.generateAccessToken(user._id ? user._id.toString() : '', user.role);
 
     return newAccessToken;
   }

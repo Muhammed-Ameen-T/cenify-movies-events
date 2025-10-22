@@ -10,11 +10,11 @@ import { User } from '../../../domain/entities/user.entity';
 
 @injectable()
 export class updateUserProfileUseCase implements IupdateUserProfileUseCase {
-  constructor(@inject('IUserRepository') private userRepository: IUserRepository) {}
+  constructor(@inject('IUserRepository') private _userRepository: IUserRepository) {}
 
   async execute(id: string, data: UpdateProfileRequestDTO): Promise<UserResponseDTO> {
     // Fetch existing user
-    const existingUser = await this.userRepository.findById(id);
+    const existingUser = await this._userRepository.findById(id);
     if (!existingUser) {
       throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
     }
@@ -38,11 +38,11 @@ export class updateUserProfileUseCase implements IupdateUserProfileUseCase {
     );
 
     // Update user in repository
-    const updatedUser = await this.userRepository.update(updatedUserData);
+    const updatedUser = await this._userRepository.update(updatedUserData);
 
     // Return UserResponseDTO
     return new UserResponseDTO(
-      updatedUser._id.toString(),
+      updatedUser._id ? updatedUser._id.toString() : '',
       updatedUser.name,
       updatedUser.email,
       updatedUser.phone,

@@ -8,11 +8,11 @@ import { IFindShowByIdUseCase } from '../../../domain/interfaces/useCases/Vendor
 
 @injectable()
 export class FindShowByIdUseCase implements IFindShowByIdUseCase {
-  constructor(@inject('ShowRepository') private showRepository: IShowRepository) {}
+  constructor(@inject('ShowRepository') private _showRepository: IShowRepository) {}
 
   async execute(showId: string): Promise<Show | null> {
     try {
-      return await this.showRepository.findById(showId);
+      return await this._showRepository.findById(showId);
     } catch (error) {
       throw new CustomError(
         ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND,

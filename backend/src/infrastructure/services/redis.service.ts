@@ -8,23 +8,23 @@ import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
  * It supports basic operations such as setting, retrieving, and deleting keys.
  */
 export class RedisService {
-  private client: ReturnType<typeof createClient>;
+  private _client: ReturnType<typeof createClient>;
 
   /**
    * Initializes the Redis client and connects to the Redis server.
-   * Handles connection events and logs errors if any occur.
+   * Handles connection events and logs errors if an occur.
    */
   constructor() {
-    this.client = createClient({
+    this._client = createClient({
       url: env.REDIS_URL, // Uses the cloud Redis URL
     });
 
-    this.client.on('error', (err) =>
+    this._client.on('error', (err) =>
       console.error(ERROR_MESSAGES.GENERAL.REDIS_CONNECTION_ERROR, err),
     );
-    this.client.on('connect', () => console.log(SuccessMsg.REDIS_CONNECTED));
+    this._client.on('connect', () => console.log(SuccessMsg.REDIS_CONNECTED));
 
-    this.client
+    this._client
       .connect()
       .catch((err) => console.error(ERROR_MESSAGES.GENERAL.REDIS_CONNECTION_ERROR, err));
   }
@@ -39,7 +39,7 @@ export class RedisService {
    */
   async set(key: string, value: string, expirySeconds: number): Promise<void> {
     try {
-      await this.client.setEx(key, expirySeconds, value);
+      await this._client.setEx(key, expirySeconds, value);
     } catch (error) {
       throw new Error('Redis set failed');
     }
@@ -53,7 +53,7 @@ export class RedisService {
    */
   async get(key: string): Promise<string | null> {
     try {
-      return await this.client.get(key);
+      return await this._client.get(key);
     } catch (error) {
       throw new Error('Redis get failed');
     }
@@ -67,7 +67,7 @@ export class RedisService {
    */
   async del(key: string): Promise<void> {
     try {
-      await this.client.del(key);
+      await this._client.del(key);
     } catch (error) {
       throw new Error('Redis delete failed');
     }

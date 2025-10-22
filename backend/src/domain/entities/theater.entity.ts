@@ -2,7 +2,7 @@ import mongoose, { ObjectId } from 'mongoose';
 
 export class Theater {
   constructor(
-    public _id: string,
+    public _id: string | null,
     public screens: string[] | null,
     public name: string,
     public status: string,

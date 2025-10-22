@@ -11,15 +11,15 @@ import { IBookingRepository } from '../../domain/interfaces/repositories/booking
 
 @injectable()
 export class ShowJobService {
-  private agenda: Agenda;
+  private _agenda: Agenda;
 
   constructor(
-    @inject('ShowRepository') private showRepository: IShowRepository,
-    @inject('CancelBookingUseCase') private cancelBooking: ICancelBookingUseCase,
-    @inject('BookingRepository') private bookingRepository: IBookingRepository,
+    @inject('ShowRepository') private _showRepository: IShowRepository,
+    @inject('CancelBookingUseCase') private _cancelBooking: ICancelBookingUseCase,
+    @inject('BookingRepository') private _bookingRepository: IBookingRepository,
   ) {
     // Initialize Agenda with MongoDB connection
-    this.agenda = new Agenda({
+    this._agenda = new Agenda({
       db: {
         address: env.MONGO_URI,
         collection: 'agendaJobs',
@@ -34,15 +34,15 @@ export class ShowJobService {
 
   private defineJobs() {
     // Job to set show status to Running
-    this.agenda.define('startShow', async (job: Job) => {
+    this._agenda.define('startShow', async (job: Job) => {
       const { showId } = job.attrs.data;
       try {
-        const show = await this.showRepository.findById(showId);
+        const show = await this._showRepository.findById(showId);
         if (!show) {
           throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
         }
         if (show.status === 'Scheduled') {
-          await this.showRepository.updateStatus(showId, 'Running');
+          await this._showRepository.updateStatus(showId, 'Running');
           console.log(`✅ Show ${showId} status updated to Running`);
         }
       } catch (error) {
@@ -52,16 +52,16 @@ export class ShowJobService {
     });
 
     // Job to set show status to Completed
-    this.agenda.define('completeShow', async (job: Job) => {
+    this._agenda.define('completeShow', async (job: Job) => {
       const { showId } = job.attrs.data;
       try {
-        const show = await this.showRepository.findById(showId);
+        const show = await this._showRepository.findById(showId);
         if (!show) {
           throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
         }
         if (show.status === 'Running') {
-          await this.showRepository.updateStatus(showId, 'Completed');
-          await this.showRepository.creditRevenueToWallet(showId);
+          await this._showRepository.updateStatus(showId, 'Completed');
+          await this._showRepository.creditRevenueToWallet(showId);
           console.log(`✅ Show ${showId} status updated to Completed`);
         }
       } catch (error) {
@@ -71,11 +71,11 @@ export class ShowJobService {
     });
 
     // Job to release expired pending seats
-    this.agenda.define('releaseExpiredSeats', async (job: Job) => {
+    this._agenda.define('releaseExpiredSeats', async (job: Job) => {
       const { showId } = job.attrs.data;
 
       try {
-        await this.showRepository.pullExpiredSeats(showId);
+        await this._showRepository.pullExpiredSeats(showId);
 
         console.log(`✅ Expired pending seats removed for showId: ${showId}`);
       } catch (error) {
@@ -84,18 +84,18 @@ export class ShowJobService {
       }
     });
 
-    this.agenda.define('cancelPendingBooking', async (job: Job) => {
+    this._agenda.define('cancelPendingBooking', async (job: Job) => {
       const { bookingId } = job.attrs.data;
       try {
         console.log(`🔍 Validating booking ${bookingId} for cancellation`);
 
-        const booking = await this.bookingRepository.findByBookingId(bookingId);
+        const booking = await this._bookingRepository.findByBookingId(bookingId);
         if (!booking) {
           throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
         }
 
         if (booking.payment.status === 'pending' && booking.status !== 'cancelled') {
-          await this.cancelBooking.execute(bookingId, 'Payment not completed within time period');
+          await this._cancelBooking.execute(bookingId, 'Payment not completed within time period');
           console.log(`🚫 Booking ${bookingId} auto-cancelled due to pending payment`);
         } else {
           console.log(
@@ -116,11 +116,11 @@ export class ShowJobService {
     try {
       await this.cancelShowJobs(showId);
 
-      await this.agenda.schedule(startTime, 'startShow', { showId });
+      await this._agenda.schedule(startTime, 'startShow', { showId });
       console.log(`✅ Scheduled startShow job for showId: ${showId} at ${startTime}`);
 
       if (endTime) {
-        await this.agenda.schedule(endTime, 'completeShow', { showId });
+        await this._agenda.schedule(endTime, 'completeShow', { showId });
         console.log(`✅ Scheduled completeShow job for showId: ${showId} at ${endTime}`);
       }
     } catch (error) {
@@ -131,7 +131,7 @@ export class ShowJobService {
 
   async scheduleSeatExpiration(showId: string): Promise<void> {
     try {
-      await this.agenda.schedule(new Date(Date.now() + 5 * 60 * 1000), 'releaseExpiredSeats', {
+      await this._agenda.schedule(new Date(Date.now() + 5 * 60 * 1000), 'releaseExpiredSeats', {
         showId,
       });
       console.log(`✅ Scheduled releaseExpiredSeats job for showId: ${showId} to run in 5 minutes`);
@@ -146,7 +146,7 @@ export class ShowJobService {
 
   async cancelShowJobs(showId: string): Promise<void> {
     try {
-      await this.agenda.cancel({ 'data.showId': showId });
+      await this._agenda.cancel({ 'data.showId': showId });
       console.log(`✅ Cancelled existing jobs for showId: ${showId}`);
     } catch (error) {
       console.error(`❌ Error cancelling jobs for showId: ${showId}`, error);
@@ -156,7 +156,7 @@ export class ShowJobService {
 
   async scheduleBookingAutoCancel(bookingId: string): Promise<void> {
     try {
-      await this.agenda.schedule(new Date(Date.now() + 10 * 60 * 1000), 'cancelPendingBooking', {
+      await this._agenda.schedule(new Date(Date.now() + 10 * 60 * 1000), 'cancelPendingBooking', {
         bookingId,
       });
       console.log(
@@ -176,7 +176,7 @@ export class ShowJobService {
 
   async startAgenda(): Promise<void> {
     try {
-      await this.agenda.start();
+      await this._agenda.start();
       console.log(SuccessMsg.AGENDA_STARTED);
     } catch (error) {
       console.error(ERROR_MESSAGES.GENERAL.FAILED_START_AGENDA, error);

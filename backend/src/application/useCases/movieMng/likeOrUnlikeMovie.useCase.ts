@@ -5,12 +5,13 @@ import { IMovieRepository } from '../../../domain/interfaces/repositories/movie.
 import { CustomError } from '../../../utils/errors/custom.error';
 import { HttpResCode } from '../../../utils/constants/httpResponseCode.utils';
 import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
+import { Movie } from '../../../domain/entities/movie.entity';
 
 @injectable()
 export class LikeOrUnlikeMovieUseCase implements ILikeOrUnlikeMovieUseCase {
-  constructor(@inject('MovieRepository') private movieRepository: IMovieRepository) {}
+  constructor(@inject('MovieRepository') private _movieRepository: IMovieRepository) {}
 
-  async execute(movieId: string, userId: string, isLike: boolean): Promise<any> {
+  async execute(movieId: string, userId: string, isLike: boolean): Promise<Movie> {
     if (!movieId || !userId || typeof isLike !== 'boolean') {
       throw new CustomError(
         ERROR_MESSAGES.VALIDATION.MISSING_REQUIRED_FIELDS,
@@ -18,7 +19,7 @@ export class LikeOrUnlikeMovieUseCase implements ILikeOrUnlikeMovieUseCase {
       );
     }
 
-    const updatedMovie = await this.movieRepository.likeMovie(movieId, userId, isLike);
+    const updatedMovie = await this._movieRepository.likeMovie(movieId, userId, isLike);
 
     if (!updatedMovie) {
       throw new CustomError(ERROR_MESSAGES.GENERAL.MOVIE_NOT_UPDATED, HttpResCode.NOT_FOUND);

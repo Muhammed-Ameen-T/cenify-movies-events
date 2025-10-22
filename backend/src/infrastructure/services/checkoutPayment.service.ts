@@ -10,14 +10,14 @@ import ERROR_MESSAGES from '../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class PaymentService {
-  private stripe: Stripe;
+  private _stripe: Stripe;
 
-  constructor(@inject('WalletRepository') private walletRepository: IWalletRepository) {
-    this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
+  constructor(@inject('WalletRepository') private _walletRepository: IWalletRepository) {
+    this._stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
   async checkWalletBalance(userId: string, amount: number): Promise<boolean> {
-    const wallet = await this.walletRepository.findByUserId(userId);
+    const wallet = await this._walletRepository.findByUserId(userId);
     if (!wallet) {
       return false;
     }
@@ -25,14 +25,14 @@ export class PaymentService {
   }
 
   async deductWalletBalance(userId: string, amount: number): Promise<void> {
-    const wallet = await this.walletRepository.findByUserId(userId);
+    const wallet = await this._walletRepository.findByUserId(userId);
     if (!wallet) {
       throw new CustomError(ERROR_MESSAGES.GENERAL.WALLET_NOT_FOUND, HttpResCode.BAD_REQUEST);
     }
     if ((wallet.balance || 0) < amount) {
       throw new CustomError(ERROR_MESSAGES.GENERAL.INSUFFICIENT_BALANCE, HttpResCode.BAD_REQUEST);
     }
-    await this.walletRepository.pushTransactionAndUpdateBalance(userId, {
+    await this._walletRepository.pushTransactionAndUpdateBalance(userId, {
       amount: amount,
       remark: 'Booking Payment Debited from Wallet',
       type: 'debit',
@@ -48,7 +48,7 @@ export class PaymentService {
     showId: string,
     seats: string[],
   ): Promise<string> {
-    const session = await this.stripe.checkout.sessions.create({
+    const session = await this._stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {

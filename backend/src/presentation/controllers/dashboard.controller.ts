@@ -22,9 +22,9 @@ export class DashboardController implements IDashboardController {
    * @param {IFetchAdminDashboardUseCase} fetchAdminDashboardUseCase - The use case for fetching admin dashboard data.
    */
   constructor(
-    @inject('FetchDashboardUseCase') private fetchDashboardUseCase: IFetchDashboardUseCase,
+    @inject('FetchDashboardUseCase') private _fetchDashboardUseCase: IFetchDashboardUseCase,
     @inject('FetchAdminDashboardUseCase')
-    private fetchAdminDashboardUseCase: IFetchAdminDashboardUseCase,
+    private _fetchAdminDashboardUseCase: IFetchAdminDashboardUseCase,
   ) {}
 
   /**
@@ -48,7 +48,7 @@ export class DashboardController implements IDashboardController {
         location: req.query.location as string,
       };
 
-      const result = await this.fetchDashboardUseCase.execute(vendorId, params);
+      const result = await this._fetchDashboardUseCase.execute(vendorId, params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);
@@ -76,7 +76,7 @@ export class DashboardController implements IDashboardController {
         location: req.query.location as string,
       };
 
-      const result = await this.fetchAdminDashboardUseCase.execute(adminId, params);
+      const result = await this._fetchAdminDashboardUseCase.execute(adminId, params);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, result);
     } catch (error) {
       next(error);

@@ -15,16 +15,16 @@ import { IStripeWebhookController } from './interface/stripeWebhook.controller.i
  */
 @injectable()
 export class StripeWebhookController implements IStripeWebhookController {
-  private stripe: Stripe;
+  private _stripe: Stripe;
 
   /**
    * Constructs an instance of StripeWebhookController.
    * @param {ICreateMoviePassUseCase} createMoviePassUseCase - The use case for creating a movie pass.
    */
   constructor(
-    @inject('CreateMoviePassUseCase') private createMoviePassUseCase: ICreateMoviePassUseCase,
+    @inject('CreateMoviePassUseCase') private _createMoviePassUseCase: ICreateMoviePassUseCase,
   ) {
-    this.stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
+    this._stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: '2025-05-28.basil' });
   }
 
   /**
@@ -41,9 +41,9 @@ export class StripeWebhookController implements IStripeWebhookController {
     let event: Stripe.Event;
 
     try {
-      event = this.stripe.webhooks.constructEvent(req.body, sig, env.STRIPE_WEBHOOK_SECRET_MOVIE_PASS);
-    } catch (err: any) {
-      console.error('Webhook signature verification failed:', err.message);
+      event = this._stripe.webhooks.constructEvent(req.body, sig, env.STRIPE_WEBHOOK_SECRET_MOVIE_PASS);
+    } catch (err) {
+      console.error('Webhook signature verification failed:', err);
       sendResponse(res, HttpResCode.BAD_REQUEST, 'Webhook Error');
       return;
     }
@@ -58,7 +58,7 @@ export class StripeWebhookController implements IStripeWebhookController {
           const expireDate = new Date(purchaseDate);
           expireDate.setDate(purchaseDate.getDate() + 30);
 
-          await this.createMoviePassUseCase.execute({
+          await this._createMoviePassUseCase.execute({
             userId,
             purchaseDate,
             expireDate,

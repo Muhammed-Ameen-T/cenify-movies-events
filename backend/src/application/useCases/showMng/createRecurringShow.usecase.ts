@@ -13,10 +13,10 @@ import mongoose from 'mongoose';
 @injectable()
 export class CreateRecurringShowUseCase implements ICreateRecurringShowUseCase {
   constructor(
-    @inject('ShowRepository') private showRepository: IShowRepository,
-    @inject('ScreenRepository') private screenRepository: IScreenRepository,
-    @inject('MovieRepository') private movieRepository: IMovieRepository,
-    @inject('TheaterRepository') private theaterRepository: ITheaterRepository,
+    @inject('ShowRepository') private _showRepository: IShowRepository,
+    @inject('ScreenRepository') private _screenRepository: IScreenRepository,
+    @inject('MovieRepository') private _movieRepository: IMovieRepository,
+    @inject('TheaterRepository') private _theaterRepository: ITheaterRepository,
   ) {}
 
   async execute(
@@ -32,7 +32,7 @@ export class CreateRecurringShowUseCase implements ICreateRecurringShowUseCase {
       }
 
       // Fetch the original show
-      const originalShow = await this.showRepository.findById(showId);
+      const originalShow = await this._showRepository.findById(showId);
       if (!originalShow) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.SHOW_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -70,7 +70,7 @@ export class CreateRecurringShowUseCase implements ICreateRecurringShowUseCase {
       }
 
       // Fetch movie duration
-      const movie = await this.movieRepository.findById(idsToValidate.movieId);
+      const movie = await this._movieRepository.findById(idsToValidate.movieId);
       if (!movie || !movie.duration) {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.MOVIE_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -78,7 +78,7 @@ export class CreateRecurringShowUseCase implements ICreateRecurringShowUseCase {
       const movieDurationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
 
       // Fetch theater interval gap
-      const theater = await this.theaterRepository.findById(idsToValidate.theaterId);
+      const theater = await this._theaterRepository.findById(idsToValidate.theaterId);
       if (!theater || typeof theater.intervalTime !== 'number') {
         throw new CustomError(ERROR_MESSAGES.VALIDATION.THEATER_NOT_FOUND, HttpResCode.BAD_REQUEST);
       }
@@ -105,7 +105,7 @@ export class CreateRecurringShowUseCase implements ICreateRecurringShowUseCase {
         const endTime = new Date(startTime.getTime() + movieDurationMs + intervalGapMs);
 
         // Check for time slot availability
-        const isSlotAvailable = await this.screenRepository.checkSlot(
+        const isSlotAvailable = await this._screenRepository.checkSlot(
           idsToValidate.screenId,
           startTime,
           endTime,
@@ -119,9 +119,9 @@ export class CreateRecurringShowUseCase implements ICreateRecurringShowUseCase {
 
         // Create new show
         const newShow = new Show(
-          null as any,
+          null,
           startTime,
-          idsToValidate.movieId, // Use string ID
+          idsToValidate.movieId, 
           idsToValidate.theaterId,
           idsToValidate.screenId,
           idsToValidate.vendorId,
@@ -131,7 +131,7 @@ export class CreateRecurringShowUseCase implements ICreateRecurringShowUseCase {
           showDate,
         );
 
-        const savedShow = await this.showRepository.create(newShow);
+        const savedShow = await this._showRepository.create(newShow);
         createdShows.push(savedShow);
       }
 

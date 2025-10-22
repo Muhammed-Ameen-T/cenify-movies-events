@@ -16,20 +16,20 @@ import { User } from '../../../domain/entities/user.entity';
 @injectable()
 export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
   constructor(
-    @inject('TheaterRepository') private vendorRepository: ITheaterRepository,
-    @inject('JwtService') private jwtService: JwtService,
-    @inject('RedisService') private redisService: RedisService,
-    @inject('IUserRepository') private authRepository: IUserRepository,
+    @inject('TheaterRepository') private _vendorRepository: ITheaterRepository,
+    @inject('JwtService') private _jwtService: JwtService,
+    @inject('RedisService') private _redisService: RedisService,
+    @inject('IUserRepository') private _authRepository: IUserRepository,
   ) {}
 
   async execute(dto: VerifyOtpVendorDTO): Promise<AuthResponseDTO> {
-    const storedOtp = await this.redisService.get(`otp:${dto.email}`);
+    const storedOtp = await this._redisService.get(`otp:${dto.email}`);
     console.log('storedOtp:', storedOtp);
     if (!storedOtp) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.INVALID_OTP, HttpResCode.BAD_REQUEST);
     }
 
-    const existingTheater = await this.vendorRepository.findByEmail(dto.email);
+    const existingTheater = await this._vendorRepository.findByEmail(dto.email);
     if (existingTheater) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.USER_ALREADY_EXISTS, HttpResCode.BAD_REQUEST);
     }
@@ -37,7 +37,7 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
     const hashedPassword = await hashPassword(dto.password);
 
     let vendor = new User(
-      null as any,
+      null,
       dto.name,
       dto.email,
       dto.phone,
@@ -55,12 +55,12 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
     console.log('sadas');
 
     try {
-      const created = await this.authRepository.create(vendor);
+      const created = await this._authRepository.create(vendor);
     } catch (error) {
       console.log(error);
     }
 
-    const createdVendor = await this.authRepository.findByEmail(dto.email);
+    const createdVendor = await this._authRepository.findByEmail(dto.email);
     console.log('created Vendor:', createdVendor);
     if (!createdVendor) {
       throw new CustomError(
@@ -70,18 +70,18 @@ export class VerifyOtpVendorUseCase implements IVerifyOtpVendorUseCase {
     }
 
     // Generate JWT tokens
-    const accessToken = this.jwtService.generateAccessToken(
-      createdVendor._id.toString(),
+    const accessToken = this._jwtService.generateAccessToken(
+      createdVendor._id ? createdVendor._id.toString() : '',
       createdVendor.role,
     );
-    const refreshToken = this.jwtService.generateRefreshToken(
-      createdVendor._id.toString(),
+    const refreshToken = this._jwtService.generateRefreshToken(
+      createdVendor._id ? createdVendor._id.toString() : '',
       createdVendor.role,
     );
-    await this.redisService.del(`otp:${dto.email}`);
+    await this._redisService.del(`otp:${dto.email}`);
 
     return new AuthResponseDTO(accessToken, refreshToken, {
-      id: createdVendor._id.toString(),
+      id: createdVendor._id ? createdVendor._id.toString() : '',
       email: createdVendor.email,
       name: createdVendor.name,
       phone: createdVendor.phone,

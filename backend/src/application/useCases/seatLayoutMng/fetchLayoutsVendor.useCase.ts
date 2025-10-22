@@ -8,7 +8,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 @injectable()
 export class FindSeatLayoutsByVendorUseCase implements IFindSeatLayoutsByVendorUseCase {
   constructor(
-    @inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository,
+    @inject('SeatLayoutRepository') private _seatLayoutRepository: ISeatLayoutRepository,
   ) {}
 
   async execute(params: {
@@ -20,7 +20,7 @@ export class FindSeatLayoutsByVendorUseCase implements IFindSeatLayoutsByVendorU
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ seatLayouts: any[]; totalCount: number }> {
     try {
-      const result = await this.seatLayoutRepository.findByVendor(params);
+      const result = await this._seatLayoutRepository.findByVendor(params);
       return result;
     } catch (error) {
       throw new CustomError(

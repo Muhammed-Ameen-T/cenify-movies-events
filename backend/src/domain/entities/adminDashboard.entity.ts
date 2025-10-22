@@ -8,6 +8,41 @@ import {
   TheaterStatus,
 } from '../interfaces/model/adminDashboard.interface';
 
+// --- RAW DATA INTERFACES (Matching Mongoose Aggregation Output) ---
+
+interface RawSalesData {
+  name: string;
+  revenue: number;
+}
+
+interface RawTopTheater {
+  _id: Types.ObjectId | string; // Mongoose result may have '_id' instead of 'id'
+  name: string;
+  location: string;
+  revenue: number;
+  bookings: number;
+  rating: number;
+  growth: number;
+  rank?: number; // Optional as it might be added during mapping
+}
+
+interface RawTopShow {
+  _id: Types.ObjectId | string; // Mongoose result may have '_id' instead of 'id'
+  title: string;
+  genre: string;
+  duration: string;
+  rating: number;
+  bookings: number;
+  revenue: number;
+  poster: string;
+  isHot: boolean;
+}
+
+// Since TheaterStatus structure is simple, we can reuse it, but define the input
+type RawTheaterStatus = TheaterStatus;
+
+// -------------------------------------------------------------------
+
 export class AdminDashboardData {
   constructor(
     public statistics: AdminStatistics,
@@ -18,11 +53,11 @@ export class AdminDashboardData {
   ) {}
 
   static fromMongo(data: {
-    statistics: AdminStatistics;
-    sales: any[];
-    topTheaters: any[];
-    topShows: any[];
-    theaterStatus: any[];
+    statistics: AdminStatistics; 
+    sales: RawSalesData[];
+    topTheaters: RawTopTheater[];
+    topShows: RawTopShow[];
+    theaterStatus: RawTheaterStatus[];
   }): AdminDashboardData {
     return new AdminDashboardData(
       {
@@ -36,6 +71,7 @@ export class AdminDashboardData {
         revenue: Number(s.revenue.toFixed(2)),
       })),
       data.topTheaters.map((t, index) => ({
+        // Use t._id as the source for the Types.ObjectId field
         id: new Types.ObjectId(t._id),
         name: t.name,
         location: t.location,
@@ -46,6 +82,7 @@ export class AdminDashboardData {
         rank: index + 1,
       })),
       data.topShows.map((s) => ({
+        // Use s._id as the source for the Types.ObjectId field
         id: new Types.ObjectId(s._id),
         title: s.title,
         genre: s.genre,

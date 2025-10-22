@@ -8,11 +8,11 @@ import { Wallet } from '../../../domain/entities/wallet.entity';
 
 @injectable()
 export class FindUserWalletUseCase implements IFindUserWalletUseCase {
-  constructor(@inject('WalletRepository') private walletRepository: IWalletRepository) {}
+  constructor(@inject('WalletRepository') private _walletRepository: IWalletRepository) {}
 
   async execute(userId: string): Promise<Wallet> {
     try {
-      const wallet = await this.walletRepository.findByUserId(userId);
+      const wallet = await this._walletRepository.findByUserId(userId);
       if (!wallet) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.RECORD_NOT_FOUND, HttpResCode.NOT_FOUND);
       }

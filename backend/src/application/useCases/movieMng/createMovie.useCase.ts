@@ -9,11 +9,11 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class CreateMovieUseCase implements ICreateMovieUseCase {
-  constructor(@inject('MovieRepository') private movieRepository: IMovieRepository) {}
+  constructor(@inject('MovieRepository') private _movieRepository: IMovieRepository) {}
 
   async execute(dto: CreateMovieDTO): Promise<Movie> {
     const newMovie = new Movie(
-      null as any,
+      null,
       dto.name,
       dto.genre,
       dto.trailer,
@@ -33,7 +33,7 @@ export class CreateMovieUseCase implements ICreateMovieUseCase {
     );
 
     try {
-      const savedMovie = await this.movieRepository.create(newMovie);
+      const savedMovie = await this._movieRepository.create(newMovie);
       return savedMovie;
     } catch (error) {
       throw new CustomError(

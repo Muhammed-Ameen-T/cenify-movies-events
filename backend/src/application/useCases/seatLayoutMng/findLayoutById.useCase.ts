@@ -13,12 +13,12 @@ import { Seat, SeatLayout } from '../../../domain/entities/seatLayout.entity';
 @injectable()
 export class FindSeatLayoutByIdUseCase implements IFindSeatLayoutByIdUseCase {
   constructor(
-    @inject('SeatLayoutRepository') private seatLayoutRepository: ISeatLayoutRepository,
+    @inject('SeatLayoutRepository') private _seatLayoutRepository: ISeatLayoutRepository,
   ) {}
 
   async execute(id: string, res: Response): Promise<SeatLayout | null> {
     try {
-      const seatLayout = await this.seatLayoutRepository.findById(id);
+      const seatLayout = await this._seatLayoutRepository.findById(id);
 
       if (!seatLayout) {
         throw new CustomError(ERROR_MESSAGES.DATABASE.SEAT_LAYOUT_NOT_FOUND, 404);

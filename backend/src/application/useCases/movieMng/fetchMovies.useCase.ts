@@ -8,7 +8,7 @@ import ERROR_MESSAGES from '../../../utils/constants/commonErrorMsg.constants';
 
 @injectable()
 export class FetchMoviesUseCase implements IFetchMoviesUseCase {
-  constructor(@inject('MovieRepository') private movieRepository: IMovieRepository) {}
+  constructor(@inject('MovieRepository') private _movieRepository: IMovieRepository) {}
 
   async execute(params?: {
     page?: number;
@@ -27,7 +27,7 @@ export class FetchMoviesUseCase implements IFetchMoviesUseCase {
       const page = params?.page || 1;
       const limit = params?.limit || 8;
 
-      const { movies, totalCount } = await this.movieRepository.findAll(params);
+      const { movies, totalCount } = await this._movieRepository.findAll(params);
       const totalPages = Math.ceil(totalCount / limit);
 
       return {

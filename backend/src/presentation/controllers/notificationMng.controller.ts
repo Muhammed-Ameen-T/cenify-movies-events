@@ -20,7 +20,7 @@ export class NotificationMngController implements INotificationMngController {
    * Constructs an instance of NotificationMngController.
    * @param {NotificationService} notificationService - The service responsible for notification operations.
    */
-  constructor(@inject('NotificationService') private notificationService: NotificationService) {}
+  constructor(@inject('NotificationService') private _notificationService: NotificationService) {}
 
   /**
    * @route POST /api/notifications/global
@@ -45,7 +45,7 @@ export class NotificationMngController implements INotificationMngController {
         );
       }
 
-      await this.notificationService.createGlobalNotification(title, description, type);
+      await this._notificationService.createGlobalNotification(title, description, type);
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, {
         message: 'Global notification created successfully',
       });
@@ -90,7 +90,7 @@ export class NotificationMngController implements INotificationMngController {
         isGlobal: false,
       };
 
-      const newNotification = await this.notificationService.createNotification(notificationData);
+      const newNotification = await this._notificationService.createNotification(notificationData);
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, newNotification);
     } catch (error) {
       next(error);
@@ -122,7 +122,7 @@ export class NotificationMngController implements INotificationMngController {
         );
       }
 
-      const success = await this.notificationService.markNotificationAsRead(notificationId, userId);
+      const success = await this._notificationService.markNotificationAsRead(notificationId, userId);
       if (success) {
         sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
           message: 'Notification marked as read',
@@ -151,7 +151,7 @@ export class NotificationMngController implements INotificationMngController {
         throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
 
-      const success = await this.notificationService.markAllNotificationsAsRead(userId);
+      const success = await this._notificationService.markAllNotificationsAsRead(userId);
       if (success) {
         sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
           message: 'All notifications marked as read',
@@ -182,7 +182,7 @@ export class NotificationMngController implements INotificationMngController {
         throw new CustomError(HttpResMsg.UNAUTHORIZED, HttpResCode.UNAUTHORIZED);
       }
 
-      const success = await this.notificationService.markAllAdminNotificationsAsRead();
+      const success = await this._notificationService.markAllAdminNotificationsAsRead();
       if (success) {
         sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
           message: 'All Admin notifications marked as read',
@@ -227,7 +227,7 @@ export class NotificationMngController implements INotificationMngController {
       }
 
       const { notifications, total, unreadCount, readCount } =
-        await this.notificationService.fetchAllNotifications(userId, page, limit, filter);
+        await this._notificationService.fetchAllNotifications(userId, page, limit, filter);
 
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
         notifications,
@@ -269,7 +269,7 @@ export class NotificationMngController implements INotificationMngController {
 
       // The service method expects a Notification entity, which the createVendorNotification in service
       // then constructs based on passed parameters. For this, we'll mimic what the service expects.
-      await this.notificationService.createVendorNotification(title, description, type);
+      await this._notificationService.createVendorNotification(title, description, type);
       sendResponse(res, HttpResCode.CREATED, HttpResMsg.SUCCESS, {
         message: 'Vendor notification created successfully',
       });
@@ -306,7 +306,7 @@ export class NotificationMngController implements INotificationMngController {
       }
 
       const { notifications, total, unreadCount, readCount } =
-        await this.notificationService.fetchAdminNotifications(page, limit, filter);
+        await this._notificationService.fetchAdminNotifications(page, limit, filter);
       sendResponse(res, HttpResCode.OK, HttpResMsg.SUCCESS, {
         notifications,
         total,

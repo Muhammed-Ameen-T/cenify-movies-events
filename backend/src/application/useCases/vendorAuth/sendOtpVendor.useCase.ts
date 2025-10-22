@@ -11,12 +11,12 @@ import { IUserRepository } from '../../../domain/interfaces/repositories/user.re
 @injectable()
 export class sendOtpVendorUseCase {
   constructor(
-    @inject('IUserRepository') private userRepository: IUserRepository,
-    @inject('RedisService') private redisService: RedisService,
+    @inject('IUserRepository') private _userRepository: IUserRepository,
+    @inject('RedisService') private _redisService: RedisService,
   ) {}
 
   async execute(dto: SendOtpVendorDTO) {
-    const existingVendor = await this.userRepository.findByEmail(dto.email);
+    const existingVendor = await this._userRepository.findByEmail(dto.email);
     if (existingVendor) {
       throw new CustomError(ERROR_MESSAGES.VALIDATION.USER_ALREADY_EXISTS, HttpResCode.BAD_REQUEST);
     }
@@ -25,7 +25,7 @@ export class sendOtpVendorUseCase {
     const otpKey = `otp:${dto.email}`;
 
     try {
-      await this.redisService.set(otpKey, otp, 300);
+      await this._redisService.set(otpKey, otp, 300);
       console.log('RegisterTheaterUseCase: Stored OTP in Redis:', { otpKey, otp });
     } catch (error) {
       console.error('RegisterTheaterUseCase: Redis error:', error);

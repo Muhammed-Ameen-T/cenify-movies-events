@@ -13,11 +13,11 @@ import { Theater } from '../../../domain/entities/theater.entity';
 
 @injectable()
 export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
-  constructor(@inject('TheaterRepository') private theaterRepository: ITheaterRepository) {}
+  constructor(@inject('TheaterRepository') private _theaterRepository: ITheaterRepository) {}
 
   async execute(id: string, data: Partial<Theater>, res: Response): Promise<void> {
     try {
-      const theater = await this.theaterRepository.findById(id);
+      const theater = await this._theaterRepository.findById(id);
       if (!theater) {
         sendResponse(res, HttpResCode.NOT_FOUND, HttpResMsg.THEATER_NOT_FOUND);
         return;
@@ -44,11 +44,11 @@ export class UpdateTheaterUseCase implements IUpdateTheaterUseCase {
       );
 
       // Persist updates
-      const savedTheater = await this.theaterRepository.updateTheaterDetails(updatedTheater);
+      const savedTheater = await this._theaterRepository.updateTheaterDetails(updatedTheater);
 
       // Prepare response DTO
       const responseDTO = new TheaterResponseDTO(
-        savedTheater._id.toString(),
+        savedTheater._id ? savedTheater._id.toString() : '',
         savedTheater.name,
         savedTheater.status,
         savedTheater.location,

@@ -2,10 +2,10 @@ import nodemailer, { Transporter } from 'nodemailer';
 import { env } from '../../config/env.config';
 
 class NodemailerService {
-  private transporter: Transporter;
+  private _transporter: Transporter;
 
   constructor() {
-    this.transporter = nodemailer.createTransport({
+    this._transporter = nodemailer.createTransport({
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE,
@@ -30,7 +30,7 @@ class NodemailerService {
    */
   async sendEmail(recipient: string, subject: string, htmlContent: string): Promise<void> {
     try {
-      await this.transporter.sendMail({
+      await this._transporter.sendMail({
         from: env.SMTP_USERNAME,
         to: recipient,
         subject,
