@@ -45,9 +45,8 @@ Cenify is a comprehensive theater ticket booking application that revolutionizes
 
 ### Payment & Integration
 - **Stripe** - Payment processing
-- **PayPal** - Alternative payment method
 - **Twilio** - SMS notifications
-- **SendGrid** - Email services
+- **NodeMaiker** - Email services
 - **Cloudinary** - Image and media management
 
 ### Development & Deployment
@@ -73,8 +72,8 @@ Ensure you have the following installed:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/cenify.git
-   cd cenify
+   git clone https://github.com/yourusername/cenify-movies-events.git
+   cd cenify-movies-events
    ```
 
 2. **Install dependencies**
@@ -83,7 +82,7 @@ Ensure you have the following installed:
    npm install
    
    # Install frontend dependencies
-   cd client
+   cd frontend
    npm install
    cd ..
    ```
@@ -364,5 +363,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   <a href="https://github.com/Muhammed-Ameen-T/cenify-movies-events/issues">Report Bug</a> •
   <a href="https://github.com/Muhammed-Ameen-T/cenify-movies-events/issues">Request Feature</a>
 </p>
+
 
 
