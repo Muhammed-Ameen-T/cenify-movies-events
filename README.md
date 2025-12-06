@@ -13,6 +13,9 @@
 - 🪑 **Real-Time Seat Selection** - Interactive seat maps with live updates
 - 💳 **Secure Payments** - Stripe & PayPal integration
 - 🎫 **Digital Tickets** - QR code generation & instant delivery
+- 💰 **User Wallet** - Store credits & instant checkout
+- ⭐ **Loyalty Points** - Earn rewards on every booking
+- 🎟️ **Movie Pass** - Subscription plans for unlimited access
 - 📱 **Mobile-First Design** - Responsive across all devices
 - 🔔 **Smart Notifications** - Email & SMS alerts
 
