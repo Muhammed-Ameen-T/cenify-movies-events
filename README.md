@@ -51,10 +51,8 @@ Cenify is a comprehensive theater ticket booking application that revolutionizes
 
 ### Development & Deployment
 - **Docker** - Containerization
-- **Jest** - Testing framework
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
-- **GitHub Actions** - CI/CD pipeline
 - **AWS/Digital Ocean** - Cloud hosting
 
 ## 🚀 Getting Started
@@ -363,6 +361,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   <a href="https://github.com/Muhammed-Ameen-T/cenify-movies-events/issues">Report Bug</a> •
   <a href="https://github.com/Muhammed-Ameen-T/cenify-movies-events/issues">Request Feature</a>
 </p>
+
 
 
 
