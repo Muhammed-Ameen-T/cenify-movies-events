@@ -7,7 +7,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
 
-## ✨ Features
+## ✨ Features 
 
 - 🎬 **Multi-Entertainment Platform** - Movies, shows, concerts & events
 - 🪑 **Real-Time Seat Selection** - Interactive seat maps with live updates
@@ -174,3 +174,4 @@ MIT © [Cenify Team](LICENSE)
 ---
 
 <p align="center">Made with ❤️ by Ameen</p>
+
